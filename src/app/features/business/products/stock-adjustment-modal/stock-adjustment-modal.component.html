@@ -1,0 +1,165 @@
+@if (isOpen) {
+<div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-gray-500/80 transition-opacity" aria-hidden="true" (click)="onClose()"></div>
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <div class="relative inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+      <!-- Header -->
+      <div class="bg-primary-600 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
+              <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-white" id="modal-title">Ajustement de stock</h3>
+              <p class="text-sm text-primary-100 truncate max-w-[220px]">{{ product?.name }}</p>
+            </div>
+          </div>
+          <button type="button" (click)="onClose()" class="rounded-lg p-1.5 text-white/80 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/50">
+            <span class="sr-only">Fermer</span>
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2 text-sm">
+          <span class="text-primary-200">Stock actuel</span>
+          <span class="text-xl font-bold text-white">{{ product?.stock_quantity ?? 0 }} {{ (strategyService.isFieldVisible('unit') ? product?.unit : '') || '' }}</span>
+          @if (stockAfter() !== null && product) {
+            <span class="text-primary-200">→</span>
+            <span class="text-xl font-bold" [class.text-green-300]="stockAfter()! > product.stock_quantity" [class.text-red-300]="stockAfter()! < product.stock_quantity" [class.text-white]="stockAfter() === product.stock_quantity">
+              {{ stockAfter() }} {{ (strategyService.isFieldVisible('unit') ? product.unit : '') || '' }}
+            </span>
+            <span class="text-primary-200 text-xs">(après)</span>
+          }
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-6 space-y-5">
+        @if (errorMessage()) {
+          <div class="flex items-start gap-3 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-red-800 text-sm" role="alert">
+            <svg class="h-5 w-5 flex-shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+
+        @if (quantityError()) {
+          <div class="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-amber-800 text-sm">
+            {{ quantityError() }}
+          </div>
+        }
+
+        <!-- Type -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Type de mouvement</label>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="flex flex-col items-center gap-1 rounded-xl border-2 p-3 cursor-pointer transition-all"
+              [class.border-green-500]="type.value === 'IN'"
+              [class.bg-green-50]="type.value === 'IN'"
+              [class.border-gray-200]="type.value !== 'IN'"
+              [class.hover:border-green-300]="type.value !== 'IN'">
+              <input type="radio" formControlName="type" value="IN" class="sr-only">
+              <svg class="h-6 w-6" [class.text-green-600]="type.value === 'IN'" [class.text-gray-400]="type.value !== 'IN'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <span class="text-xs font-medium" [class.text-green-700]="type.value === 'IN'" [class.text-gray-600]="type.value !== 'IN'">Entrée</span>
+            </label>
+            <label class="flex flex-col items-center gap-1 rounded-xl border-2 p-3 cursor-pointer transition-all"
+              [class.border-red-500]="type.value === 'OUT'"
+              [class.bg-red-50]="type.value === 'OUT'"
+              [class.border-gray-200]="type.value !== 'OUT'"
+              [class.hover:border-red-300]="type.value !== 'OUT'">
+              <input type="radio" formControlName="type" value="OUT" class="sr-only">
+              <svg class="h-6 w-6" [class.text-red-600]="type.value === 'OUT'" [class.text-gray-400]="type.value !== 'OUT'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+              </svg>
+              <span class="text-xs font-medium" [class.text-red-700]="type.value === 'OUT'" [class.text-gray-600]="type.value !== 'OUT'">Sortie</span>
+            </label>
+            <label class="flex flex-col items-center gap-1 rounded-xl border-2 p-3 cursor-pointer transition-all"
+              [class.border-primary-500]="type.value === 'ADJUSTMENT'"
+              [class.bg-primary-50]="type.value === 'ADJUSTMENT'"
+              [class.border-gray-200]="type.value !== 'ADJUSTMENT'"
+              [class.hover:border-primary-300]="type.value !== 'ADJUSTMENT'">
+              <input type="radio" formControlName="type" value="ADJUSTMENT" class="sr-only">
+              <svg class="h-6 w-6" [class.text-primary-600]="type.value === 'ADJUSTMENT'" [class.text-gray-400]="type.value !== 'ADJUSTMENT'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span class="text-xs font-medium" [class.text-primary-700]="type.value === 'ADJUSTMENT'" [class.text-gray-600]="type.value !== 'ADJUSTMENT'">Correction</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Quantité -->
+        <div>
+          <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantité</label>
+          <div class="flex items-center gap-2">
+            @if (type.value === 'IN') {
+              <div class="flex gap-1">
+                <button type="button" (click)="setQuickQuantity(1)" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">+1</button>
+                <button type="button" (click)="setQuickQuantity(5)" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">+5</button>
+                <button type="button" (click)="setQuickQuantity(10)" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">+10</button>
+              </div>
+            }
+            <input type="number" id="quantity" formControlName="quantity" step="0.001" min="0.001"
+              class="block w-32 rounded-xl border border-gray-300 bg-white py-2.5 pl-3 pr-2 text-center text-sm font-medium shadow-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500">
+          </div>
+          @if (quantity.invalid && (quantity.dirty || quantity.touched)) {
+            <p class="mt-1 text-sm text-red-600">La quantité doit être supérieure à 0.</p>
+          }
+        </div>
+
+        <!-- Raison -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Raison (optionnel)</label>
+          <div class="flex flex-wrap gap-2 mb-2">
+            @for (r of quickReasons; track r.value) {
+              <button type="button"
+                (click)="setQuickReason(r.value)"
+                class="rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors"
+                [class.border-primary-500]="reason.value === r.value"
+                [class.bg-primary-50]="reason.value === r.value"
+                [class.text-primary-700]="reason.value === r.value"
+                [class.border-gray-200]="reason.value !== r.value"
+                [class.bg-white]="reason.value !== r.value"
+                [class.text-gray-600]="reason.value !== r.value"
+                [class.hover:border-primary-300]="reason.value !== r.value">
+                {{ r.label }}
+              </button>
+            }
+          </div>
+          <textarea id="reason" formControlName="reason" rows="2" placeholder="Ou saisir une raison personnalisée..."
+            class="block w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-3 pt-2">
+          <button type="button" (click)="onClose()"
+            class="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+            Annuler
+          </button>
+          <button type="submit"
+            [disabled]="form.invalid || isSubmitting() || quantityError()"
+            class="flex-1 rounded-xl border border-transparent bg-primary-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2">
+            @if (isSubmitting()) {
+              <svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            }
+            Enregistrer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+}
+
+
+

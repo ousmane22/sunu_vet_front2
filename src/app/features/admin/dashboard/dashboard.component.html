@@ -1,0 +1,114 @@
+<div class="p-4 md:p-8 max-w-7xl mx-auto w-full">
+    <!-- Welcome Banner -->
+    <div
+        class="bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl md:rounded-3xl shadow-xl p-6 md:p-8 mb-6 md:mb-8 text-white relative overflow-hidden">
+        <div class="relative z-10">
+            <h2 class="text-xl md:text-3xl font-extrabold mb-2">Bonjour, {{ user()?.name }} 👋</h2>
+            <p class="text-primary-100 text-sm md:text-lg max-w-2xl">
+                Bienvenue sur votre espace d'administration de la plateforme. Tout est sous contrôle.
+            </p>
+        </div>
+
+        <!-- Decorative background elements -->
+        <div
+            class="absolute top-0 right-0 -mt-8 -mr-8 w-40 md:w-64 h-40 md:h-64 bg-white opacity-10 rounded-full blur-3xl">
+        </div>
+        <div
+            class="absolute bottom-0 right-16 md:right-32 -mb-8 w-24 md:w-40 h-24 md:h-40 bg-white opacity-10 rounded-full blur-2xl">
+        </div>
+    </div>
+
+    <div *ngIf="stats() as statData; else loading">
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mb-6 md:mb-8">
+            <app-stat-card label="Entreprises Actives" [value]="statData.data.active_businesses" theme="green"
+                iconPath="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                route="/super-admin/businesses">
+            </app-stat-card>
+
+            <app-stat-card label="Total Utilisateurs" [value]="statData.data.total_users" theme="blue"
+                iconPath="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                route="/super-admin/business-admins">
+            </app-stat-card>
+
+            <app-stat-card label="Visiteurs (Accueil)" [value]="statData.data.unique_visitors" theme="indigo"
+                iconPath="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                route="/super-admin/dashboard">
+            </app-stat-card>
+
+            <app-stat-card label="Revenu Mensuel"
+                [value]="(statData.data.monthly_revenue | currency:'XOF':'symbol-narrow') || '0'" theme="purple"
+                iconPath="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                route="/super-admin/revenue">
+            </app-stat-card>
+
+            <app-stat-card label="En attente" [value]="statData.data.pending_businesses" suffix="Approbation"
+                theme="amber"
+                iconPath="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                route="/super-admin/businesses">
+            </app-stat-card>
+        </div>
+
+        <!-- Recent Visits -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8 text-slate-800">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h3 class="text-lg font-bold text-gray-900">Points d'accès récents</h3>
+                <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-full">
+                    10 dernières activités
+                </span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-gray-50/50 text-gray-400 text-[10px] uppercase tracking-wider">
+                            <th class="px-6 py-4 font-semibold">IP / Navigateur</th>
+                            <th class="px-6 py-4 font-semibold">Lien accédé</th>
+                            <th class="px-6 py-4 font-semibold">Provenance (Referer)</th>
+                            <th class="px-6 py-4 font-semibold">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr *ngFor="let visit of statData.data.recent_visits"
+                            class="hover:bg-gray-50/80 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="text-sm font-medium text-gray-900">{{ visit.ip_address }}</div>
+                                <div class="text-[10px] text-gray-400 truncate max-w-[200px]"
+                                    [title]="visit.user_agent">{{ visit.user_agent }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 bg-blue-50 text-blue-700 text-[11px] rounded font-mono">
+                                    /{{ visit.path || '' }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-[11px] text-gray-500 truncate max-w-[200px]" [title]="visit.referer">
+                                    {{ visit.referer || 'Accès direct' }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-xs text-gray-500">
+                                {{ visit.created_at | date:'dd/MM/yyyy HH:mm' }}
+                            </td>
+                        </tr>
+                        <tr *ngIf="statData.data.recent_visits.length === 0">
+                            <td colspan="4" class="px-6 py-10 text-center text-gray-400">
+                                Aucune visite enregistrée pour le moment.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #loading>
+        <div class="h-64 flex items-center justify-center">
+            <svg class="animate-spin h-10 w-10 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+        </div>
+    </ng-template>
+</div>

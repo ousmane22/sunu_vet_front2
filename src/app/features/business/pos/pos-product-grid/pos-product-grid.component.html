@@ -1,0 +1,143 @@
+<div class="flex flex-1 flex-col min-w-0 min-h-0 bg-zinc-50/80 rounded-2xl border border-zinc-200/80 overflow-hidden">
+
+  <!-- Header -->
+  <div class="shrink-0 z-10 bg-white border-b border-zinc-200 px-3 py-3 sm:px-4 sm:py-3.5 flex flex-col gap-3 sm:flex-row sm:items-center">
+    <div class="flex items-center gap-2.5 min-w-0 sm:shrink-0">
+      <div class="w-9 h-9 rounded-xl bg-primary-50 text-primary-700 flex items-center justify-center shrink-0">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      </div>
+      <div class="min-w-0">
+        <h1 class="text-base sm:text-lg font-bold text-black tracking-tight truncate">
+          Vente {{ strategyService.getLabel('products') }}
+        </h1>
+        @if (meta(); as m) {
+          <p class="text-xs font-medium text-zinc-600">{{ m.total }} produit{{ m.total > 1 ? 's' : '' }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="relative flex-1 w-full min-w-0">
+      <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-zinc-400">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </span>
+      <input
+        type="search"
+        [formControl]="searchControl"
+        placeholder="Rechercher un produit…"
+        class="w-full h-11 sm:h-12 pl-10 sm:pl-11 pr-4 rounded-xl border border-zinc-200 bg-white text-sm sm:text-base font-medium text-black placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition"
+      />
+    </div>
+  </div>
+
+  <!-- Caisse fermée -->
+  @if (registerChecked() && !activeRegister() && requireOpenRegister()) {
+    <div class="m-3 sm:m-4 p-4 sm:p-5 rounded-2xl border border-amber-200 bg-amber-50 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+      <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 17c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h3 class="text-sm sm:text-base font-bold text-amber-950">Caisse fermée</h3>
+        <p class="text-sm text-amber-800 mt-0.5">Ouvrez une session pour enregistrer des ventes.</p>
+      </div>
+      <a routerLink="/business/cash-registers"
+        class="inline-flex items-center justify-center h-11 px-4 rounded-xl bg-amber-600 text-white text-sm font-bold hover:bg-amber-700 transition shrink-0">
+        Ouvrir la caisse
+      </a>
+    </div>
+  }
+
+  <!-- Grille -->
+  <div class="flex-1 min-h-0 overflow-y-auto overscroll-contain p-2.5 sm:p-3 md:p-4">
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-16 gap-3">
+        <div class="w-10 h-10 border-[3px] border-zinc-200 border-t-primary-600 rounded-full animate-spin"></div>
+        <p class="text-sm font-medium text-zinc-600">Chargement des produits…</p>
+      </div>
+    } @else if (products().length === 0) {
+      <div class="flex flex-col items-center justify-center py-16 text-center px-4">
+        <p class="text-base font-bold text-black">Aucun produit trouvé</p>
+        <p class="text-sm text-zinc-600 mt-1 max-w-sm">Modifiez la recherche ou activez des produits dans le stock.</p>
+      </div>
+    } @else {
+      <div class="pos-products-grid">
+        @for (med of products(); track med.id) {
+          <button
+            type="button"
+            class="group text-left rounded-2xl border border-zinc-200 bg-white p-3 flex flex-col gap-2 min-h-[128px] transition hover:border-primary-300 hover:shadow-md active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:opacity-55 disabled:cursor-not-allowed disabled:hover:border-zinc-200 disabled:hover:shadow-none disabled:active:scale-100"
+            [class.bg-zinc-50]="med.stock_quantity <= 0"
+            [disabled]="med.stock_quantity <= 0 || (requireOpenRegister() && registerChecked() && !activeRegister())"
+            (click)="addToCart(med)"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <span
+                class="inline-flex max-w-[75%] truncate rounded-md px-2 py-0.5 text-[11px] sm:text-xs font-semibold capitalize"
+                [ngClass]="getBadgeClass(getBadgeLabel(med))"
+              >
+                {{ getBadgeLabel(med) }}
+              </span>
+              @if (med.stock_quantity <= 0) {
+                <span class="shrink-0 rounded-md bg-red-100 px-1.5 py-0.5 text-[11px] font-bold text-red-700">Rupture</span>
+              }
+            </div>
+
+            <h3 class="text-sm font-bold text-black leading-snug line-clamp-2 flex-1">
+              {{ med.name }}
+            </h3>
+
+            <div class="mt-auto pt-2 border-t border-zinc-100 space-y-1.5">
+              <p class="text-base font-extrabold text-black tabular-nums tracking-tight break-words">
+                {{ med.selling_price | formatPrice }}
+              </p>
+              <div class="flex items-center justify-between gap-2">
+                <p class="text-xs font-semibold tabular-nums"
+                  [class.text-emerald-700]="med.stock_quantity > 10"
+                  [class.text-amber-700]="med.stock_quantity > 0 && med.stock_quantity <= 10"
+                  [class.text-red-700]="med.stock_quantity <= 0">
+                  Stock {{ med.stock_quantity }}
+                </p>
+                <span
+                  class="shrink-0 w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center shadow-sm shadow-primary-600/20 group-hover:bg-primary-700 transition"
+                  aria-hidden="true"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v12m6-6H6" />
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </button>
+        }
+      </div>
+
+      @if (hasMore()) {
+        <div class="mt-5 sm:mt-6 flex justify-center pb-6">
+          <button
+            type="button"
+            (click)="loadMore()"
+            [disabled]="loading()"
+            class="inline-flex items-center gap-2 h-11 px-5 rounded-xl border border-zinc-200 bg-white text-sm font-bold text-black hover:border-primary-300 hover:text-primary-700 disabled:opacity-60 transition"
+          >
+            @if (loading()) {
+              <span class="w-4 h-4 border-2 border-zinc-300 border-t-primary-600 rounded-full animate-spin"></span>
+              Chargement…
+            } @else {
+              Voir plus
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            }
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>

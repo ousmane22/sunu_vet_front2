@@ -1,0 +1,11 @@
+@if (register(); as reg) {
+<app-detail-slide-over
+    [open]="true"
+    title="Détails / transactions"
+    [subtitle]="(reg.date | formatDate) + ' · ' + (subtitle() ?? '')"
+    panelClass="max-w-xl"
+    (closeSlideOver)="close.emit()">
+
+    <app-cash-register-details [register]="reg" [showExportButton]="true" (actionDone)="close.emit()" />
+</app-detail-slide-over>
+}

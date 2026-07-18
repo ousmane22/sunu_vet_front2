@@ -1,0 +1,116 @@
+@if (isOpen()) {
+<div class="fixed inset-0 z-50 overflow-hidden flex items-center justify-center p-4" role="dialog" aria-modal="true">
+  <!-- Fond statique : clic ne ferme pas le modal -->
+  <div class="absolute inset-0 bg-gray-500 bg-opacity-75" aria-hidden="true"></div>
+
+  <div
+    class="relative bg-white rounded-2xl text-left overflow-hidden shadow-xl w-full max-w-[95vw] sm:max-w-5xl lg:max-w-6xl max-h-[90vh] flex flex-col">
+    <div class="flex-1 min-h-0 overflow-y-auto px-4 pt-5 pb-4 sm:p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+          Ajouter des médicaments depuis le catalogue
+        </h3>
+        <p class="text-sm text-gray-500 mb-4">
+          Cochez les références à ajouter, puis enregistrez. Vous pourrez ensuite compléter prix et stock en modifiant
+          chaque médicament.
+        </p>
+
+        <div class="mb-4">
+          <input type="text" [formControl]="searchControl" placeholder="Rechercher par nom, DCI, fabricant..."
+            class="block w-full border border-gray-300 rounded-xl shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm p-2.5" />
+        </div>
+
+        @if (errorMessage()) {
+        <div class="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm border border-red-200">
+          {{ errorMessage() }}
+        </div>
+        }
+
+        @if (catalogueLoading()) {
+        <div class="flex justify-center py-12">
+          <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
+        </div>
+        } @else if (references().length === 0) {
+        <p class="text-sm text-gray-500 py-8 text-center">Aucune référence trouvée.</p>
+        } @else {
+        <div class="flex items-center justify-between gap-2 mb-2 text-sm">
+          <span class="text-gray-500">{{ catalogueTotal() }} référence(s)</span>
+          <div class="flex gap-2">
+            <button type="button" (click)="selectAll()" class="text-primary-600 hover:text-primary-700 font-medium">
+              Tout sélectionner (page)
+            </button>
+            <button type="button" (click)="clearSelection()" class="text-gray-500 hover:text-gray-700">
+              Tout désélectionner
+            </button>
+          </div>
+        </div>
+        <ul
+          class="max-h-[40vh] sm:max-h-[50vh] overflow-y-auto divide-y divide-gray-200 rounded-xl border border-gray-200">
+          @for (ref of references(); track ref.id) {
+          <li>
+            <label class="flex items-start gap-3 w-full px-4 py-3 transition-colors"
+              [class.cursor-pointer]="!isAlreadyInBusiness(ref.id)" [class.hover:bg-gray-50]="!isAlreadyInBusiness(ref.id)"
+              [class.cursor-not-allowed]="isAlreadyInBusiness(ref.id)" [class.bg-gray-50]="isAlreadyInBusiness(ref.id)">
+              <input type="checkbox" [checked]="isChecked(ref)" [disabled]="isAlreadyInBusiness(ref.id)"
+                (change)="toggleRef(ref)"
+                class="mt-1 h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 disabled:opacity-70" />
+              <div class="flex flex-col gap-0.5 flex-1 min-w-0">
+                <span class="font-medium text-gray-900">{{ ref.name }}</span>
+                <span class="text-xs text-gray-500">
+                  {{ ref.generic_name ? ref.generic_name + ' · ' : '' }}{{ ref.form_label }}
+                  @if (ref.strength) {
+                  · {{ ref.strength }}
+                  }
+                  @if (ref.manufacturer) {
+                  · {{ ref.manufacturer }}
+                  }
+                  @if (isAlreadyInBusiness(ref.id)) {
+                  <span class="ml-1 text-primary-600 font-medium">· Déjà en stock</span>
+                  }
+                </span>
+              </div>
+            </label>
+          </li>
+          }
+        </ul>
+        @if (catalogueLastPage() > 1) {
+        <div class="mt-3 flex items-center justify-between text-sm">
+          <span class="text-gray-500">Page {{ cataloguePage() }} / {{ catalogueLastPage() }}</span>
+          <div class="flex gap-2">
+            <button type="button" (click)="cataloguePrev()" [disabled]="cataloguePage() === 1"
+              class="px-3 py-1 rounded-lg border border-gray-300 bg-white text-gray-700 disabled:opacity-50 hover:bg-gray-50">
+              Précédent
+            </button>
+            <button type="button" (click)="catalogueNext()" [disabled]="cataloguePage() === catalogueLastPage()"
+              class="px-3 py-1 rounded-lg border border-gray-300 bg-white text-gray-700 disabled:opacity-50 hover:bg-gray-50">
+              Suivant
+            </button>
+          </div>
+        </div>
+        }
+        }
+
+        <div class="flex items-center justify-between gap-4 mt-6 pt-4 border-t border-gray-200">
+          <span class="text-sm text-gray-600">
+            @if (selectedCount() > 0) {
+            {{ selectedCount() }} sélectionné(s)
+            } @else {
+            Cochez les médicaments à ajouter
+            }
+          </span>
+          <div class="flex gap-2">
+            <button type="button" (click)="onCancel()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50">
+              Annuler
+            </button>
+            <button type="button" (click)="saveSelected()" [disabled]="selectedCount() === 0 || isSaving()"
+              class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-xl hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed">
+              {{ isSaving() ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+}
+
+

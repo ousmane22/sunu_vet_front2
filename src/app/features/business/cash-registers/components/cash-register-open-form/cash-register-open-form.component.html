@@ -1,0 +1,38 @@
+<div class="bg-white rounded-2xl border-2 border-gray-300 overflow-hidden">
+    <div class="bg-slate-50 px-6 py-5 border-b-2 border-gray-300 flex items-center gap-3">
+        <div class="w-11 h-11 bg-white rounded-full border-2 border-gray-300 flex items-center justify-center text-black">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+        </div>
+        <div>
+            <h2 class="text-lg font-bold text-black">Ouvrir la caisse du jour</h2>
+            <p class="text-sm font-medium text-gray-700">La caisse est actuellement fermée.</p>
+        </div>
+    </div>
+    <form [formGroup]="openForm()" (ngSubmit)="submit.emit()" class="p-6">
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-bold text-black mb-1.5">Fond de caisse initial (FCFA)</label>
+                <input type="number" formControlName="opening_balance"
+                    class="w-full text-lg px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-semibold text-black bg-white"
+                    placeholder="Ex: 50000" />
+            </div>
+        </div>
+        <div class="mt-6">
+            <button type="submit" [disabled]="openForm().invalid || isSubmitting()"
+                class="w-full flex justify-center py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-slate-900 hover:bg-black disabled:opacity-50 transition-colors">
+                @if (isSubmitting()) {
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                Ouverture...
+                } @else {
+                Ouvrir la caisse
+                }
+            </button>
+        </div>
+    </form>
+</div>

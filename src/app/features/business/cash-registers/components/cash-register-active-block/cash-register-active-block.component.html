@@ -1,0 +1,66 @@
+<div class="bg-emerald-50 rounded-2xl border-2 border-emerald-200 overflow-hidden">
+
+    <!-- Header statut -->
+    <div class="px-6 py-5 flex items-center gap-3 border-b border-emerald-200">
+        <div class="w-11 h-11 bg-white rounded-full border-2 border-emerald-300 flex items-center justify-center text-emerald-800 shrink-0">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+            </svg>
+        </div>
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-lg font-bold text-black">Caisse ouverte</h2>
+                <span class="px-3 py-1 bg-emerald-200 text-emerald-900 text-xs font-bold rounded-full shrink-0">
+                    Ouvert
+                </span>
+            </div>
+            <p class="text-sm font-medium text-gray-700 mt-0.5">
+                Depuis {{ openedAtLabel() }}
+                @if (elapsedLabel()) {
+                <span class="text-black font-semibold"> · {{ elapsedLabel() }}</span>
+                }
+            </p>
+        </div>
+    </div>
+
+    <!-- Métriques -->
+    <div class="p-6 space-y-5">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="p-4 bg-white rounded-xl border-2 border-gray-200">
+                <p class="text-xs font-bold text-black uppercase tracking-wide">Fond initial</p>
+                <p class="text-lg font-bold text-slate-800 mt-1">{{ register().opening_balance | formatPrice }}</p>
+            </div>
+            <div class="p-4 bg-white rounded-xl border-2 border-emerald-200">
+                <p class="text-xs font-bold text-emerald-900 uppercase tracking-wide">Encaissé aujourd'hui</p>
+                <p class="text-lg font-bold text-emerald-800 mt-1">{{ incomeToday() | formatPrice }}</p>
+            </div>
+            <div class="p-4 bg-white rounded-xl border-2 border-primary-200">
+                <p class="text-xs font-bold text-primary-900 uppercase tracking-wide">Total théorique</p>
+                <p class="text-lg font-bold text-primary-800 mt-1">{{ theoreticalBalance() | formatPrice }}</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3">
+            <button type="button" (click)="openCloseModal.emit()"
+                class="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl
+                       bg-slate-900 hover:bg-black text-white text-sm font-bold
+                       transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Fermer la caisse
+            </button>
+            <button type="button" (click)="openMovements.emit()"
+                class="sm:w-auto px-6 py-3.5 rounded-xl bg-white border-2 border-gray-300 text-black text-sm font-bold
+                       hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+                Mouvements
+            </button>
+        </div>
+    </div>
+</div>

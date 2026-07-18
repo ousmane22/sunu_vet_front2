@@ -1,0 +1,155 @@
+<div class="px-6 pb-8 space-y-6">
+
+    <!-- Solde théorique (hero) -->
+    <div class="rounded-2xl bg-slate-900 text-white p-5 flex items-center justify-between gap-4">
+        <div class="min-w-0">
+            <p class="text-xs font-bold uppercase tracking-wide text-white/80 flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Solde théorique
+            </p>
+            <p class="text-2xl font-bold mt-1 tabular-nums text-emerald-300">{{ theoreticalBalance() | formatPrice }}</p>
+            <p class="text-xs font-medium text-white/70 mt-1">
+                Fond {{ register().opening_balance | formatPrice }}
+                + encaissements − sorties
+            </p>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- Métriques -->
+    <div class="grid grid-cols-2 gap-3">
+        <div class="p-4 bg-white rounded-xl border-2 border-gray-300">
+            <p class="text-xs font-bold text-black uppercase tracking-wide flex items-center gap-1.5 mb-2">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                </svg>
+                Ouverture
+            </p>
+            <p class="text-base font-bold text-slate-800 tabular-nums">{{ register().opening_balance | formatPrice }}</p>
+        </div>
+        <div class="p-4 bg-emerald-50 rounded-xl border-2 border-emerald-300">
+            <p class="text-xs font-bold text-emerald-900 uppercase tracking-wide flex items-center gap-1.5 mb-2">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                </svg>
+                Encaissements
+            </p>
+            <p class="text-base font-bold text-emerald-900 tabular-nums">+ {{ totalIncome() | formatPrice }}</p>
+        </div>
+        <div class="p-4 bg-red-50 rounded-xl border-2 border-red-300">
+            <p class="text-xs font-bold text-red-900 uppercase tracking-wide flex items-center gap-1.5 mb-2">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
+                </svg>
+                Dépenses
+            </p>
+            <p class="text-base font-bold text-red-900 tabular-nums">− {{ totalExpense() | formatPrice }}</p>
+        </div>
+        <div class="p-4 bg-amber-50 rounded-xl border-2 border-amber-300">
+            <p class="text-xs font-bold text-amber-900 uppercase tracking-wide flex items-center gap-1.5 mb-2">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
+                </svg>
+                Remboursements
+            </p>
+            <p class="text-base font-bold text-amber-900 tabular-nums">− {{ totalRefund() | formatPrice }}</p>
+        </div>
+    </div>
+
+    <!-- Journal -->
+    <div>
+        <h4 class="text-sm font-bold text-black uppercase tracking-wide mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            Journal des opérations
+            <span class="ml-auto text-xs font-bold text-gray-700 normal-case tracking-normal">
+                {{ register().transactions?.length || 0 }}
+            </span>
+        </h4>
+
+        @if (!register().transactions?.length) {
+        <div class="text-center py-12 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-white border-2 border-gray-300 flex items-center justify-center text-black">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+            </div>
+            <p class="text-sm font-bold text-black">Aucune transaction</p>
+            <p class="text-xs text-gray-700 font-medium mt-1">Les mouvements apparaîtront ici.</p>
+        </div>
+        } @else {
+        <div class="rounded-xl border-2 border-gray-300 overflow-hidden divide-y divide-gray-200 bg-white">
+            @for (tx of (register().transactions ?? []); track tx.id) {
+            <div class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
+                <div
+                    [ngClass]="tx.type === 'income'
+                        ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                        : (isRefund(tx) ? 'bg-amber-100 text-amber-900 border-amber-300' : 'bg-red-100 text-red-900 border-red-300')"
+                    class="w-9 h-9 rounded-lg border flex items-center justify-center shrink-0">
+                    @if (tx.type === 'income') {
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                    </svg>
+                    } @else if (isRefund(tx)) {
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                    </svg>
+                    } @else {
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
+                    </svg>
+                    }
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-black truncate">{{ tx.description || tx.category }}</p>
+                    <p class="text-xs text-gray-700 font-medium mt-0.5 flex items-center gap-1.5 flex-wrap">
+                        <span>{{ tx.date | date:'HH:mm' }}</span>
+                        <span>·</span>
+                        <span>{{ tx.user?.name || '—' }}</span>
+                        @if (isRefund(tx)) {
+                        <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-bold border border-amber-300">Remboursement</span>
+                        } @else if (tx.type === 'expense') {
+                        <span class="px-1.5 py-0.5 rounded bg-red-100 text-red-900 font-bold border border-red-300">Dépense</span>
+                        } @else {
+                        <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-900 font-bold border border-emerald-300">Encaissement</span>
+                        }
+                    </p>
+                </div>
+                <p [ngClass]="tx.type === 'income'
+                        ? 'text-emerald-900'
+                        : (isRefund(tx) ? 'text-amber-900' : 'text-red-900')"
+                    class="text-sm font-bold tabular-nums shrink-0">
+                    {{ tx.type === 'income' ? '+' : '−' }}{{ tx.amount | formatPrice }}
+                </p>
+            </div>
+            }
+        </div>
+        }
+    </div>
+
+    @if (showExportButton()) {
+    <button type="button" (click)="downloadReportPdf()"
+        class="w-full py-3.5 px-4 rounded-xl text-sm font-bold text-black bg-white border-2 border-gray-300
+               hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+        <svg class="w-4 h-4 text-red-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+        Télécharger le rapport PDF
+    </button>
+    }
+</div>

@@ -1,0 +1,90 @@
+<div class="fixed inset-0 z-50 overflow-y-auto" (click)="close.emit()">
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <div class="fixed inset-0 bg-gray-900/60" aria-hidden="true"></div>
+    <div (click)="$event.stopPropagation()" class="relative w-full max-w-md rounded-2xl bg-white shadow-xl p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">{{ member() ? 'Modifier le membre' : 'Ajouter un membre' }}</h3>
+      
+      @if (error()) {
+        <div class="mb-4 p-3 text-xs font-medium text-red-700 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2">
+          <svg class="w-4 h-4 shrink-0 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="flex-1">{{ error() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="space-y-4">
+          <div>
+            <label for="form-name" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+            <input id="form-name" type="text" formControlName="name"
+              class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+              placeholder="Jean Dupont" />
+            @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <p class="mt-1 text-xs text-red-600">Requis.</p>
+            }
+          </div>
+          <div>
+            <label for="form-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input id="form-email" type="email" formControlName="email"
+              class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+              placeholder="jean@entreprise.com" />
+            @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <p class="mt-1 text-xs text-red-600">Email valide requis.</p>
+            }
+          </div>
+          <div>
+            <label for="form-role" class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+            <select id="form-role" formControlName="role"
+              class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20">
+              <option value="">Choisir un rôle</option>
+              @for (r of roles(); track r.value) {
+              <option [value]="r.value">{{ r.label }}</option>
+              }
+            </select>
+            @if (form.get('role')?.invalid && form.get('role')?.touched) {
+            <p class="mt-1 text-xs text-red-600">Rôle requis.</p>
+            }
+          </div>
+          <div [class.pt-2]="member()" [class.border-t]="member()" [class.border-gray-100]="member()">
+            @if (member()) {
+            <p class="text-xs text-gray-500 mb-2">Modifier le mot de passe (optionnel)</p>
+            } @else {
+            <label for="form-password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+            }
+            <div class="space-y-2">
+              <input id="form-password" type="password" formControlName="password"
+                class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                [placeholder]="member() ? 'Nouveau mot de passe (min. 8 caractères)' : 'Min. 8 caractères'" />
+              @if (form.get('password')?.invalid && form.get('password')?.touched) {
+              <p class="mt-1 text-xs text-red-600">Min. 8 caractères.</p>
+              }
+              @if (member()) {
+              <input id="form-password-confirm" type="password" formControlName="password_confirmation"
+                class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+                placeholder="Confirmer le mot de passe" />
+              } @else {
+              <div class="mt-2">
+                <label for="form-password-confirm" class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
+                <input id="form-password-confirm" type="password" formControlName="password_confirmation"
+                  class="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20" />
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" (click)="close.emit()"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200">Annuler</button>
+          <button type="submit" [disabled]="form.invalid || isSaving()"
+            class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-xl hover:bg-primary-700 disabled:opacity-50">
+            {{ member() ? 'Enregistrer' : 'Ajouter' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+

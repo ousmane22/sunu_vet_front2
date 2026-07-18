@@ -1,0 +1,71 @@
+<div class="space-y-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div class="bg-emerald-50 border border-emerald-100 p-6 rounded-3xl shadow-sm relative overflow-hidden group">
+            <i
+                class="fas fa-arrow-trend-up absolute -right-4 -bottom-4 text-emerald-200/50 text-8xl group-hover:scale-110 transition-transform"></i>
+            <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
+                <i class="fas fa-coins text-xs"></i> Recettes
+            </p>
+            <p class="text-3xl font-black text-emerald-900 mt-2 relative z-10">{{ data.total_revenue | formatPrice }}
+            </p>
+            <p class="text-xs text-emerald-600 mt-1 opacity-75 relative z-10">Total encaissé sur la période</p>
+        </div>
+        <div class="bg-rose-50 border border-rose-100 p-6 rounded-3xl shadow-sm relative overflow-hidden group">
+            <i
+                class="fas fa-arrow-trend-down absolute -right-4 -bottom-4 text-rose-200/50 text-8xl group-hover:scale-110 transition-transform"></i>
+            <p class="text-[10px] font-black text-rose-500 uppercase tracking-widest flex items-center gap-2">
+                <i class="fas fa-wallet text-xs"></i> Dépenses
+            </p>
+            <p class="text-3xl font-black text-rose-900 mt-2 relative z-10">- {{ data.total_expenses | formatPrice }}
+            </p>
+            <p class="text-xs text-rose-600 mt-1 opacity-75 relative z-10">Total décaissé sur la période</p>
+        </div>
+        <div class="bg-primary-50 border border-primary-100 p-6 rounded-3xl shadow-sm relative overflow-hidden group">
+            <i
+                class="fas fa-piggy-bank absolute -right-4 -bottom-4 text-primary-200/50 text-8xl group-hover:scale-110 transition-transform"></i>
+            <p class="text-[10px] font-black text-primary-500 uppercase tracking-widest flex items-center gap-2">
+                <i class="fas fa-balance-scale text-xs"></i> Marge Net
+            </p>
+            <p class="text-3xl font-black text-primary-900 mt-2 relative z-10"
+                [class.text-rose-600]="data.net_margin < 0">
+                {{ data.net_margin | formatPrice }}
+            </p>
+            <p class="text-xs text-primary-600 mt-1 opacity-75 relative z-10">Bénéfice net</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
+            <h3 class="text-lg font-bold text-slate-900">Répartition des dépenses</h3>
+        </div>
+        <div class="p-6">
+            @if (data.expenses_by_category.length) {
+            <div class="h-64 mb-6">
+                <canvas baseChart [type]="'doughnut'" [data]="expensesChartData" [options]="expensesChartOptions"></canvas>
+            </div>
+            }
+            <div class="space-y-4">
+                @for (cat of data.expenses_by_category; track cat.category) {
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <span class="text-sm font-bold text-slate-700 capitalize">{{ getCategoryLabel(cat.category)
+                            }}</span>
+                        <span class="text-sm font-black text-slate-900">{{ cat.total | formatPrice }}</span>
+                    </div>
+                    <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-primary-500"
+                            [style.width.%]="(cat.total / (data.total_expenses || 1)) * 100">
+                        </div>
+                    </div>
+                </div>
+                } @empty {
+                <div class="text-center py-8">
+                    <p class="text-slate-400 italic">Aucune dépense sur cette période.</p>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,10 @@
+<div class="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+    <div class="flex justify-between items-center text-sm mb-2">
+        <span class="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Total Panier</span>
+        <span class="font-black text-gray-900">{{ subtotal() | formatPrice }}</span>
+    </div>
+    <div class="flex justify-between items-center text-sm">
+        <span class="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Net à payer</span>
+        <span class="font-black text-primary-600 text-lg">{{ netAmount() | formatPrice }}</span>
+    </div>
+</div>

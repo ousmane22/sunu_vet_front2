@@ -1,0 +1,46 @@
+<div class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true" (click)="onCancel()"></div>
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <h3 class="text-lg font-bold text-gray-900 mb-6">
+          {{ category() ? 'Modifier la catégorie' : 'Nouvelle catégorie' }}
+        </h3>
+
+        @if (errorMessage()) {
+          <div class="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm border border-red-200">
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <div class="space-y-4">
+          <div>
+            <label for="cat_name" class="block text-sm font-medium text-gray-700">Nom</label>
+            <input type="text" id="cat_name" formControlName="name" class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm p-2.5 border">
+          </div>
+
+          <div>
+            <label for="cat_desc" class="block text-sm font-medium text-gray-700">Description (optionnelle)</label>
+            <textarea id="cat_desc" formControlName="description" rows="3" class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm p-2.5 border resize-none"></textarea>
+          </div>
+
+          <div class="flex items-center">
+            <input type="checkbox" id="cat_active" formControlName="is_active" class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+            <label for="cat_active" class="ml-2 block text-sm text-gray-900">Catégorie active</label>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-end gap-3">
+          <button type="button" (click)="onCancel()" class="bg-white py-2 px-4 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+            Annuler
+          </button>
+          <button type="submit" [disabled]="form.invalid || isSaving()" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-xl text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50">
+            {{ isSaving() ? 'Enregistrement...' : 'Enregistrer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

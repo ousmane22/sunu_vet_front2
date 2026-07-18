@@ -1,0 +1,147 @@
+<div class="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <a [routerLink]="['/business/inventory']" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition">
+        <svg class="w-5 h-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </a>
+      <div>
+        <h1 class="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Inventaire #{{ sessionDisplayId() }}</h1>
+        <p class="text-gray-500 text-sm mt-0.5">
+          {{ session()?.started_at | date:'dd/MM/yyyy à HH:mm' }} · {{ session()?.user?.name }}
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          (click)="printReport()"
+          class="px-3 py-2 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50">
+          Imprimer
+        </button>
+        <button
+          type="button"
+          (click)="downloadPdf()"
+          class="px-3 py-2 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50">
+          Télécharger PDF
+        </button>
+      </div>
+    </div>
+    @if (session()?.status === 'in_progress' && can('stock.inventory.validate')) {
+      <div class="flex flex-wrap items-center gap-2">
+        @if (hasChanges()) {
+          <button
+            type="button"
+            (click)="saveLines()"
+            [disabled]="isSaving()"
+            class="px-4 py-2.5 rounded-xl border border-primary-500 text-primary-600 font-semibold text-sm hover:bg-primary-50 disabled:opacity-50">
+            {{ isSaving() ? 'Enregistrement...' : 'Enregistrer les quantités' }}
+          </button>
+        }
+        <button
+          type="button"
+          (click)="complete()"
+          [disabled]="isCompleting() || hasChanges()"
+          class="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 disabled:opacity-50">
+          {{ isCompleting() ? 'Validation...' : 'Valider l\'inventaire' }}
+        </button>
+        <button
+          type="button"
+          (click)="cancel()"
+          class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-semibold text-sm hover:bg-slate-50">
+          Annuler
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="rounded-xl bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm font-medium">
+      {{ error() }}
+    </div>
+  }
+  @if (success()) {
+    <div class="rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 text-sm font-medium">
+      {{ success() }}
+    </div>
+  }
+
+  @if (session(); as s) {
+    <div class="flex flex-wrap items-center gap-3 mb-4">
+      <span class="px-3 py-1.5 rounded-lg text-xs font-bold uppercase"
+        [ngClass]="{
+          'bg-amber-100 text-amber-800': s.status === 'in_progress',
+          'bg-emerald-100 text-emerald-800': s.status === 'completed',
+          'bg-slate-100 text-slate-600': s.status === 'cancelled'
+        }">
+        {{ statusLabel(s.status) }}
+      </span>
+      @if (s.completed_at) {
+        <span class="text-sm text-slate-500">Clôturé le {{ s.completed_at | date:'dd/MM/yyyy HH:mm' }}</span>
+      }
+    </div>
+
+    @if (isLoading()) {
+      <div class="flex justify-center py-20">
+        <div class="w-10 h-10 border-4 border-slate-100 border-t-primary-500 rounded-full animate-spin"></div>
+      </div>
+    } @else {
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-100">
+            <thead class="bg-slate-50/80">
+              <tr>
+                <th class="px-4 md:px-6 py-3 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Produit</th>
+                <th class="px-4 md:px-6 py-3 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Qté système</th>
+                <th class="px-4 md:px-6 py-3 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Qté comptée</th>
+                @if (showDifferenceColumn(s)) {
+                  <th class="px-4 md:px-6 py-3 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Écart</th>
+                }
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+              @for (row of linesWithEdit(); track row.id) {
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td class="px-4 md:px-6 py-4">
+                    <div class="font-semibold text-slate-900">{{ row.product?.name ?? 'Produit #' + row.product_id }}</div>
+                    @if (row.product?.sku) {
+                      <div class="text-xs text-slate-500 mt-0.5">SKU: {{ row.product.sku }}</div>
+                    }
+                  </td>
+                  <td class="px-4 md:px-6 py-4 text-sm text-slate-600">
+                    {{ row.quantity_system }} {{ row.product?.unit ?? 'unité' }}
+                  </td>
+                  <td class="px-4 md:px-6 py-4">
+                    @if (s.status === 'in_progress') {
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.001"
+                        [value]="row.editValue ?? ''"
+                        (input)="setCount(row.id, parseCount($any($event.target).value))"
+                        class="w-24 md:w-28 rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-medium focus:ring-2 focus:ring-primary-400 focus:border-primary-400" />
+                    } @else {
+                      <span class="text-sm text-slate-700">{{ row.quantity_counted ?? '-' }}</span>
+                    }
+                  </td>
+                  @if (s.status === 'completed' || row.quantity_difference != null) {
+                    <td class="px-4 md:px-6 py-4 text-sm" [ngClass]="diffClass(row)">
+                      @if (row.quantity_difference != null) {
+                        {{ row.quantity_difference > 0 ? '+' : '' }}{{ row.quantity_difference }}
+                      } @else {
+                        -
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if ((s.lines?.length ?? 0) === 0) {
+          <div class="text-center py-12 text-slate-500 text-sm">Aucun produit actif pour cette clinique.</div>
+        }
+      </div>
+    }
+  }
+</div>

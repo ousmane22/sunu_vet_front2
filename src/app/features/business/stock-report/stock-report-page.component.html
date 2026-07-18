@@ -1,0 +1,195 @@
+<div class="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
+  <div>
+    <h1 class="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Inventaire analytique</h1>
+    <p class="text-gray-500 text-sm mt-0.5">Rapport sur une période : combien on avait, combien on a acheté, combien on a vendu, combien il reste.</p>
+  </div>
+
+  <div class="flex flex-col gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/50">
+    <div class="flex flex-wrap items-end gap-4">
+      <div class="flex flex-wrap gap-2">
+        <button
+          type="button"
+          (click)="setPeriod('day')"
+          [class.ring-2]="period() === 'day'"
+          [class.ring-primary-500]="period() === 'day'"
+          class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold hover:bg-white bg-white">
+          Jour
+        </button>
+        <button
+          type="button"
+          (click)="setPeriod('week')"
+          [class.ring-2]="period() === 'week'"
+          [class.ring-primary-500]="period() === 'week'"
+          class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold hover:bg-white bg-white">
+          Semaine
+        </button>
+        <button
+          type="button"
+          (click)="setPeriod('month')"
+          [class.ring-2]="period() === 'month'"
+          [class.ring-primary-500]="period() === 'month'"
+          class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold hover:bg-white bg-white">
+          Mois
+        </button>
+        <button
+          type="button"
+          (click)="setPeriod('year')"
+          [class.ring-2]="period() === 'year'"
+          [class.ring-primary-500]="period() === 'year'"
+          class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-semibold hover:bg-white bg-white">
+          Année
+        </button>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <label class="text-sm font-semibold text-slate-700">Du</label>
+        <input
+          type="date"
+          [value]="startDate()"
+          (input)="startDate.set($any($event.target).value)"
+          class="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium">
+        <label class="text-sm font-semibold text-slate-700">Au</label>
+        <input
+          type="date"
+          [value]="endDate()"
+          (input)="endDate.set($any($event.target).value)"
+          class="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium">
+        <button
+          type="button"
+          (click)="applyCustomDates()"
+          class="px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700">
+          Appliquer
+        </button>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <label class="text-sm font-semibold text-slate-700">Produit</label>
+        <div class="relative min-w-[240px]">
+          <input
+            type="text"
+            [value]="productDropdownOpen() ? productSearchQuery() : selectedProductLabel()"
+            (input)="productSearchQuery.set($any($event.target).value)"
+            (focus)="openProductDropdown()"
+            (blur)="onProductComboboxBlur()"
+            placeholder="Rechercher ou sélectionner un produit"
+            class="w-full px-3 py-2 pr-8 rounded-lg border border-slate-200 text-sm font-medium placeholder-gray-400 bg-white">
+          <span class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </span>
+          @if (productDropdownOpen()) {
+            <div class="absolute z-20 left-0 right-0 mt-1 max-h-60 overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg py-1">
+              <button
+                type="button"
+                (mousedown)="selectProduct(null); $event.preventDefault()"
+                [class.bg-primary-50]="productId() === null"
+                class="w-full px-3 py-2 text-left text-sm font-medium text-slate-700 hover:bg-slate-50">
+                Tous les produits
+              </button>
+              @for (p of filteredProducts(); track p.id) {
+                <button
+                  type="button"
+                  (mousedown)="selectProduct(p); $event.preventDefault()"
+                  [class.bg-primary-50]="productId() === p.id"
+                  class="w-full px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-50">
+                  {{ p.name }}{{ p.sku ? ' (' + p.sku + ')' : '' }}
+                </button>
+              }
+              @if (filteredProducts().length === 0) {
+                <div class="px-3 py-2 text-sm text-slate-500">Aucun produit trouvé</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="rounded-xl bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm font-medium">
+      {{ error() }}
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="rounded-xl border border-slate-100 bg-slate-50 p-8 text-center text-slate-500 font-medium">
+      Chargement…
+    </div>
+  } @else if (report()) {
+    <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+      <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex flex-wrap items-center justify-between gap-3">
+        <span class="text-sm text-slate-600">
+          Période : {{ report()!.period.start | date:'dd/MM/yyyy' }} → {{ report()!.period.end | date:'dd/MM/yyyy' }}
+          @if (productId()) {
+            <span class="ml-2 font-medium">· Un seul produit</span>
+          }
+        </span>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            (click)="exportPdf()"
+            class="px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50">
+            Export PDF
+          </button>
+          <button
+            type="button"
+            (click)="exportExcel()"
+            class="px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50">
+            Export Excel
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b border-slate-200 bg-slate-50">
+              <th class="px-4 py-3 text-xs font-black text-slate-500 uppercase tracking-wider">Produit</th>
+              <th class="px-4 py-3 text-xs font-black text-slate-500 uppercase tracking-wider text-right">On avait</th>
+              <th class="px-4 py-3 text-xs font-black text-slate-500 uppercase tracking-wider text-right">Acheté</th>
+              <th class="px-4 py-3 text-xs font-black text-slate-500 uppercase tracking-wider text-right">Vendu</th>
+              <th class="px-4 py-3 text-xs font-black text-slate-500 uppercase tracking-wider text-right">Il reste</th>
+              <th class="px-4 py-3 text-xs font-black text-slate-500 uppercase tracking-wider text-right">Prix achat</th>
+              <th class="px-4 py-3 text-xs font-black text-slate-500 uppercase tracking-wider text-right">Valeur stock</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of report()!.lines; track trackByProductId($index, line)) {
+              <tr class="border-b border-slate-100 hover:bg-slate-50/50">
+                <td class="px-4 py-3">
+                  <p class="font-semibold text-slate-900">{{ line.product_name }}</p>
+                  @if (line.sku) {
+                    <p class="text-xs text-slate-400">{{ line.sku }}</p>
+                  }
+                </td>
+                <td class="px-4 py-3 text-right font-medium text-slate-700">{{ line.stock_debut }}</td>
+                <td class="px-4 py-3 text-right font-medium text-emerald-600">+{{ line.entrees }}</td>
+                <td class="px-4 py-3 text-right font-medium text-amber-600">-{{ line.ventes }}</td>
+                <td class="px-4 py-3 text-right font-bold text-slate-900">{{ line.stock_restant }}</td>
+                <td class="px-4 py-3 text-right font-medium text-slate-700">{{ line.prix_achat | formatPrice }}</td>
+                <td class="px-4 py-3 text-right font-bold text-slate-900">{{ line.valeur_stock | formatPrice }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (report()!.lines.length === 0) {
+        <div class="px-4 py-8 text-center text-slate-500 text-sm">Aucun produit sur la période.</div>
+      } @else {
+        <div class="px-4 py-4 border-t border-slate-200 bg-slate-50/70">
+          <p class="text-xs font-black text-slate-500 uppercase tracking-wider mb-3">Totaux</p>
+          <table class="w-full max-w-xs">
+            <tbody>
+              <tr class="border-b border-slate-100">
+                <td class="py-2 pr-4 text-sm font-medium text-slate-700">Quantité totale en stock</td>
+                <td class="py-2 text-right font-bold text-slate-900">{{ totalQuantityStock() }}</td>
+              </tr>
+              <tr>
+                <td class="py-2 pr-4 text-sm font-medium text-slate-700">Valeur totale du stock</td>
+                <td class="py-2 text-right font-bold text-slate-900">{{ totalValeurStock() | formatPrice }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

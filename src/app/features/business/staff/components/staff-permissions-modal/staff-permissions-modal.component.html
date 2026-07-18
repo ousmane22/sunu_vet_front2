@@ -1,0 +1,46 @@
+<div class="fixed inset-0 z-50 overflow-y-auto" (click)="close.emit()">
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <div class="fixed inset-0 bg-gray-900/60" aria-hidden="true"></div>
+    <div (click)="$event.stopPropagation()" class="relative w-full max-w-3xl rounded-2xl bg-white shadow-xl p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-2">Permissions Spécifiques : {{ member().name }}</h3>
+      <p class="text-sm text-gray-500 mb-4">Attribuez des droits d'accès particuliers à l'utilisateur, au-delà de son rôle principal.</p>
+
+      <div class="max-h-[60vh] overflow-y-auto pr-2 space-y-6">
+        @for (group of availablePermissions(); track group.group_key) {
+        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+          <h4 class="font-bold text-gray-800 mb-3 uppercase tracking-wider text-xs">{{ group.group_label }}</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            @for (perm of group.permissions; track perm.id) {
+            <div class="flex items-start gap-2">
+              <input type="checkbox" [id]="'perm-' + perm.name" [checked]="hasPermission(perm.name)"
+                [disabled]="isRolePermission(perm.name)"
+                (change)="togglePermission(perm.name)"
+                class="mt-0.5 w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed" />
+              <label [for]="'perm-' + perm.name" class="text-sm cursor-pointer select-none flex flex-col"
+                [class.text-gray-400]="isRolePermission(perm.name)"
+                [class.text-gray-700]="!isRolePermission(perm.name)">
+                <span>{{ perm.label }}</span>
+                @if (isRolePermission(perm.name)) {
+                  <span class="text-[10px] text-gray-400 mt-0.5">Inclus dans le rôle</span>
+                }
+              </label>
+            </div>
+            }
+          </div>
+        </div>
+        }
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-gray-100 flex justify-end gap-3">
+        <button type="button" (click)="close.emit()"
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">Annuler</button>
+        <button type="button" (click)="onSubmit()" [disabled]="isSaving()"
+          class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-xl hover:bg-primary-700 disabled:opacity-50 transition-colors">Enregistrer
+          les permissions</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

@@ -1,0 +1,109 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" (click)="cancel()"></div>
+    <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
+
+        <div class="bg-gradient-to-r from-primary-600 to-primary-800 px-8 py-5 flex items-center justify-between">
+            <div>
+                <h2 class="text-lg font-bold text-white">{{ isEditMode ? 'Modifier le Paiement' : 'Enregistrer un Paiement' }}</h2>
+                <p class="text-primary-200 text-sm">{{ isEditMode ? 'Modifiez les détails de la transaction' : 'Saisissez les détails de la transaction' }}</p>
+            </div>
+            <button (click)="cancel()" class="text-white/70 hover:text-white p-1 rounded-lg transition-colors">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-8 space-y-5">
+
+            <!-- Subscription select -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">Abonnement concerné <span
+                        class="text-red-500">*</span></label>
+                <select formControlName="subscription_id"
+                    [disabled]="isEditMode"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    [class.border-red-400]="f.subscription_id.invalid && f.subscription_id.touched">
+                    <option [value]="null">— Choisir un abonnement —</option>
+                    <option *ngFor="let sub of subscriptions()" [value]="sub.id">
+                        {{ sub.plan?.name }} ({{ sub.starts_at | date:'dd/MM/yy' }} → {{ sub.ends_at | date:'dd/MM/yy'
+                        }})
+                    </option>
+                </select>
+                <p *ngIf="f.subscription_id.invalid && f.subscription_id.touched" class="mt-1 text-xs text-red-500">
+                    Sélectionnez un abonnement.</p>
+            </div>
+
+            <!-- Amount + Method -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Montant (XOF) <span
+                            class="text-red-500">*</span></label>
+                    <input formControlName="amount" type="number" placeholder="20000"
+                        class="w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 transition"
+                        [class.border-red-400]="f.amount.invalid && f.amount.touched"
+                        [class.border-gray-300]="!(f.amount.invalid && f.amount.touched)">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Méthode <span
+                            class="text-red-500">*</span></label>
+                    <select formControlName="payment_method"
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        [class.border-red-400]="f.payment_method.invalid && f.payment_method.touched">
+                        <option value="">— Choisir —</option>
+                        <option *ngFor="let m of paymentMethods" [value]="m">{{ m }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Date + Status -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Date du paiement <span
+                            class="text-red-500">*</span></label>
+                    <input formControlName="paid_at" type="date"
+                        class="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Statut</label>
+                    <select formControlName="status"
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <option value="completed">Complété</option>
+                        <option value="pending">En attente</option>
+                        <option value="failed">Échoué</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Transaction ID -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1.5">ID Transaction (optionnel)</label>
+                <input formControlName="transaction_id" type="text"
+                    placeholder="Laissez vide pour générer automatiquement"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+            </div>
+
+            <!-- Error -->
+            <div *ngIf="serverError" class="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{{
+                serverError }}</div>
+
+            <!-- Actions -->
+            <div class="flex justify-between pt-2">
+                <button type="button" (click)="cancel()"
+                    class="border border-gray-300 text-gray-600 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">Annuler</button>
+                <button type="submit" [disabled]="isSubmitting"
+                    class="bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white px-6 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition flex items-center space-x-2">
+                    <svg *ngIf="isSubmitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z">
+                        </path>
+                    </svg>
+                    <span>{{ isSubmitting ? (isEditMode ? 'Modification...' : 'Enregistrement...') : (isEditMode ? 'Modifier le paiement' : 'Enregistrer le paiement') }}</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+

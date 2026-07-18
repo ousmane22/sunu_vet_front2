@@ -1,0 +1,69 @@
+<section class="py-12 sm:py-16 md:py-20 lg:py-24 bg-white border-y border-gray-100 overflow-x-hidden" aria-labelledby="project-preview-heading">
+  <div class="mx-auto w-full max-w-[min(100%,90rem)] px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-12 xl:gap-16 items-center min-w-0">
+      <!-- Capture à gauche (desktop) — colonne plus large qu’un 50/50 -->
+      <div class="relative lg:col-span-8 min-w-0">
+        <div class="absolute -inset-4 sm:-inset-6 bg-gradient-to-br from-primary-100/80 to-primary-50/50 rounded-[2rem] blur-2xl -z-10 pointer-events-none"></div>
+        <div class="relative rounded-2xl sm:rounded-3xl shadow-2xl shadow-gray-900/15 ring-1 ring-gray-200/80 overflow-hidden bg-gray-100 max-w-full xl:origin-left xl:scale-[1.03]">
+          <img
+            src="assets/images/hero_image.png"
+            alt="Aperçu du tableau de bord SunuVet : ventes, consultations, clients et stock"
+            class="w-full h-auto block"
+            width="1200"
+            height="800"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      </div>
+
+      <!-- Texte à droite (desktop) -->
+      <div class="text-center lg:text-left lg:col-span-4 min-w-0">
+        <p class="text-sm font-semibold text-primary-600 uppercase tracking-widest mb-3">
+          Aperçu du produit
+        </p>
+        <h2 id="project-preview-heading" class="text-3xl md:text-4xl lg:text-[2.5rem] font-bold text-gray-900 tracking-tight leading-tight mb-6">
+          Pilotez votre clinique depuis un seul écran
+        </h2>
+        <p class="text-lg text-gray-600 leading-relaxed mb-8">
+          Tableau de bord, point de vente, consultations, clients et médicaments : tout est regroupé dans une interface claire,
+          pensée pour les équipes vétérinaires au quotidien.
+        </p>
+        <ul class="space-y-4 mb-10 text-left inline-block w-full max-w-md mx-auto lg:mx-0">
+          <li class="flex items-start gap-3 text-gray-700">
+            <span class="flex-shrink-0 mt-0.5 w-6 h-6 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            </span>
+            <span>Indicateurs du jour : ventes, consultations, alertes stock</span>
+          </li>
+          <li class="flex items-start gap-3 text-gray-700">
+            <span class="flex-shrink-0 mt-0.5 w-6 h-6 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            </span>
+            <span>Navigation par rôles : vente, soins, stock, finances</span>
+          </li>
+          <li class="flex items-start gap-3 text-gray-700">
+            <span class="flex-shrink-0 mt-0.5 w-6 h-6 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            </span>
+            <span>Historique des activités et chiffres en F&nbsp;CFA</span>
+          </li>
+        </ul>
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start w-full sm:w-auto">
+          <a
+            routerLink="/register"
+            class="inline-flex items-center justify-center w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-white bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-600/25 transition-all no-underline text-center"
+          >
+            Essayer gratuitement
+          </a>
+          <a
+            href="#tarifs"
+            class="inline-flex items-center justify-center w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 transition-colors no-underline text-center"
+          >
+            Voir les tarifs
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

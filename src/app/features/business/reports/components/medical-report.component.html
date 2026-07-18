@@ -1,0 +1,57 @@
+<!-- Synthèse : consultations + montant -->
+<div class="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div class="bg-primary-600 p-6 rounded-3xl shadow-lg text-white">
+        <p class="text-primary-100 text-sm font-bold uppercase tracking-wider">Consultations (période)</p>
+        <p class="text-4xl font-black mt-1">{{ data.total_consultations }}</p>
+        <p class="text-primary-200 text-sm mt-2">{{ strategyService.isVet() ? 'consultations enregistrées' : 'activités' }}</p>
+    </div>
+    <div class="bg-slate-800 p-6 rounded-3xl shadow-lg text-white">
+        <p class="text-slate-300 text-sm font-bold uppercase tracking-wider">Montant net consultations</p>
+        <p class="text-4xl font-black mt-1">{{ data.total_consultations_net | formatPrice }}</p>
+        <p class="text-slate-400 text-sm mt-2">Sur la période sélectionnée</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+        <h3 class="text-lg font-bold text-slate-900 mb-6">Répartition par Espèce animale</h3>
+        @if (data.by_species.length) {
+        <div class="h-56 mb-6">
+            <canvas baseChart [type]="'doughnut'" [data]="speciesChartData" [options]="speciesChartOptions"></canvas>
+        </div>
+        }
+        <div class="space-y-4">
+            @for (sp of data.by_species; track sp.animal_species) {
+            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                <span class="text-sm font-bold text-slate-700 capitalize">{{ sp.animal_species || 'Non renseigné' }}</span>
+                <div class="flex items-center gap-3">
+                    @if (sp.total_net != null) {
+                    <span class="text-xs font-semibold text-slate-500">{{ sp.total_net | formatPrice }}</span>
+                    }
+                    <span class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-sm font-black text-primary-600">
+                        {{ sp.count }} {{ strategyService.isVet() ? 'consultations' : 'ventes' }}
+                    </span>
+                </div>
+            </div>
+            } @empty {
+            <p class="text-center text-slate-400 italic py-12">Aucune donnée {{ strategyService.isVet() ? 'médicale' : "d'activité" }}.</p>
+            }
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+        <h3 class="text-lg font-bold text-slate-900 mb-6 text-center">Évolution sur les 6 derniers mois</h3>
+        @if (data.monthly_volume.length) {
+        <div class="h-64">
+            <canvas baseChart [type]="'line'" [data]="monthlyChartData" [options]="monthlyChartOptions"></canvas>
+        </div>
+        } @else {
+        <div class="h-64 flex flex-col items-center justify-center text-slate-300">
+            <i class="fas fa-chart-line text-4xl mb-2"></i>
+            <p class="text-sm">Aucune donnée historique</p>
+        </div>
+        }
+    </div>
+</div>
+
+

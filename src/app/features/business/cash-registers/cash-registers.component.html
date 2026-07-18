@@ -1,0 +1,81 @@
+<div class="p-4 md:p-8 max-w-5xl mx-auto w-full space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-bold text-black tracking-tight">Caisse</h1>
+            <p class="mt-1 text-sm font-medium text-gray-700">
+                Ouvrez la caisse avant le point de vente, les consultations et les dépenses.
+            </p>
+        </div>
+        @if (activeRegister()) {
+        <button type="button" (click)="openDetails()"
+            class="px-4 py-2.5 bg-white border-2 border-gray-300 rounded-xl text-sm font-bold text-black hover:bg-gray-50 transition-colors flex items-center gap-2 self-start sm:self-auto">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Détails / transactions
+        </button>
+        }
+    </div>
+
+    @if (openRegisterRequiredNotice()) {
+    <div class="p-4 rounded-xl bg-amber-50 border-2 border-amber-300 text-amber-950 text-sm font-medium">
+        Une caisse ouverte est requise pour accéder aux <strong>consultations</strong> et aux <strong>dépenses</strong>.
+        Ouvrez la caisse ci-dessous pour continuer.
+    </div>
+    }
+    @if (errorMessage()) {
+    <div class="p-4 rounded-xl bg-red-50 border-2 border-red-300 text-red-900 text-sm font-medium">{{ errorMessage() }}</div>
+    }
+    @if (successMessage()) {
+    <div class="p-4 rounded-xl bg-emerald-50 border-2 border-emerald-300 text-emerald-900 text-sm font-medium">{{ successMessage() }}</div>
+    }
+
+    @if (isLoading()) {
+    <div class="flex justify-center py-12">
+        <svg class="animate-spin h-10 w-10 text-primary-700" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+    </div>
+    } @else {
+    @if (!activeRegister()) {
+    <app-cash-register-open-form [openForm]="openForm" [isSubmitting]="isSubmitting()" (submit)="openRegister()" />
+    }
+    @if (activeRegister(); as reg) {
+    <app-cash-register-active-block
+        [register]="reg"
+        [theoreticalBalance]="theoreticalBalance()"
+        (openCloseModal)="openCloseModal()"
+        (openMovements)="openDetails()" />
+    }
+    }
+
+    <app-cash-register-history-table
+        [history]="history()"
+        [isLoadingHistory]="isLoadingHistory()"
+        [getTheoreticalFinal]="getTheoreticalFinalFn"
+        [getDifference]="getDifferenceFn"
+        (openDetails)="openDetails($event)"
+        (exportSessionPdf)="exportSessionPdf($event)"
+        (exportHistoryPdf)="onExportHistoryPdf()"
+        (correctBalance)="openCorrectionModal($event)" />
+</div>
+
+<app-cash-register-details-modal [register]="detailsRegister()" (close)="toggleDetails()" />
+
+<app-cash-register-close-modal
+    [open]="showCloseModal()"
+    [theoreticalBalance]="theoreticalBalance()"
+    [isSubmitting]="isSubmitting()"
+    (closeModal)="dismissCloseModal()"
+    (closingBalanceConfirmed)="closeRegister($event)" />
+
+<app-cash-register-close-modal
+    [open]="!!registerToCorrect()"
+    [theoreticalBalance]="registerToCorrect() ? getTheoreticalFinal(registerToCorrect()!) : 0"
+    [prefillValue]="registerToCorrect() ? +registerToCorrect()!.closing_balance! : null"
+    [isCorrection]="true"
+    [isSubmitting]="isSubmitting()"
+    (closeModal)="dismissCorrectionModal()"
+    (closingBalanceConfirmed)="correctRegisterBalance($event)" />

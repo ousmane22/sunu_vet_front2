@@ -1,0 +1,87 @@
+<div class="p-8 w-full max-w-[1400px] mx-auto space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight text-gray-900">Personnel de la clinique vétérinaire</h2>
+      <p class="text-sm text-gray-500 mt-1">Gérez les comptes d'accès, les rôles et les permissions spécifiques du personnel.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button (click)="openAddModal()"
+        class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-primary-600 rounded-xl hover:bg-primary-700 shadow-sm transition-all active:scale-95">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Ajouter un membre
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  @if (errorMessage()) {
+  <div class="p-4 text-sm text-red-700 bg-red-50 rounded-xl border border-red-100 flex items-center gap-3">
+    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd"
+        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+        clip-rule="evenodd" />
+    </svg>
+    {{ errorMessage() }}
+  </div>
+  }
+  @if (successMessage()) {
+  <div class="p-4 text-sm text-green-700 bg-green-50 rounded-xl border border-green-100 flex items-center gap-3">
+    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd"
+        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+        clip-rule="evenodd" />
+    </svg>
+    {{ successMessage() }}
+  </div>
+  }
+
+  <!-- Data List -->
+  <app-staff-list
+    [staff]="staff()"
+    [roles]="roles()"
+    [isLoading]="isLoading()"
+    [isSaving]="isSaving()"
+    [currentUserId]="currentUser()?.id"
+    (edit)="openEditModal($event)"
+    (toggleStatus)="toggleStatus($event)"
+    (permissions)="openPermissionsModal($event)"
+  ></app-staff-list>
+
+  <!-- Modals -->
+  @if (showAddModal()) {
+    <app-staff-form-modal
+      [roles]="roles()"
+      [isSaving]="isSaving()"
+      [error]="errorMessage()"
+      (save)="onSubmitAdd($event)"
+      (close)="closeAddModal()"
+    ></app-staff-form-modal>
+  }
+
+  @if (showEditModal()) {
+    <app-staff-form-modal
+      [member]="editingMember()"
+      [roles]="roles()"
+      [isSaving]="isSaving()"
+      [error]="errorMessage()"
+      (save)="onSubmitEdit($event)"
+      (close)="closeEditModal()"
+    ></app-staff-form-modal>
+  }
+
+  @if (showPermissionsModal() && editingMember()) {
+    <app-staff-permissions-modal
+      [member]="editingMember()!"
+      [availablePermissions]="availablePermissions()"
+      [isSaving]="isSaving()"
+      (save)="onSubmitPermissions($event)"
+      (close)="closePermissionsModal()"
+    ></app-staff-permissions-modal>
+  }
+
+</div>
+
+

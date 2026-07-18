@@ -1,0 +1,160 @@
+<div class="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-black text-gray-900 tracking-tight">Inventaire</h1>
+      <p class="text-gray-500 mt-1 font-medium">Sessions d'inventaire physique et régularisation du stock.</p>
+    </div>
+    @if (can('stock.inventory.create')) {
+    <button type="button" (click)="start()" [disabled]="hasInProgress() || isStarting()"
+      class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-primary-600 text-white font-bold text-sm hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg shadow-primary-500/20">
+      @if (isStarting()) {
+      <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
+      </svg>
+      }
+      Démarrer un inventaire
+    </button>
+    }
+  </div>
+
+  @if (error()) {
+  <div class="rounded-xl bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm font-medium">
+    {{ error() }}
+  </div>
+  }
+
+  @if (hasInProgress() && can('stock.inventory.create')) {
+  <div
+    class="rounded-xl bg-amber-50 border border-amber-200 text-amber-800 px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <p class="font-medium">Un inventaire est déjà en cours. Terminez-le ou annulez-le avant d'en démarrer un nouveau.
+    </p>
+    @if (inProgressSessionId(); as id) {
+    <a [routerLink]="['/business/inventory', id]"
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 text-white font-semibold text-sm hover:bg-amber-700 transition shrink-0">
+      Ouvrir l'inventaire en cours
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </a>
+    }
+  </div>
+  }
+
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="p-4 border-b border-slate-100 flex flex-wrap items-center gap-3">
+      <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Statut</label>
+      <select [value]="statusFilter()" (change)="statusFilter.set($any($event.target).value); onFilterChange()"
+        class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-primary-400 focus:border-primary-400">
+        <option value="">Tous</option>
+        <option value="in_progress">En cours</option>
+        <option value="completed">Terminé</option>
+        <option value="cancelled">Annulé</option>
+      </select>
+    </div>
+
+    @if (isLoading()) {
+    <div class="flex flex-col items-center justify-center py-20 gap-4">
+      <div class="w-10 h-10 border-4 border-slate-100 border-t-primary-500 rounded-full animate-spin"></div>
+      <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">Chargement...</p>
+    </div>
+    } @else if (sessions().length === 0) {
+    <div class="text-center py-20 text-slate-500">
+      <p class="font-semibold">Aucune session d'inventaire.</p>
+      <p class="text-sm mt-1">Démarrez un inventaire pour comparer les quantités physiques au stock enregistré.</p>
+    </div>
+    } @else {
+    <!-- Mobile View (Cards) -->
+    <div class="md:hidden divide-y divide-slate-100">
+      @for (s of sessions(); track s.id) {
+      <a [routerLink]="['/business/inventory', s.id]" class="block p-4 active:bg-slate-50 transition-colors">
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Session #{{
+              s.id.toString().padStart(5, '0') }}</p>
+            <p class="text-[10px] text-slate-400 font-medium">{{ s.started_at | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+          <span class="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider"
+            [ngClass]="statusClass(s.status)">
+            {{ statusLabel(s.status) }}
+          </span>
+        </div>
+
+        <div class="flex items-center justify-between mt-3">
+          <div class="flex items-center gap-2">
+            <div
+              class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500">
+              {{ (s.user?.name ?? '?')[0] }}
+            </div>
+            <span class="text-xs font-bold text-slate-700">{{ s.user?.name ?? '-' }}</span>
+          </div>
+          <div class="text-right">
+            <p class="text-xs font-black text-slate-900">{{ s.lines_count ?? s.lines?.length ?? 0 }} articles</p>
+          </div>
+        </div>
+      </a>
+      }
+    </div>
+
+    <!-- Desktop View (Table) -->
+    <div class="hidden md:block overflow-x-auto">
+      <table class="min-w-full divide-y divide-slate-100">
+        <thead class="bg-slate-50/80">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Session</th>
+            <th class="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Démarré le</th>
+            <th class="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Par</th>
+            <th class="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Statut</th>
+            <th class="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Lignes</th>
+            <th class="px-6 py-4 text-right text-xs font-black text-slate-500 uppercase tracking-widest">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          @for (s of sessions(); track s.id) {
+          <tr class="hover:bg-slate-50/50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="font-bold text-slate-900">#{{ s.id.toString().padStart(5, '0') }}</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+              {{ s.started_at | date:'dd/MM/yyyy HH:mm' }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{ s.user?.name ?? '-' }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-3 py-1 rounded-lg text-xs font-bold uppercase" [ngClass]="statusClass(s.status)">
+                {{ statusLabel(s.status) }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{ s.lines_count ?? s.lines?.length ?? 0 }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right">
+              <a [routerLink]="['/business/inventory', s.id]"
+                class="text-primary-600 font-semibold text-sm hover:text-primary-700">
+                Voir
+              </a>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (lastPage() > 1) {
+    <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+      <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Page {{ currentPage() }} / {{ lastPage() }}
+        ({{ total() }} au total)</p>
+      <div class="flex gap-2">
+        <button (click)="load(currentPage() - 1)" [disabled]="currentPage() <= 1"
+          class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold disabled:opacity-50 hover:bg-white">
+          Précédent
+        </button>
+        <button (click)="load(currentPage() + 1)" [disabled]="currentPage() >= lastPage()"
+          class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-semibold disabled:opacity-50 hover:bg-white">
+          Suivant
+        </button>
+      </div>
+    </div>
+    }
+    }
+  </div>
+</div>

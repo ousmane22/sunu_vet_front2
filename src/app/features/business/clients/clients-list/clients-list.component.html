@@ -1,0 +1,197 @@
+<div class="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
+
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div>
+      <h1 class="text-3xl md:text-4xl font-bold text-black tracking-tight">Clients</h1>
+      <p class="text-gray-700 mt-1 font-medium">Retrouvez vos clients, soldes dus et historiques.</p>
+    </div>
+    <button type="button" (click)="openCreate()"
+      class="bg-slate-900 hover:bg-black text-white px-5 py-3 rounded-xl transition-colors flex items-center gap-2 font-bold text-sm self-start md:self-auto">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+      Nouveau client
+    </button>
+  </div>
+
+  <!-- Recherche -->
+  <div class="bg-white p-5 rounded-xl border-2 border-gray-300">
+    <label for="search" class="block text-xs font-bold text-black uppercase tracking-wide mb-2">Rechercher</label>
+    <div class="relative max-w-md">
+      <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input id="search" type="search" [formControl]="searchControl"
+        placeholder="Nom, téléphone ou email..."
+        class="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm font-semibold text-black placeholder:text-gray-500" />
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border-2 border-gray-300 overflow-hidden">
+    @if (isLoading()) {
+    <div class="flex flex-col items-center justify-center py-24 gap-4">
+      <div class="relative h-10 w-10">
+        <div class="absolute inset-0 rounded-full border-2 border-gray-200"></div>
+        <div class="absolute inset-0 rounded-full border-2 border-primary-600 border-t-transparent animate-spin"></div>
+      </div>
+      <p class="text-black text-sm font-semibold">Chargement des clients...</p>
+    </div>
+    } @else if (clients().length === 0) {
+    <div class="flex flex-col items-center justify-center py-24 text-center">
+      <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mb-5 border-2 border-gray-300">
+        <svg class="w-7 h-7 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </div>
+      <h3 class="text-base font-bold text-black">Aucun client trouvé</h3>
+      <p class="text-sm text-gray-700 mt-1.5 max-w-[260px]">Ajoutez un client ou modifiez votre recherche.</p>
+    </div>
+    } @else {
+
+    <!-- Mobile -->
+    <div class="md:hidden divide-y divide-gray-200">
+      @for (c of clients(); track c.id) {
+      <div (click)="openDetails(c)" class="p-4 active:bg-gray-50 transition-colors cursor-pointer">
+        <div class="flex justify-between items-start gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-lg bg-gray-100 border-2 border-gray-300 text-black flex items-center justify-center font-bold shrink-0">
+              {{ c.name.charAt(0).toUpperCase() }}
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-black truncate">{{ c.name }}</p>
+              <p class="text-xs text-gray-700 font-medium mt-0.5">{{ c.phone || 'Pas de numéro' }}</p>
+            </div>
+          </div>
+          @if (hasDebt(c.balance_due)) {
+          <div class="text-right shrink-0">
+            <p class="text-[10px] font-bold text-amber-900 uppercase">Dû</p>
+            <p class="text-sm font-bold text-amber-900 tabular-nums">{{ (c.balance_due || 0) | formatPrice }}</p>
+          </div>
+          }
+        </div>
+        <div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200" (click)="$event.stopPropagation()">
+          @if (hasDebt(c.balance_due)) {
+          <button type="button" (click)="openPaymentModal(c)"
+            class="flex-1 px-3 py-2 rounded-lg text-xs font-bold text-amber-900 bg-amber-50 border border-amber-300">
+            Régler
+          </button>
+          }
+          <button type="button" (click)="openDetails(c)"
+            class="flex-1 px-3 py-2 rounded-lg text-xs font-bold text-black bg-white border-2 border-gray-300">
+            Voir détail
+          </button>
+          <button type="button" (click)="openEdit(c)"
+            class="px-3 py-2 rounded-lg text-xs font-bold text-black bg-white border-2 border-gray-300">
+            Éditer
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Desktop -->
+    <div class="hidden md:block overflow-x-auto">
+      <table class="min-w-full">
+        <thead>
+          <tr class="border-b-2 border-gray-300 bg-gray-50">
+            <th class="px-6 py-3 text-left"><span class="text-xs font-bold text-black uppercase tracking-wide">Client</span></th>
+            <th class="px-6 py-3 text-left"><span class="text-xs font-bold text-black uppercase tracking-wide">Téléphone</span></th>
+            <th class="px-6 py-3 text-left"><span class="text-xs font-bold text-black uppercase tracking-wide">Email</span></th>
+            <th class="px-6 py-3 text-right"><span class="text-xs font-bold text-black uppercase tracking-wide">Solde dû</span></th>
+            <th class="px-6 py-3 text-right"><span class="text-xs font-bold text-black uppercase tracking-wide">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          @for (c of clients(); track c.id) {
+          <tr (click)="openDetails(c)" class="hover:bg-gray-50 transition-colors cursor-pointer">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-gray-100 border-2 border-gray-300 text-black flex items-center justify-center font-bold text-sm">
+                  {{ c.name.charAt(0).toUpperCase() }}
+                </div>
+                <p class="text-sm font-bold text-black">{{ c.name }}</p>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <p class="text-sm font-medium text-black flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                {{ c.phone ?? '—' }}
+              </p>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <p class="text-sm font-medium text-black">{{ c.email ?? '—' }}</p>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right">
+              <span [ngClass]="hasDebt(c.balance_due) ? 'text-amber-800 font-bold' : 'text-emerald-800 font-semibold'"
+                class="text-sm tabular-nums">
+                {{ (c.balance_due || 0) | formatPrice }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right" (click)="$event.stopPropagation()">
+              <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                @if (hasDebt(c.balance_due)) {
+                <button type="button" (click)="openPaymentModal(c)"
+                  class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-amber-900 bg-amber-50 border border-amber-300 hover:bg-amber-100">
+                  Régler
+                </button>
+                }
+                <button type="button" (click)="openDetails(c)"
+                  class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-black bg-white border-2 border-gray-300 hover:bg-gray-50">
+                  Voir détail
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+                <button type="button" (click)="openEdit(c)"
+                  class="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold text-black hover:bg-gray-100 border border-transparent hover:border-gray-300">
+                  Modifier
+                </button>
+                <button type="button" (click)="deleteClient(c)"
+                  class="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold text-red-800 hover:bg-red-50 border border-transparent hover:border-red-300">
+                  Supprimer
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="px-6 py-4 bg-gray-50 border-t-2 border-gray-300">
+      <p class="text-sm text-gray-700 font-medium">
+        <span class="font-bold text-black">{{ filteredCount() }}</span>
+        client{{ filteredCount() > 1 ? 's' : '' }}
+      </p>
+    </div>
+    }
+  </div>
+</div>
+
+<app-client-form-modal
+  [open]="showFormModal()"
+  [client]="editingClient()"
+  (saved)="onClientSaved($event)"
+  (cancelled)="closeFormModal()" />
+
+<app-add-payment-modal
+  [open]="!!clientForPayment()"
+  [amountDue]="clientForPayment()?.balance_due ?? 0"
+  [referenceLabel]="clientForPayment() ? 'Client ' + clientForPayment()!.name : ''"
+  [clientName]="clientForPayment()?.name ?? null"
+  [isSubmitting]="isSubmittingPayment()"
+  [maxAmount]="clientForPayment()?.balance_due ?? null"
+  (submitPayload)="onPaymentSubmit($event)"
+  (closeModal)="closePaymentModal()" />
+
+<app-client-detail-slide
+  [clientId]="detailsClientId()"
+  (closed)="closeDetails()"
+  (updated)="onClientUpdatedFromSlide($event)"
+  (deleted)="onClientDeletedFromSlide($event)"
+  (editRequested)="onEditFromSlide($event)"
+  (payRequested)="openPaymentModal($event)" />

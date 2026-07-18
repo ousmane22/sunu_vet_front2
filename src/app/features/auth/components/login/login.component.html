@@ -1,0 +1,297 @@
+<div class="min-h-screen min-h-[100dvh] flex flex-col lg:flex-row bg-gray-50">
+    <!-- Left Column - Login Form -->
+    <div
+        class="w-full lg:w-1/2 flex flex-col justify-center px-4 sm:px-8 md:px-16 lg:px-24 bg-white z-10 shadow-[20px_0_30px_-15px_rgba(0,0,0,0.05)] overflow-x-hidden">
+
+        <div class="max-w-md w-full mx-auto py-6 sm:py-8 w-full">
+            <!-- Logo and Back Link -->
+            <div class="flex items-center justify-between mb-6 sm:mb-10 md:mb-12">
+                <a routerLink="/"
+                    class="flex items-center text-gray-500 hover:text-primary-600 transition-colors group text-sm font-medium min-h-[44px] py-2">
+                    <svg class="w-5 h-5 mr-2 shrink-0 transform group-hover:-translate-x-1 transition-transform" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span class="truncate">Retour au site</span>
+                </a>
+            </div>
+
+            <!-- Header -->
+            <div class="text-center md:text-left mb-8 sm:mb-10">
+                <img src="assets/images/logo_vet.png" alt="SunuVet Logo"
+                    class="h-12 sm:h-16 mb-6 sm:mb-8 block md:hidden mx-auto object-contain">
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 mb-2 sm:mb-3 tracking-tight">Bienvenue</h1>
+                <p class="text-gray-500 text-base sm:text-lg">Connectez-vous à votre espace SunuVet.</p>
+            </div>
+
+            <!-- Message après redirection (entreprise désactivée ou abonnement expiré) -->
+            @if (redirectMessage()) {
+            <app-alert type="warning">{{ redirectMessage() }}</app-alert>
+            }
+
+            <!-- Message après réinitialisation du mot de passe -->
+            @if (resetSuccessMessage()) {
+            <app-alert type="success">{{ resetSuccessMessage() }}</app-alert>
+            }
+
+            <!-- Global Error Message -->
+            @if (errorMessage()) {
+            <app-alert type="danger">{{ errorMessage() }}</app-alert>
+            }
+
+            <!-- Form -->
+            <form class="space-y-5 sm:space-y-6" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                <div>
+                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">Adresse Email</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                [class.text-red-400]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                            </svg>
+                        </div>
+                        <input id="email" formControlName="email" type="email" autocomplete="email" required
+                            class="w-full pl-10 sm:pl-11 pr-4 py-3 sm:py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors text-gray-900 placeholder-gray-400 font-medium min-h-[48px] text-base"
+                            [class.border-red-300]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                            [class.focus:border-red-500]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                            [class.focus:ring-red-500]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                            placeholder="votre@email.com">
+                    </div>
+                    @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+                    <p class="mt-2 text-sm text-red-600 font-medium">L'adresse email est requise et doit être valide.
+                    </p>
+                    }
+                </div>
+
+                <div>
+                    <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5 sm:mb-2">
+                        <label for="password" class="block text-sm font-semibold text-gray-700">Mot de passe</label>
+                        <button type="button" (click)="openForgotModal()"
+                            class="text-sm font-medium text-primary-600 hover:text-primary-500 hover:underline min-h-[44px] flex items-center touch-manipulation">Mot de
+                            passe oublié ?</button>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                [class.text-red-400]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </div>
+                        <input id="password" formControlName="password" [attr.type]="passwordVisible() ? 'text' : 'password'" autocomplete="current-password"
+                            required
+                            class="w-full pl-10 sm:pl-11 pr-12 py-3 sm:py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors text-gray-900 placeholder-gray-400 font-medium min-h-[48px] text-base"
+                            [class.border-red-300]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                            [class.focus:border-red-500]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                            [class.focus:ring-red-500]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                            placeholder="••••••••">
+                        <button type="button" (click)="togglePasswordVisibility()" tabindex="-1"
+                            class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none focus:text-primary-600 transition-colors"
+                            [attr.aria-label]="passwordVisible() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+                            @if (passwordVisible()) {
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            </svg>
+                            } @else {
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            }
+                        </button>
+                    </div>
+                    @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+                    <p class="mt-2 text-sm text-red-600 font-medium">Le mot de passe est obligatoire.</p>
+                    }
+                </div>
+
+                <div class="flex items-center">
+                    <input id="remember-me" formControlName="rememberMe" type="checkbox"
+                        class="h-5 w-5 text-primary-600 focus:ring-primary-500 border-gray-300 rounded cursor-pointer">
+                    <label for="remember-me" class="ml-3 block text-sm font-medium text-gray-700 cursor-pointer">
+                        Se souvenir de moi
+                    </label>
+                </div>
+
+                <div>
+                    <button type="submit" [disabled]="isLoading()"
+                        class="w-full flex justify-center items-center py-3.5 sm:py-4 px-4 border border-transparent rounded-xl shadow-lg shadow-primary-500/30 text-base sm:text-lg font-bold text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transform hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none min-h-[48px] touch-manipulation">
+                        @if (isLoading()) {
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        Connexion en cours...
+                        } @else {
+                        Se connecter
+                        }
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-gray-100 text-center px-2">
+                <p class="text-gray-500 font-medium">
+                    Vous n'avez pas de compte ?
+                    <a routerLink="/register"
+                        class="text-primary-600 font-bold hover:text-primary-500 ml-1 hover:underline">Démarrer un essai
+                        gratuit</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Mot de passe oublié -->
+    @if (showForgotModal()) {
+        <div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 overflow-y-auto" (click)="closeForgotModal()">
+            <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 md:p-8 max-h-[90vh] overflow-y-auto pb-8" (click)="$event.stopPropagation()">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-gray-900">Mot de passe oublié</h2>
+                    <button type="button" (click)="closeForgotModal()" class="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100" aria-label="Fermer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <p class="text-sm text-gray-500 mb-6">Un code vous sera envoyé par email pour réinitialiser votre mot de passe.</p>
+
+                @if (forgotSuccess()) {
+                    <app-alert type="success" class="mb-4">{{ forgotSuccess() }}</app-alert>
+                }
+                @if (forgotError()) {
+                    <app-alert type="danger" class="mb-4">{{ forgotError() }}</app-alert>
+                }
+
+                @if (forgotStep() === 1) {
+                    <form [formGroup]="forgotEmailForm" (ngSubmit)="sendResetCode()" class="space-y-4">
+                        <div>
+                            <label for="forgot-email" class="block text-sm font-semibold text-gray-700 mb-1.5">Adresse email</label>
+                            <input id="forgot-email" formControlName="email" type="email" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 placeholder-gray-400" placeholder="votre&#64;email.com" [class.border-red-300]="forgotEmailForm.get('email')?.invalid && forgotEmailForm.get('email')?.touched">
+                            @if (forgotEmailForm.get('email')?.invalid && forgotEmailForm.get('email')?.touched) {
+                                <p class="mt-1.5 text-sm text-red-600">Email requis et valide.</p>
+                            }
+                        </div>
+                        <div class="flex gap-3 pt-2">
+                            <button type="button" (click)="closeForgotModal()" class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50">Annuler</button>
+                            <button type="submit" [disabled]="isLoading() || forgotEmailForm.invalid" class="flex-1 py-3 px-4 rounded-xl bg-primary-600 text-white font-semibold hover:bg-primary-500 disabled:opacity-70 disabled:cursor-not-allowed">
+                                @if (isLoading()) { Envoi... } @else { Envoyer le code }
+                            </button>
+                        </div>
+                    </form>
+                }
+
+                @if (forgotStep() === 2) {
+                    <form [formGroup]="forgotResetForm" (ngSubmit)="submitResetPassword()" class="space-y-4">
+                        <div>
+                            <label for="reset-code" class="block text-sm font-semibold text-gray-700 mb-1.5">Code reçu à {{ forgotEmail() }}</label>
+                            <input id="reset-code" formControlName="code" type="text" inputmode="numeric" maxlength="6" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 text-center text-lg tracking-widest font-bold" placeholder="000000" [class.border-red-300]="forgotResetForm.get('code')?.invalid && forgotResetForm.get('code')?.touched">
+                            @if (forgotResetForm.get('code')?.invalid && forgotResetForm.get('code')?.touched) {
+                                <p class="mt-1.5 text-sm text-red-600">Saisissez le code à 6 chiffres.</p>
+                            }
+                        </div>
+                        <div>
+                            <label for="reset-password" class="block text-sm font-semibold text-gray-700 mb-1.5">Nouveau mot de passe</label>
+                            <div class="relative">
+                                <input id="reset-password" formControlName="password" [attr.type]="resetPasswordVisible() ? 'text' : 'password'" class="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500" placeholder="Min. 8 caractères" [class.border-red-300]="forgotResetForm.get('password')?.invalid && forgotResetForm.get('password')?.touched">
+                                <button type="button" (click)="toggleResetPasswordVisibility()" tabindex="-1" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600">
+                                    @if (resetPasswordVisible()) {
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                                    } @else {
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    }
+                                </button>
+                            </div>
+                            @if (forgotResetForm.get('password')?.invalid && forgotResetForm.get('password')?.touched) {
+                                <p class="mt-1.5 text-sm text-red-600">Minimum 8 caractères, lettres et chiffres.</p>
+                            }
+                        </div>
+                        <div>
+                            <label for="reset-password-confirm" class="block text-sm font-semibold text-gray-700 mb-1.5">Confirmer le mot de passe</label>
+                            <input id="reset-password-confirm" formControlName="password_confirmation" type="password" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500" placeholder="Répétez le mot de passe" [class.border-red-300]="forgotResetForm.hasError('passwordMismatch') && forgotResetForm.get('password_confirmation')?.touched">
+                            @if (forgotResetForm.hasError('passwordMismatch') && forgotResetForm.get('password_confirmation')?.touched) {
+                                <p class="mt-1.5 text-sm text-red-600">Les deux mots de passe ne correspondent pas.</p>
+                            }
+                        </div>
+                        <p class="text-center text-sm text-gray-500">
+                            Vous n'avez pas reçu le code ?
+                            @if (resendCountdown() > 0) {
+                                <span class="font-medium text-gray-600">Renvoyer dans {{ resendCountdown() }} s</span>
+                            } @else {
+                                <button type="button" (click)="resendResetCode()" [disabled]="isResending()" class="ml-1 text-primary-600 font-bold hover:underline disabled:opacity-70">Renvoyer le code</button>
+                            }
+                        </p>
+                        <div class="flex gap-3 pt-2">
+                            <button type="button" (click)="backToForgotStep1()" class="flex-1 py-3 px-4 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50">Retour</button>
+                            <button type="submit" [disabled]="isLoading() || forgotResetForm.invalid" class="flex-1 py-3 px-4 rounded-xl bg-primary-600 text-white font-semibold hover:bg-primary-500 disabled:opacity-70 disabled:cursor-not-allowed">
+                                @if (isLoading()) { Mise à jour... } @else { Réinitialiser le mot de passe }
+                            </button>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Right Column - Image -->
+    <div class="hidden lg:block relative w-1/2 overflow-hidden bg-primary-900 group">
+        <div
+            class="absolute inset-0 bg-black/30 z-10 mix-blend-multiply transition-opacity duration-500 group-hover:opacity-20">
+        </div>
+        <img class="absolute inset-0 w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-[2s] ease-out brightness-90"
+            src="assets/images/judy-beth-morris-_C0d7QRGtJI-unsplash.jpg" alt="Vétérinaire et chien">
+
+        <div class="absolute inset-0 z-20 bg-gradient-to-t from-primary-900/90 via-primary-900/40 to-transparent"></div>
+
+        <div class="absolute bottom-0 left-0 right-0 z-30 p-16">
+            <div
+                class="backdrop-blur-md bg-white/10 p-8 rounded-3xl border border-white/20 shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                <img src="assets/images/logo_vet.png" alt="SunuVet Logo"
+                    class="h-14 mb-6 object-contain brightness-0 invert opacity-90">
+                <blockquote class="mb-6">
+                    <p class="text-2xl font-bold text-white leading-relaxed tracking-wide">
+                        "SunuVet a complètement transformé la façon dont nous gérons notre entreprise. Plus de temps pour
+                        nos patients animaux, moins de paperasse."
+                    </p>
+                </blockquote>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div
+                            class="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-xl uppercase shadow-inner">
+                            DA
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-lg font-bold text-white leading-none mb-1">Dr. Fallou Hann</p>
+                            <p class="text-primary-200 text-sm font-medium">Clinique Vétérinaire de l'Avenir</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-1 text-yellow-400">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

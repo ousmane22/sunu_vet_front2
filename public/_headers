@@ -1,0 +1,9 @@
+# Netlify / hébergeurs compatibles : copié à la racine du dist
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.css
+  Cache-Control: public, max-age=31536000, immutable

@@ -1,0 +1,126 @@
+<app-detail-slide-over [open]="open()" [loading]="loading()" [title]="detailTitle()"
+  [subtitle]="consultation()?.created_at ? (consultation()!.created_at | formatDate) : null" panelClass="max-w-xl"
+  (closeSlideOver)="close.emit()">
+  @if (consultation(); as cons) {
+  <div class="px-6 pb-8 space-y-6">
+    <div class="flex items-center gap-2 flex-wrap">
+      <span [ngClass]="getStatusClass(cons.status)"
+        class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide border">
+        {{ getStatusLabel(cons.status) }}
+      </span>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-white rounded-xl p-4 border-2 border-gray-300">
+        <p class="text-xs font-bold text-black uppercase tracking-wide mb-1 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-primary-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          Client
+        </p>
+        <p class="text-sm font-bold text-black">{{ cons.client?.name ?? '—' }}</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 border-2 border-gray-300">
+        <p class="text-xs font-bold text-black uppercase tracking-wide mb-1 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-indigo-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Réalisé par
+        </p>
+        <p class="text-sm font-bold text-black">{{ cons.user?.name ?? '—' }}</p>
+      </div>
+    </div>
+
+    @if (cons.animal_species || cons.reason_visit || cons.businessal_exam || cons.diagnosis || cons.treatment_notes) {
+    <div class="space-y-3">
+      @if (cons.animal_species) {
+      <p class="text-sm font-medium text-black">
+        <span class="font-bold text-primary-800">Animal :</span> {{ cons.animal_species }}
+      </p>
+      }
+      @if (cons.reason_visit) {
+      <div class="rounded-xl border-2 border-gray-300 bg-white p-3">
+        <p class="text-xs font-bold text-black uppercase tracking-wide mb-1">Motif</p>
+        <p class="text-sm text-gray-800 whitespace-pre-line">{{ cons.reason_visit }}</p>
+      </div>
+      }
+      @if (cons.businessal_exam) {
+      <div class="rounded-xl border-2 border-gray-300 bg-white p-3">
+        <p class="text-xs font-bold text-black uppercase tracking-wide mb-1">Examen clinique</p>
+        <p class="text-sm text-gray-800 whitespace-pre-line">{{ cons.businessal_exam }}</p>
+      </div>
+      }
+      @if (cons.diagnosis) {
+      <div class="rounded-xl border-2 border-emerald-300 bg-emerald-50 p-3">
+        <p class="text-xs font-bold text-emerald-900 uppercase tracking-wide mb-1">Diagnostic</p>
+        <p class="text-sm text-emerald-950 whitespace-pre-line">{{ cons.diagnosis }}</p>
+      </div>
+      }
+      @if (cons.treatment_notes) {
+      <div class="rounded-xl border-2 border-blue-300 bg-blue-50 p-3">
+        <p class="text-xs font-bold text-blue-900 uppercase tracking-wide mb-1">Traitement</p>
+        <p class="text-sm text-blue-950 whitespace-pre-line">{{ cons.treatment_notes }}</p>
+      </div>
+      }
+    </div>
+    }
+
+    <div class="bg-slate-900 text-white rounded-xl p-5 space-y-2">
+      <div class="flex justify-between text-sm font-medium text-white/80">
+        <span>Total net</span>
+        <span class="font-bold text-white tabular-nums">{{ cons.net_amount | formatPrice }}</span>
+      </div>
+      <div class="flex justify-between text-sm font-bold text-emerald-300">
+        <span>Payé</span>
+        <span class="tabular-nums">{{ cons.amount_paid | formatPrice }}</span>
+      </div>
+      @if (cons.amount_due > 0) {
+      <div class="flex justify-between text-sm font-bold text-amber-300 pt-1 border-t border-white/20">
+        <span>Reste dû</span>
+        <span class="tabular-nums">{{ cons.amount_due | formatPrice }}</span>
+      </div>
+      }
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-sm font-bold text-black">Paiements</h3>
+        @if (cons.status === 'partial' && canAddPayment()) {
+        <button type="button" (click)="addPayment.emit(cons)"
+          class="text-xs font-bold text-primary-800 hover:underline">+ Ajouter un paiement</button>
+        }
+      </div>
+      <div class="space-y-2">
+        @for (p of (cons.payments ?? []); track p.id) {
+        <div class="flex items-center justify-between p-3 bg-emerald-50 border-2 border-emerald-200 rounded-lg">
+          <span class="text-sm font-medium text-black">{{ p.paid_at | formatDate }}</span>
+          <span class="font-bold text-emerald-800">+{{ p.amount | formatPrice }}</span>
+        </div>
+        }
+        @if (!cons.payments?.length) {
+        <p class="text-sm font-medium text-gray-700">Aucun paiement enregistré.</p>
+        }
+      </div>
+    </div>
+
+    @if (cons.status !== 'cancelled') {
+    <div class="flex gap-2">
+      @if (canEdit()) {
+      <button type="button" (click)="edit.emit(cons)"
+        class="flex-1 py-3 text-sm font-bold text-amber-900 bg-amber-50 border-2 border-amber-300 rounded-xl hover:bg-amber-100 transition-colors">
+        Modifier
+      </button>
+      }
+      @if (canCancel()) {
+      <button type="button" (click)="cancel.emit(cons)"
+        class="flex-1 py-3 text-sm font-bold text-red-900 bg-red-50 border-2 border-red-300 rounded-xl hover:bg-red-100 transition-colors">
+        Annuler
+      </button>
+      }
+    </div>
+    }
+  </div>
+  }
+</app-detail-slide-over>

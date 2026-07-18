@@ -1,0 +1,23 @@
+@if (demoModal.isOpen()) {
+  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] bg-black/60 backdrop-blur-sm" (click)="close()" role="dialog" aria-modal="true" aria-label="Démo">
+    <div class="relative w-full max-w-5xl max-h-[90vh] rounded-2xl overflow-hidden bg-white shadow-2xl" (click)="$event.stopPropagation()">
+      <button type="button" (click)="close()" class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-900" aria-label="Fermer">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div class="relative">
+        <button type="button" (click)="prevSlide(); $event.stopPropagation()" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center text-gray-700" aria-label="Précédent">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <img [src]="demoImages[carouselIndex()]" [alt]="'Capture démo ' + (carouselIndex() + 1)" class="w-full h-auto max-h-[85vh] object-contain">
+        <button type="button" (click)="nextSlide(); $event.stopPropagation()" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center text-gray-700" aria-label="Suivant">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+      <div class="flex justify-center gap-2 py-4 bg-gray-50">
+        @for (img of demoImages; track img; let i = $index) {
+          <button type="button" (click)="goToSlide(i)" [class.ring-2]="carouselIndex() === i" [class.ring-primary-500]="carouselIndex() === i" class="w-2.5 h-2.5 rounded-full transition-colors" [class.bg-primary-600]="carouselIndex() === i" [class.bg-gray-300]="carouselIndex() !== i" [attr.aria-label]="'Slide ' + (i + 1)"></button>
+        }
+      </div>
+    </div>
+  </div>
+}

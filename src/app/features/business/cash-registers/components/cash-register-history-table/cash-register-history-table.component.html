@@ -1,0 +1,97 @@
+<div class="mt-10 mb-8">
+    <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <h3 class="text-lg font-bold text-black">Historique des sessions</h3>
+        <div class="flex items-center gap-2">
+            @if (isLoadingHistory()) {
+            <span class="text-xs text-gray-700 font-medium animate-pulse">Mise à jour...</span>
+            }
+            <button (click)="exportHistoryPdf.emit()" type="button"
+                class="px-4 py-2 rounded-lg text-sm font-bold text-black bg-white border-2 border-gray-300 hover:bg-gray-50 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4 text-red-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Rapport PDF
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl border-2 border-gray-300 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-gray-50 border-b-2 border-gray-300">
+                        <th class="px-6 py-3 text-xs font-bold text-black uppercase tracking-wide">Date / caissier</th>
+                        <th class="px-6 py-3 text-xs font-bold text-black uppercase tracking-wide text-right">Fonds final</th>
+                        <th class="px-6 py-3 text-xs font-bold text-black uppercase tracking-wide text-right">Écart</th>
+                        <th class="px-6 py-3 text-xs font-bold text-black uppercase tracking-wide">Statut</th>
+                        <th class="px-6 py-3 text-xs font-bold text-black uppercase tracking-wide text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    @for (reg of history(); track reg.id) {
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <p class="text-sm font-bold text-black">{{ reg.date | formatDate:false }}</p>
+                            <p class="text-xs text-gray-700 font-medium mt-0.5">{{ reg.user?.name || '—' }}</p>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            @if (reg.status === 'closed') {
+                            <p class="text-sm font-bold text-primary-800">{{ reg.closing_balance | formatPrice }}</p>
+                            <p class="text-xs text-gray-700 mt-0.5">Théo. {{ getTheoreticalFinal()(reg) | formatPrice }}</p>
+                            } @else {
+                            <span class="text-sm italic text-emerald-800 font-semibold">en cours</span>
+                            }
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            @if (reg.status === 'closed') {
+                            @let diff = getDifference()(reg);
+                            <span
+                                [ngClass]="diff === 0 ? 'text-gray-700' : (diff > 0 ? 'text-emerald-800' : 'text-red-800')"
+                                class="text-sm font-bold">
+                                {{ diff > 0 ? '+' : '' }}{{ diff | formatPrice }}
+                            </span>
+                            } @else {
+                            <span class="text-gray-700">—</span>
+                            }
+                        </td>
+                        <td class="px-6 py-4">
+                            <span
+                                [ngClass]="reg.status === 'open'
+                                    ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                                    : 'bg-gray-100 text-black border-gray-300'"
+                                class="px-2.5 py-1 rounded-md text-xs font-bold border">
+                                {{ reg.status === 'open' ? 'Ouverte' : 'Fermée' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <button (click)="openDetails.emit(reg)" type="button"
+                                    class="px-3 py-1.5 text-sm font-bold text-black hover:bg-gray-100 rounded-lg transition border border-transparent hover:border-gray-300">
+                                    Voir
+                                </button>
+                                @if (reg.status === 'closed') {
+                                <button (click)="correctBalance.emit(reg)" type="button"
+                                    class="px-3 py-1.5 text-sm font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 rounded-lg transition border border-amber-300">
+                                    Corriger
+                                </button>
+                                <button (click)="exportSessionPdf.emit(reg)" type="button"
+                                    class="px-3 py-1.5 text-sm font-bold text-primary-900 bg-primary-50 hover:bg-primary-100 rounded-lg transition border border-primary-300">
+                                    PDF
+                                </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-sm text-gray-700 font-medium">
+                            Les sessions clôturées apparaîtront ici avec leur écart de caisse.
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

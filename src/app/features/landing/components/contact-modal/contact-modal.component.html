@@ -1,0 +1,14 @@
+@if (contactModal.isOpen()) {
+  <div class="fixed inset-0 z-[90] flex items-center justify-center p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] bg-black/50 backdrop-blur-sm" (click)="contactModal.close()" role="dialog" aria-modal="true" aria-label="Contact essai gratuit">
+    <div class="relative w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl text-center" (click)="$event.stopPropagation()">
+      <div class="mb-6 w-14 h-14 mx-auto rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-2">Merci pour votre intérêt</h3>
+      <p class="text-gray-600 mb-6">Pour activer votre essai gratuit 15 jours, merci de nous contacter :</p>
+      <p class="text-lg font-semibold text-primary-600 mb-1"><a href="tel:+221706446143" class="hover:underline">+221 70 644 61 43</a></p>
+      <p class="text-lg font-semibold text-primary-600 mb-6"><a href="mailto:contact@sunuvet.com" class="hover:underline">contact&#64;sunuvet.com</a></p>
+      <button type="button" (click)="contactModal.close()" class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-500 transition-colors">Fermer</button>
+    </div>
+  </div>
+}

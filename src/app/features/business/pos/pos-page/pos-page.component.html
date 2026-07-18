@@ -1,0 +1,58 @@
+<div #posFullscreenRef class="flex flex-col h-full overflow-hidden bg-zinc-100/70">
+
+  <!-- Barre supérieure : onglets mobile + plein écran -->
+  <div class="flex items-stretch border-b border-zinc-200 bg-white shrink-0 z-20">
+    <div class="lg:hidden flex flex-1 min-w-0 divide-x divide-zinc-200">
+      <app-tab-button [active]="mobileTab() === 'products'" (tabClick)="mobileTab.set('products')">
+        <span tabIcon>
+          <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </span>
+        <span tabLabel>Produits</span>
+      </app-tab-button>
+      <app-tab-button [active]="mobileTab() === 'cart'" [badge]="cartService.totalItems()" (tabClick)="mobileTab.set('cart')">
+        <span tabIcon>
+          <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </span>
+        <span tabLabel>Panier</span>
+      </app-tab-button>
+    </div>
+    <button
+      type="button"
+      (click)="toggleFullscreen()"
+      [attr.aria-label]="isFullscreen() ? 'Quitter le plein écran' : 'Plein écran'"
+      class="shrink-0 w-12 sm:w-14 flex items-center justify-center border-l border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-black transition-colors ml-auto"
+    >
+      @if (isFullscreen()) {
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      } @else {
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+        </svg>
+      }
+    </button>
+  </div>
+
+  <div class="flex flex-1 gap-3 sm:gap-4 p-2 sm:p-3 md:p-4 lg:p-5 min-h-0 w-full max-w-[1800px] mx-auto">
+    <div
+      [ngClass]="mobileTab() === 'products' ? 'flex' : 'hidden lg:flex'"
+      class="flex-1 min-w-0 h-full min-h-0 flex flex-col"
+    >
+      <app-pos-product-grid class="h-full min-h-0" />
+    </div>
+
+    <div
+      [ngClass]="mobileTab() === 'cart' ? 'flex flex-1 min-w-0' : 'hidden lg:flex'"
+      class="h-full min-h-0 flex flex-col lg:shrink-0 w-full lg:w-auto"
+    >
+      <app-pos-cart class="flex-1 min-h-0 w-full" />
+    </div>
+  </div>
+</div>

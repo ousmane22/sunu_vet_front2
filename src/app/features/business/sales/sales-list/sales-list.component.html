@@ -1,0 +1,323 @@
+<div class="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-bold text-black tracking-tight">Historique des Ventes</h1>
+            <p class="text-gray-700 mt-1 font-medium">Consultez, filtrez et gérez les transactions de votre clinique vétérinaire.</p>
+        </div>
+        <div
+            class="bg-primary-900 text-white px-7 py-4 rounded-2xl border border-primary-800 flex flex-col items-center md:items-end">
+            <p class="text-xs font-bold text-white/90 uppercase tracking-wide mb-1">
+                Total ventes · {{ periodLabel() }}
+            </p>
+            <p class="text-3xl font-bold tracking-tight text-white">{{ filteredTotalAmount() | formatPrice }}</p>
+            <p class="text-sm font-semibold text-white mt-1">
+                {{ filteredSalesCount() }} vente{{ filteredSalesCount() > 1 ? 's' : '' }}
+            </p>
+        </div>
+    </div>
+
+    <!-- STATS DASHBOARD (cliquables = filtre période) -->
+    <app-sales-stats
+        [statsToday]="statsToday()"
+        [statsWeek]="statsWeek()"
+        [statsMonth]="statsMonth()"
+        [selectedPeriod]="selectedPeriod()"
+        (periodChange)="onPeriodChange($event)">
+    </app-sales-stats>
+
+    <!-- FILTERS SECTION -->
+    <div class="bg-white p-5 rounded-xl border-2 border-gray-300">
+        <form [formGroup]="filterForm" class="flex flex-wrap items-end gap-4">
+
+            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                <button type="button" (click)="onPeriodChange('today')"
+                    [class.bg-primary-900]="selectedPeriod() === 'today'"
+                    [class.text-white]="selectedPeriod() === 'today'"
+                    [class.bg-white]="selectedPeriod() !== 'today'"
+                    [class.text-black]="selectedPeriod() !== 'today'"
+                    class="px-4 py-2.5 text-sm font-bold rounded-lg border-2 border-gray-300 transition-colors">
+                    Aujourd'hui
+                </button>
+                <button type="button" (click)="onPeriodChange('week')"
+                    [class.bg-primary-900]="selectedPeriod() === 'week'"
+                    [class.text-white]="selectedPeriod() === 'week'"
+                    [class.bg-white]="selectedPeriod() !== 'week'"
+                    [class.text-black]="selectedPeriod() !== 'week'"
+                    class="px-4 py-2.5 text-sm font-bold rounded-lg border-2 border-gray-300 transition-colors">
+                    Cette semaine
+                </button>
+                <button type="button" (click)="onPeriodChange('month')"
+                    [class.bg-primary-900]="selectedPeriod() === 'month'"
+                    [class.text-white]="selectedPeriod() === 'month'"
+                    [class.bg-white]="selectedPeriod() !== 'month'"
+                    [class.text-black]="selectedPeriod() !== 'month'"
+                    class="px-4 py-2.5 text-sm font-bold rounded-lg border-2 border-gray-300 transition-colors">
+                    Ce mois
+                </button>
+                <button type="button" (click)="enableCustomPeriod()"
+                    [class.bg-primary-900]="selectedPeriod() === 'custom'"
+                    [class.text-white]="selectedPeriod() === 'custom'"
+                    [class.bg-white]="selectedPeriod() !== 'custom'"
+                    [class.text-black]="selectedPeriod() !== 'custom'"
+                    class="px-4 py-2.5 text-sm font-bold rounded-lg border-2 border-gray-300 transition-colors">
+                    Par dates
+                </button>
+            </div>
+
+            @if (selectedPeriod() === 'custom') {
+            <div class="flex-1 min-w-[180px]">
+                <label class="block text-xs font-bold text-black uppercase tracking-wide mb-2">
+                    Du
+                </label>
+                <input type="date" formControlName="date_from"
+                    class="w-full px-4 py-2.5 bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm font-semibold text-black" />
+            </div>
+            <div class="flex-1 min-w-[180px]">
+                <label class="block text-xs font-bold text-black uppercase tracking-wide mb-2">
+                    Au
+                </label>
+                <input type="date" formControlName="date_to"
+                    class="w-full px-4 py-2.5 bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm font-semibold text-black" />
+            </div>
+            }
+
+            <button type="button" (click)="resetFilters()"
+                class="px-5 py-2.5 text-sm font-bold text-black bg-white hover:bg-red-50 border-2 border-gray-300 hover:border-red-400 hover:text-red-700 rounded-lg transition-colors flex items-center gap-2">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Réinitialiser
+            </button>
+
+        </form>
+    </div>
+
+    <!-- TABLE SECTION -->
+    <div class="bg-white rounded-xl border-2 border-gray-300 overflow-hidden">
+
+        @if (isLoading()) {
+        <div class="flex flex-col items-center justify-center py-24 gap-4">
+            <div class="relative h-10 w-10">
+                <div class="absolute inset-0 rounded-full border-2 border-gray-200"></div>
+                <div class="absolute inset-0 rounded-full border-2 border-primary-600 border-t-transparent animate-spin"></div>
+            </div>
+            <p class="text-black text-sm font-semibold">Chargement des ventes...</p>
+        </div>
+        } @else if (sales().length === 0) {
+        <div class="flex flex-col items-center justify-center py-24 text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mb-5 border-2 border-gray-300">
+                <svg class="w-7 h-7 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+            </div>
+            <h3 class="text-base font-bold text-black">Aucune vente trouvée</h3>
+            <p class="text-sm text-gray-700 mt-1.5 max-w-[240px]">Modifiez vos filtres pour voir d'autres résultats.</p>
+        </div>
+        } @else {
+
+        <!-- Mobile View (Cards) -->
+        <div class="md:hidden divide-y divide-gray-200">
+            @for (sale of sales(); track sale.id) {
+            <div (click)="openDetails(sale)" class="p-4 active:bg-gray-50 transition-colors cursor-pointer">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <p class="text-xs font-bold text-black uppercase tracking-wide mb-0.5">Vente #{{ (sale.id.toString()).padStart(5, '0') }}</p>
+                        <p class="text-xs text-gray-700">{{ sale.created_at | date:'dd/MM/yyyy · HH:mm' }}</p>
+                    </div>
+                    <span [ngClass]="getStatusClass(sale.status)" class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide">
+                        @if (sale.status === 'completed') { Validé }
+                        @else if (sale.status === 'partial') { Partiel }
+                        @else { Annulé }
+                    </span>
+                </div>
+
+                <div class="flex items-center justify-between mt-3">
+                    <div class="flex flex-col gap-1">
+                        <p class="text-sm font-bold text-black">
+                             {{ sale.user?.name || 'Vendeur' }}
+                        </p>
+                        <p class="text-xs text-gray-700">
+                            {{ sale.items_count }} article{{ sale.items_count > 1 ? 's' : '' }}
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-base font-bold text-primary-800">{{ (sale.net_amount || sale.total_amount) | formatPrice }}</p>
+                        @if (sale.payment_method) {
+                            <p class="text-xs font-bold text-primary-700 uppercase mt-0.5">
+                                {{ sale.payment_method === 'cash' ? 'Espèces' : (sale.payment_method === 'card' ? 'Carte' : 'Mobile') }}
+                            </p>
+                        }
+                    </div>
+                </div>
+
+                @if (sale.status === 'partial') {
+                    <div class="mt-2 text-xs font-bold text-amber-800 bg-amber-100 px-2 py-1 rounded-md inline-block border border-amber-300">
+                        Reste à payer : {{ sale.amount_due | formatPrice }}
+                    </div>
+                }
+            </div>
+            }
+        </div>
+
+        <!-- Desktop View (Table) -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="min-w-full">
+                <thead>
+                    <tr class="border-b-2 border-gray-300 bg-gray-50">
+                        <th scope="col" class="px-6 py-3 text-left">
+                            <span class="text-xs font-bold text-black uppercase tracking-wide">ID / Date</span>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left">
+                            <span class="text-xs font-bold text-black uppercase tracking-wide">Vendeur</span>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left">
+                            <span class="text-xs font-bold text-black uppercase tracking-wide">Articles</span>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left">
+                            <span class="text-xs font-bold text-black uppercase tracking-wide">Paiement</span>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-right">
+                            <span class="text-xs font-bold text-black uppercase tracking-wide">Total</span>
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-center">
+                            <span class="text-xs font-bold text-black uppercase tracking-wide">Statut</span>
+                        </th>
+                        <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    @for (sale of sales(); track sale.id) {
+                    <tr (click)="openDetails(sale)"
+                        class="hover:bg-gray-50 transition-colors duration-150 group cursor-pointer">
+
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <p class="text-sm font-bold text-black font-mono">#{{ (sale.id.toString()).padStart(5, '0') }}</p>
+                            <p class="text-xs text-gray-700 mt-0.5">{{ sale.created_at | date:'dd MMM yyyy · HH:mm' }}</p>
+                        </td>
+
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <p class="text-sm font-semibold text-black flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                {{ sale.user?.name || 'Vendeur' }}
+                            </p>
+                        </td>
+
+                        <td class="px-6 py-4">
+                            <p class="text-sm font-medium text-black">
+                                {{ sale.items_count }} article{{ sale.items_count > 1 ? 's' : '' }}
+                            </p>
+                        </td>
+
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @switch (sale.payment_method) {
+                            @case ('cash') {
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                Espèces
+                            </span>
+                            }
+                            @case ('card') {
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-blue-100 text-blue-900 border border-blue-300">
+                                Carte
+                            </span>
+                            }
+                            @case ('mobile_money') {
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                Mobile Money
+                            </span>
+                            }
+                            }
+                        </td>
+
+                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                            <span class="text-sm font-bold text-primary-800 tabular-nums">
+                                {{ (sale.net_amount || sale.total_amount) | formatPrice }}
+                            </span>
+                            @if (sale.discount_amount > 0) {
+                            <p class="text-xs text-green-700 font-semibold">(-{{ sale.discount_amount | formatPrice }})</p>
+                            }
+                        </td>
+
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span [ngClass]="getStatusClass(sale.status)"
+                                class="px-2.5 py-1 rounded-md text-xs font-bold">
+                                @if (sale.status === 'completed') { Validé }
+                                @else if (sale.status === 'partial') { Partiel }
+                                @else { Annulé }
+                            </span>
+                        </td>
+
+                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                            <div class="flex items-center justify-end gap-1.5">
+                                @if (sale.status === 'partial') {
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-amber-900 bg-amber-100 border border-amber-300 rounded-md whitespace-nowrap">
+                                    Dû : {{ sale.amount_due | formatPrice }}
+                                </span>
+                                }
+                                <button type="button" (click)="openDetails(sale); $event.stopPropagation()"
+                                    class="w-8 h-8 flex items-center justify-center rounded-md bg-gray-100 text-black border border-gray-300 hover:bg-primary-50 hover:text-primary-800 hover:border-primary-300 transition-colors"
+                                    title="Voir le détail" aria-label="Voir le détail">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 border-t-2 border-gray-300 flex items-center justify-between">
+            <p class="text-sm text-gray-700 font-medium">
+                <span class="font-bold text-black">{{ sales().length }}</span> vente{{ sales().length > 1 ? 's' : ''
+                }} affichée{{ sales().length > 1 ? 's' : '' }} sur la page
+            </p>
+
+            @if (lastPage() > 1) {
+            <div class="flex items-center gap-2">
+                <button [disabled]="currentPage() === 1" (click)="changePage(currentPage() - 1)"
+                    class="p-1.5 text-black hover:bg-white rounded-lg disabled:opacity-40 transition-colors border border-transparent hover:border-gray-300">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <div class="px-3 text-sm font-bold text-black bg-white border-2 border-gray-300 py-1.5 rounded-lg">
+                    {{ currentPage() }} <span class="text-gray-600 font-medium mx-1">/</span> {{ lastPage() }}
+                </div>
+                <button [disabled]="currentPage() === lastPage()" (click)="changePage(currentPage() + 1)"
+                    class="p-1.5 text-black hover:bg-white rounded-lg disabled:opacity-40 transition-colors border border-transparent hover:border-gray-300">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+            }
+        </div>
+
+        }
+    </div>
+
+    <app-sale-detail 
+        [sale]="selectedSaleForDetails()"
+        [loading]="isLoadingDetails()"
+        [canDeposit]="can('caisse.deposit')"
+        [canRefund]="can('pos.refund')"
+        (close)="closeDetails()"
+        (addPayment)="openPaymentModal($event)"
+        (printInvoice)="printInvoice($event)"
+        (printReceipt)="printReceipt($event)"
+        (cancel)="cancelSale($event)">
+    </app-sale-detail>
+
+    <app-add-payment-modal [open]="!!selectedSaleForPayment()" [amountDue]="selectedSaleForPayment()?.amount_due ?? 0"
+        [referenceLabel]="selectedSaleForPayment() ? 'Vente #' + selectedSaleForPayment()!.id : ''"
+        [clientName]="selectedSaleForPayment()?.client?.name ?? 'Inconnu'" [showNote]="true"
+        [isSubmitting]="isSubmittingPayment()" [maxAmount]="selectedSaleForPayment()?.amount_due ?? null"
+        (submitPayload)="onPaymentSubmit($event)" (closeModal)="closePaymentModal()" />
+</div>

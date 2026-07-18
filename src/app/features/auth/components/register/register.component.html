@@ -1,0 +1,222 @@
+<div class="min-h-screen min-h-[100dvh] flex flex-col lg:flex-row bg-slate-50">
+  <div class="w-full lg:w-2/3 flex flex-col justify-center px-4 sm:px-8 md:px-12 lg:px-20 bg-white z-10 shadow-[16px_0_40px_-12px_rgba(0,0,0,0.08)] overflow-x-hidden">
+    <div class="max-w-lg w-full mx-auto py-6 sm:py-8 md:py-12 w-full">
+      <a routerLink="/" class="inline-flex items-center text-slate-500 hover:text-primary-600 transition-colors text-sm font-medium mb-6 sm:mb-10 group min-h-[44px]">
+        <svg class="w-5 h-5 mr-2 shrink-0 transform group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        <span class="truncate">Retour au site</span>
+      </a>
+
+      <div class="mb-6 sm:mb-10">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mb-1.5 sm:mb-2 tracking-tight">Créer un compte</h1>
+        <p class="text-slate-500 text-sm sm:text-base">Inscription réservée aux professionnels vétérinaires</p>
+      </div>
+
+      <!-- Stepper 2 étapes -->
+      <nav class="flex items-stretch gap-1 sm:gap-2 mb-6 sm:mb-10" aria-label="Étapes d'inscription">
+        @for (s of steps; track s.num) {
+          <button
+            type="button"
+            (click)="goToStep(s.num)"
+            [disabled]="isStepDisabled(s.num)"
+            class="flex-1 min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 py-3 px-3 sm:px-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold transition-all min-h-[44px] border-2 outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+            [class.bg-primary-50]="currentStep() === s.num"
+            [class.border-primary-500]="currentStep() === s.num"
+            [class.text-primary-700]="currentStep() === s.num"
+            [class.bg-slate-50]="currentStep() > s.num"
+            [class.border-slate-200]="currentStep() > s.num"
+            [class.text-slate-500]="currentStep() > s.num"
+            [class.bg-white]="currentStep() < s.num"
+            [class.border-slate-200]="currentStep() < s.num"
+            [class.text-slate-400]="currentStep() < s.num"
+            [class.cursor-not-allowed]="isStepDisabled(s.num)"
+            [class.cursor-pointer]="!isStepDisabled(s.num)"
+            [class.opacity-70]="isStepDisabled(s.num)">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="s.icon"/></svg>
+            <span class="truncate">{{ s.label }}</span>
+          </button>
+          @if (s.num < steps.length) {
+            <span class="w-4 sm:w-6 h-0.5 rounded self-center shrink-0 bg-slate-200" [class.bg-primary-300]="currentStep() > s.num" aria-hidden="true"></span>
+          }
+        }
+      </nav>
+
+      @if (successMessage()) {
+        <app-alert type="success" class="mb-6">{{ successMessage() }}</app-alert>
+      }
+      @if (errorMessage()) {
+        <app-alert type="danger" class="mb-6">{{ errorMessage() }}</app-alert>
+      }
+
+      <!-- Étape 1 : Infos clinique + Infos personnelles -->
+      @if (currentStep() === 1) {
+        <form [formGroup]="step1Form" (ngSubmit)="onStep1Submit($event)" class="space-y-8">
+          <section class="space-y-5">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-primary-600 flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center text-primary-600">1</span>
+              Infos clinique
+            </h2>
+            <div class="space-y-4 pl-0 sm:pl-6 md:pl-10">
+              <div>
+                <label for="business_name" class="block text-sm font-semibold text-slate-700 mb-1.5">Nom du cabinet</label>
+                <input id="business_name" formControlName="business_name" type="text" class="input-reg" placeholder="Cabinet Vétérinaire du Plateau" [class.input-error]="step1Form.get('business_name')?.invalid && step1Form.get('business_name')?.touched">
+                @if (step1Form.get('business_name')?.invalid && step1Form.get('business_name')?.touched) {
+                  <p class="mt-1.5 text-sm text-red-600">Le nom du cabinet est obligatoire.</p>
+                }
+              </div>
+              <div>
+                <label for="business_address" class="block text-sm font-semibold text-slate-700 mb-1.5">Adresse</label>
+                <input id="business_address" formControlName="business_address" type="text" class="input-reg" placeholder="123 avenue de la République, Dakar" [class.input-error]="step1Form.get('business_address')?.invalid && step1Form.get('business_address')?.touched">
+                @if (step1Form.get('business_address')?.invalid && step1Form.get('business_address')?.touched) {
+                  <p class="mt-1.5 text-sm text-red-600">L'adresse du cabinet est obligatoire.</p>
+                }
+              </div>
+              <div>
+                <label for="business_phone" class="block text-sm font-semibold text-slate-700 mb-1.5">Téléphone</label>
+                <app-phone-country-input formControlName="business_phone" placeholder="33 123 45 67"
+                  [hasError]="!!(step1Form.get('business_phone')?.invalid && step1Form.get('business_phone')?.touched)">
+                </app-phone-country-input>
+                @if (step1Form.get('business_phone')?.invalid && step1Form.get('business_phone')?.touched) {
+                  <p class="mt-1.5 text-sm text-red-600">Le numéro du cabinet est obligatoire.</p>
+                }
+              </div>
+            </div>
+          </section>
+
+          <section class="space-y-5">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-primary-600 flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center text-primary-600">2</span>
+              Infos personnelles
+            </h2>
+            <div class="space-y-4 pl-0 sm:pl-6 md:pl-10">
+              <div>
+                <label for="name" class="block text-sm font-semibold text-slate-700 mb-1.5">Votre nom</label>
+                <input id="name" formControlName="name" type="text" autocomplete="name" class="input-reg" placeholder="Dr. Jean Dupont" [class.input-error]="step1Form.get('name')?.invalid && step1Form.get('name')?.touched">
+                @if (step1Form.get('name')?.invalid && step1Form.get('name')?.touched) {
+                  <p class="mt-1.5 text-sm text-red-600">Le nom est obligatoire.</p>
+                }
+              </div>
+              <div>
+                <label for="email" class="block text-sm font-semibold text-slate-700 mb-1.5">Adresse email</label>
+                <input id="email" formControlName="email" type="email" autocomplete="email" class="input-reg" placeholder="vous&#64;cabinet.com" [class.input-error]="step1Form.get('email')?.invalid && step1Form.get('email')?.touched">
+                @if (step1Form.get('email')?.invalid && step1Form.get('email')?.touched) {
+                  <p class="mt-1.5 text-sm text-red-600">Email requis et valide.</p>
+                }
+              </div>
+            </div>
+          </section>
+
+          @if (codeSent()) {
+            <div class="rounded-xl bg-primary-50 border border-primary-100 p-4 mb-2">
+              <p class="text-sm font-medium text-primary-800">Un code a déjà été envoyé à {{ email() }}. Saisissez-le à l'étape suivante ou renvoyez-en un nouveau.</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <button type="button" (click)="goToStep(2)" class="flex-1 btn-reg">
+                Continuer vers Code &amp; mot de passe
+              </button>
+              <div class="flex items-center justify-center sm:justify-end">
+                @if (resendCountdown() > 0) {
+                  <span class="text-sm text-slate-500">Renvoyer dans {{ resendCountdown() }} s</span>
+                } @else {
+                  <button type="button" (click)="sendCode()" [disabled]="isLoading() || step1Form.invalid" class="text-sm font-semibold text-primary-600 hover:text-primary-500 disabled:opacity-60">
+                    @if (isLoading()) { Envoi... } @else { Renvoyer un nouveau code }
+                  </button>
+                }
+              </div>
+            </div>
+          } @else {
+            <button type="submit" [disabled]="isLoading() || step1Form.invalid" class="btn-reg">
+              @if (isLoading()) {
+                <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Envoi en cours...
+              } @else {
+                Envoyer le code par email
+              }
+            </button>
+          }
+        </form>
+      }
+
+      <!-- Étape 2 : Code + Mot de passe -->
+      @if (currentStep() === 2) {
+        <form [formGroup]="step2Form" (ngSubmit)="submitRegister()" class="space-y-6">
+          <div>
+            <label for="code" class="block text-sm font-semibold text-slate-700 mb-1.5">Code reçu à {{ email() }}</label>
+            <input id="code" formControlName="code" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" class="input-reg text-center text-xl tracking-[0.4em] font-bold" placeholder="000000" [class.input-error]="step2Form.get('code')?.invalid && step2Form.get('code')?.touched">
+            @if (step2Form.get('code')?.invalid && step2Form.get('code')?.touched) {
+              <p class="mt-1.5 text-sm text-red-600">Saisissez le code à 6 chiffres reçu par email.</p>
+            }
+          </div>
+          <div>
+            <label for="password" class="block text-sm font-semibold text-slate-700 mb-1.5">Mot de passe</label>
+            <div class="relative">
+              <input id="password" formControlName="password" [attr.type]="passwordVisible() ? 'text' : 'password'" autocomplete="new-password" class="input-reg pr-12" placeholder="Min. 8 caractères, lettres et chiffres" [class.input-error]="step2Form.get('password')?.invalid && step2Form.get('password')?.touched">
+              <button type="button" (click)="togglePasswordVisibility()" tabindex="-1" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600" [attr.aria-label]="passwordVisible() ? 'Masquer' : 'Afficher'">
+                @if (passwordVisible()) {
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                } @else {
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                }
+              </button>
+            </div>
+            @if (step2Form.get('password')?.invalid && step2Form.get('password')?.touched) {
+              <p class="mt-1.5 text-sm text-red-600">Minimum 8 caractères, lettres et chiffres.</p>
+            }
+          </div>
+          <div>
+            <label for="password_confirmation" class="block text-sm font-semibold text-slate-700 mb-1.5">Confirmer le mot de passe</label>
+            <input id="password_confirmation" formControlName="password_confirmation" type="password" autocomplete="new-password" class="input-reg" placeholder="Répétez le mot de passe" [class.input-error]="step2Form.hasError('passwordMismatch') && step2Form.get('password_confirmation')?.touched">
+            @if (step2Form.hasError('passwordMismatch') && step2Form.get('password_confirmation')?.touched) {
+              <p class="mt-1.5 text-sm text-red-600">Les deux mots de passe ne correspondent pas.</p>
+            }
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <button type="button" (click)="goToStep(1)" class="flex-1 py-3.5 px-4 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 min-h-[48px]">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+              Retour à Clinique &amp; vous
+            </button>
+            <button type="submit" [disabled]="isLoading() || step2Form.invalid" class="flex-1 btn-reg min-h-[48px]">
+              @if (isLoading()) {
+                <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                Création...
+              } @else {
+                Créer mon compte
+              }
+            </button>
+          </div>
+
+          <p class="text-center text-sm text-slate-500 pt-4">
+            Vous n'avez pas reçu le code ?
+            @if (resendCountdown() > 0) {
+              <span class="font-medium text-slate-600">Renvoyer dans {{ resendCountdown() }} s</span>
+            } @else {
+              <button type="button" (click)="resendCode()" [disabled]="isResending()" class="ml-1 text-primary-600 font-bold hover:text-primary-500 hover:underline disabled:opacity-70 disabled:cursor-not-allowed">
+                @if (isResending()) { Envoi... } @else { Renvoyer le code }
+              </button>
+            }
+          </p>
+        </form>
+      }
+    </div>
+
+    <div class="max-w-lg w-full mx-auto pt-4 sm:pt-6 pb-6 sm:pb-8 border-t border-slate-100 px-4 sm:px-0">
+      <p class="text-slate-500 text-sm text-center">
+        Vous avez déjà un compte ?
+        <a routerLink="/login" class="text-primary-600 font-bold hover:text-primary-500 ml-1 hover:underline">Se connecter</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="hidden lg:block relative w-1/3 overflow-hidden bg-primary-900 group">
+    <div class="absolute inset-0 bg-black/30 z-10 mix-blend-multiply transition-opacity duration-500 group-hover:opacity-20"></div>
+    <img class="absolute inset-0 w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-[2s] ease-out brightness-90" src="assets/images/judy-beth-morris-_C0d7QRGtJI-unsplash.jpg" alt="Vétérinaire et chien">
+    <div class="absolute inset-0 z-20 bg-gradient-to-t from-primary-900/90 via-primary-900/40 to-transparent"></div>
+    <div class="absolute bottom-0 left-0 right-0 z-30 p-12">
+      <div class="backdrop-blur-md bg-white/10 p-6 rounded-2xl border border-white/20 shadow-2xl">
+        <p class="text-lg font-bold text-white leading-relaxed">Essai gratuit 15 jours. Gérez votre clinique vétérinaire en toute sérénité.</p>
+      </div>
+    </div>
+  </div>
+</div>

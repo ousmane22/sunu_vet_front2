@@ -1,0 +1,88 @@
+<div class="flex flex-col h-full min-w-0 min-h-0 bg-white rounded-2xl border border-zinc-200/80 overflow-hidden lg:w-[380px] xl:w-[400px]">
+  <!-- Header -->
+  <div class="shrink-0 px-4 py-3.5 border-b border-zinc-200 flex items-center justify-between gap-3 bg-white">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <div class="w-9 h-9 rounded-xl bg-primary-50 text-primary-700 flex items-center justify-center shrink-0">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      </div>
+      <div class="min-w-0">
+        <h2 class="text-base font-bold text-black tracking-tight">Panier</h2>
+        <p class="text-xs font-medium text-zinc-600">
+          {{ cartService.totalItems() }} article{{ cartService.totalItems() > 1 ? 's' : '' }}
+        </p>
+      </div>
+    </div>
+    @if (cartService.cart().length > 0) {
+      <button
+        type="button"
+        (click)="cartService.clear()"
+        class="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl border border-red-200 bg-red-50 text-sm font-semibold text-red-700 hover:bg-red-100 hover:border-red-300 active:scale-[0.98] transition"
+      >
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+        Vider
+      </button>
+    }
+  </div>
+
+  <!-- Articles -->
+  <div class="flex-1 min-h-0 overflow-y-auto px-3 py-3 sm:px-4 space-y-2.5 bg-zinc-50/50">
+    @if (cartService.cart().length === 0) {
+      <div class="h-full min-h-[200px] flex flex-col items-center justify-center text-center px-4">
+        <div class="w-14 h-14 rounded-2xl bg-zinc-100 text-zinc-400 flex items-center justify-center mb-3">
+          <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+        <p class="text-sm font-bold text-black">Panier vide</p>
+        <p class="text-sm text-zinc-600 mt-1">Touchez un produit pour l’ajouter.</p>
+      </div>
+    } @else {
+      @for (item of cartService.cart(); track item.product.id) {
+        <app-pos-cart-item
+          [item]="item"
+          (quantityChange)="cartService.setQuantity(item.product.id, $event)"
+          (remove)="cartService.remove(item.product.id)"
+        />
+      }
+    }
+  </div>
+
+  <!-- Footer paiement -->
+  @if (cartService.cart().length > 0) {
+    <div class="shrink-0 p-3 sm:p-4 border-t border-zinc-200 bg-white">
+      <div class="flex items-center justify-between mb-3 px-0.5">
+        <span class="text-sm font-semibold text-zinc-700">Total</span>
+        <span class="text-xl font-extrabold text-black tabular-nums tracking-tight">
+          {{ cartService.totalAmount() | formatPrice }}
+        </span>
+      </div>
+      <button
+        type="button"
+        (click)="showPaymentModal.set(true)"
+        class="w-full h-12 sm:h-14 rounded-xl bg-primary-600 text-white font-bold text-sm sm:text-base hover:bg-primary-700 active:scale-[0.99] transition shadow-lg shadow-primary-600/25"
+      >
+        Encaisser
+      </button>
+    </div>
+  }
+</div>
+
+<app-pos-checkout-modal
+  [isOpen]="showPaymentModal()"
+  [requireOpenRegister]="requireOpenRegister()"
+  [activeRegister]="activeRegister()"
+  (close)="showPaymentModal.set(false)"
+  (saleFinished)="onSaleFinished($event)"
+/>
+
+<app-pos-sale-result
+  [sale]="saleResult()"
+  (newSale)="startNewSale()"
+/>

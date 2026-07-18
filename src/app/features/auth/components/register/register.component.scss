@@ -1,0 +1,31 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.input-reg {
+  @apply w-full px-4 py-3 sm:py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors text-slate-900 placeholder-slate-400 font-medium text-base;
+  min-height: 48px;
+  &.input-error {
+    @apply border-red-300 ring-1 ring-red-200;
+  }
+}
+
+.btn-reg {
+  @apply w-full flex justify-center items-center py-3.5 sm:py-4 px-4 border border-transparent rounded-xl shadow-lg shadow-primary-500/25 text-base sm:text-lg font-bold text-white bg-primary-600 hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed;
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.step-enter {
+  opacity: 0;
+  transform: translateX(12px);
+}
+.step-enter-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.step-enter-done {
+  opacity: 1;
+  transform: translateX(0);
+}

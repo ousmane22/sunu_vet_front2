@@ -1,0 +1,101 @@
+<!-- Loading -->
+@if (isLoading()) {
+<div class="h-64 flex items-center justify-center">
+    <svg class="animate-spin h-10 w-10 text-primary-600" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+    </svg>
+</div>
+}
+
+@if (!isLoading() && business(); as c) {
+<div class="flex flex-col h-full">
+    <!-- ══ HEADER ══ -->
+    <div class="px-8 pt-6 pb-0 bg-white border-b border-gray-200">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-3">
+                <a routerLink="/super-admin/businesses" class="text-gray-400 hover:text-primary-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </a>
+                <span class="text-gray-300">/</span>
+                <span class="text-sm text-gray-500">Entreprises</span>
+                <span class="text-gray-300">/</span>
+                <span class="text-sm font-medium text-gray-900">{{ c.name }}</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                @if (c.is_active) {
+                <span
+                    class="inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-600/20">
+                    <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-green-500 inline-block"></span>Active
+                </span>
+                } @else {
+                <span
+                    class="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 ring-1 ring-inset ring-red-600/10">
+                    <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-red-500 inline-block"></span>Désactivée
+                </span>
+                }
+                <button (click)="modalService.open(M_EDIT)"
+                    class="flex items-center space-x-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span>Modifier</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4 mb-5">
+            <div
+                class="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold text-2xl shadow-lg flex-shrink-0">
+                {{ c.name?.charAt(0) || '?' }}
+            </div>
+            <div>
+                <h1 class="text-2xl font-extrabold text-gray-900">{{ c.name }}</h1>
+                <p class="text-sm text-gray-500">{{ c.email }} · {{ c.city }}, {{ c.country }}</p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <nav class="-mb-px flex space-x-1">
+            @for (tab of tabs; track tab.id) {
+            <button (click)="activeTab.set(tab.id)" [class]="activeTab() === tab.id
+                            ? 'border-b-2 border-primary-600 text-primary-700 bg-primary-50'
+                            : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
+                class="flex items-center space-x-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-all">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="tab.icon" />
+                </svg>
+                <span>{{ tab.label }}</span>
+            </button>
+            }
+        </nav>
+    </div>
+
+    <!-- ══ TAB CONTENT (composants enfants) ══ -->
+    <div class="flex-1 overflow-y-auto px-8 py-6 bg-gray-50">
+        @switch (activeTab()) {
+        @case ('info') {
+        <app-business-detail-info [business]="c" />
+        }
+        @case ('subscriptions') {
+        <app-business-detail-subscriptions [business]="c" (refreshed)="onTabRefreshed()" />
+        }
+        @case ('payments') {
+        <app-business-detail-payments [business]="c" (refreshed)="onTabRefreshed()" />
+        }
+        @case ('admins') {
+        <app-business-detail-admins [business]="c" (refreshed)="onTabRefreshed()" />
+        }
+        }
+    </div>
+</div>
+}
+
+<!-- Modal édition entreprise (reste au niveau parent) -->
+<app-business-modal *ngIf="modalService.isOpen(M_EDIT) && business()" [business]="business()"
+    (saved)="onBusinessSaved()" (cancelled)="modalService.close(M_EDIT)">
+</app-business-modal>

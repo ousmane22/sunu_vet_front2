@@ -1,0 +1,130 @@
+<div class="space-y-8 animate-in fade-in duration-500">
+    <!-- Résumé Financier : 3 colonnes (sans consultations) ou 4 (vétérinaire) pour occuper la largeur -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6"
+         [ngClass]="strategyService.isVet() ? 'lg:grid-cols-4' : 'lg:grid-cols-3'">
+        <div class="bg-white p-4 md:p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">CA Total (Net)</p>
+                    <p class="text-2xl font-black text-slate-900">{{ data.summary.total_net | formatPrice }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Ventes</p>
+                    <p class="text-2xl font-black text-slate-900">{{ data.summary.sales_count }} <span class="text-sm text-slate-400 font-medium">factures</span></p>
+                </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-bold">{{ data.summary.sales_net | formatPrice }} net</p>
+        </div>
+
+        @if (strategyService.isVet()) {
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl">
+                    <i class="fas fa-stethoscope"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Consultations</p>
+                    <p class="text-2xl font-black text-slate-900">{{ data.summary.consultations_count }} <span class="text-sm text-slate-400 font-medium">actes</span></p>
+                </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-bold">{{ data.summary.consultations_net | formatPrice }} net</p>
+        </div>
+        }
+
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-xl">
+                    <i class="fas fa-user-clock"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Nouveaux Crédits</p>
+                    <p class="text-2xl font-black text-slate-900">{{ data.new_debts | formatPrice }}</p>
+                </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2 font-medium">Montant restant à recouvrer</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Modes de Règlement -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden text-slate-900">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-black text-lg tracking-tight">Répartition des Encaissements</h3>
+                <i class="fas fa-wallet text-slate-400"></i>
+            </div>
+            <div class="p-6">
+                @if (data.payments.length) {
+                <div class="h-56 mb-6">
+                    <canvas baseChart [type]="'doughnut'" [data]="paymentChartData" [options]="paymentChartOptions"></canvas>
+                </div>
+                }
+                <div class="space-y-4">
+                    @for (pay of data.payments; track pay.payment_method) {
+                    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <span class="font-bold text-slate-700">{{ getPaymentLabel(pay.payment_method) }}</span>
+                        <span class="font-black text-primary-600 text-lg">{{ pay.total | formatPrice }}</span>
+                    </div>
+                    } @empty {
+                    <div class="text-center py-8">
+                        <p class="text-slate-400 font-medium italic">Aucun encaissement sur cette période.</p>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Articles -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden text-slate-900">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-black text-lg tracking-tight">Top Articles / Prestations</h3>
+                <i class="fas fa-medal text-amber-400"></i>
+            </div>
+            @if (data.top_articles.length) {
+            <div class="p-6 h-72">
+                <canvas baseChart [type]="'bar'" [data]="topArticlesChartData" [options]="topArticlesChartOptions"></canvas>
+            </div>
+            }
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[500px]">
+                    <thead>
+                        <tr class="bg-slate-50/50 text-left">
+                            <th class="px-4 md:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Produit</th>
+                            <th class="px-4 md:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Qté</th>
+                            <th class="px-4 md:px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @for (art of data.top_articles; track art.name) {
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4">
+                                <span class="font-bold text-slate-800">{{ art.name }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-3 py-1 bg-slate-100 rounded-lg text-xs font-black text-slate-600">{{ art.qty | number:'1.0-0' }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <span class="font-black text-slate-900">{{ art.total | formatPrice }}</span>
+                            </td>
+                        </tr>
+                        } @empty {
+                            <tr>
+                                <td colspan="3" class="px-6 py-12 text-center text-slate-400 font-medium italic">Aucune vente enregistrée.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

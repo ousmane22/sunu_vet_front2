@@ -1,0 +1,50 @@
+<div class="p-8 max-w-4xl mx-auto w-full">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Paramètres</h1>
+        <p class="mt-1 text-sm text-gray-500">Modifiez les informations de votre clinique vétérinaire et gérez les rôles.</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="border-b border-gray-200 mb-6">
+        <nav class="flex gap-8">
+            <button type="button" (click)="setTab(TABS.GENERAL)" [class]="activeTab() === TABS.GENERAL
+                    ? 'border-b-2 border-primary-600 text-primary-600 font-medium pb-3'
+                    : 'text-gray-500 hover:text-gray-700 pb-3 border-b-2 border-transparent'">
+                Général
+            </button>
+            <button type="button" (click)="setTab(TABS.ROLES)" [class]="activeTab() === TABS.ROLES
+                    ? 'border-b-2 border-primary-600 text-primary-600 font-medium pb-3'
+                    : 'text-gray-500 hover:text-gray-700 pb-3 border-b-2 border-transparent'">
+                Rôles
+            </button>
+            <button type="button" (click)="setTab(TABS.BILLING)" [class]="activeTab() === TABS.BILLING
+                    ? 'border-b-2 border-primary-600 text-primary-600 font-medium pb-3'
+                    : 'text-gray-500 hover:text-gray-700 pb-3 border-b-2 border-transparent'">
+                Facturation
+            </button>
+            <button type="button" (click)="setTab(TABS.SUBSCRIPTION)" [class]="activeTab() === TABS.SUBSCRIPTION
+                    ? 'border-b-2 border-primary-600 text-primary-600 font-medium pb-3'
+                    : 'text-gray-500 hover:text-gray-700 pb-3 border-b-2 border-transparent'">
+                Abonnement
+            </button>
+        </nav>
+    </div>
+
+    @if (activeTab() === TABS.GENERAL) {
+    <app-business-general-settings></app-business-general-settings>
+    }
+
+    @if (activeTab() === TABS.ROLES) {
+    <app-business-roles-settings></app-business-roles-settings>
+    }
+
+    @if (activeTab() === TABS.BILLING) {
+    <app-business-billing-settings></app-business-billing-settings>
+    }
+
+    @if (activeTab() === TABS.SUBSCRIPTION) {
+    <app-business-subscription-settings></app-business-subscription-settings>
+    }
+</div>
+
+
