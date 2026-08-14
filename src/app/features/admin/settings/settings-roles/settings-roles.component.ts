@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SettingsService, RoleDetail, PermissionDetail } from '../../services/settings.service';
 import { RolePermissionsModalComponent } from '../modals/role-permissions-modal/role-permissions-modal.component';
+import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
 
 @Component({
   selector: 'app-settings-roles',
@@ -11,6 +12,7 @@ import { RolePermissionsModalComponent } from '../modals/role-permissions-modal/
 })
 export class SettingsRolesComponent implements OnInit {
   private settingsService = inject(SettingsService);
+  private dialog = inject(SunuDialogService);
 
   roles = signal<RoleDetail[]>([]);
   permissions = signal<PermissionDetail[]>([]);
@@ -45,16 +47,30 @@ export class SettingsRolesComponent implements OnInit {
     this.loadAll();
   }
 
-  deleteRole(role: RoleDetail) {
-    if (!confirm(`Supprimer le rôle "${role.name}" ?`)) return;
+  async deleteRole(role: RoleDetail) {
+    const confirmed = await this.dialog.confirm(`Supprimer le rôle « ${role.name} » ?`, {
+      title: 'Supprimer le rôle',
+      destructive: true,
+      confirmText: 'Supprimer',
+    });
+    if (!confirmed) return;
+
     this.settingsService.deleteRole(role.id).subscribe({
       next: () => this.loadAll(),
-      error: (err: any) => alert(err.error?.message || 'Erreur'),
+      error: async (err: any) => {
+        await this.dialog.alert(err.error?.message || 'Erreur', { type: 'danger', title: 'Erreur' });
+      },
     });
   }
 
-  deletePermission(perm: PermissionDetail) {
-    if (!confirm(`Supprimer la permission "${perm.name}" ?`)) return;
+  async deletePermission(perm: PermissionDetail) {
+    const confirmed = await this.dialog.confirm(`Supprimer la permission « ${perm.name} » ?`, {
+      title: 'Supprimer la permission',
+      destructive: true,
+      confirmText: 'Supprimer',
+    });
+    if (!confirmed) return;
+
     this.settingsService.deletePermission(perm.id).subscribe({
       next: () => this.loadAll(),
     });

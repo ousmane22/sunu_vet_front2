@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BusinessRolesService } from '../../../services/business-roles.service';
 import { BusinessStrategyService } from '../../../../../core/services/business-strategy.service';
 import type { BusinessRole, PermissionGroup } from '../../../models';
+import { SunuDialogService } from '../../../../../shared/services/sunu-dialog.service';
 
 @Component({
     selector: 'app-business-roles-settings',
@@ -140,6 +141,7 @@ export class RolesSettingsComponent implements OnInit {
     private fb = inject(FormBuilder);
     private rolesService = inject(BusinessRolesService);
     private strategyService = inject(BusinessStrategyService);
+    private dialog = inject(SunuDialogService);
 
     roles = signal<BusinessRole[]>([]);
     availablePermissionsGrouped = signal<PermissionGroup[]>([]);
@@ -272,8 +274,14 @@ export class RolesSettingsComponent implements OnInit {
         });
     }
 
-    deleteRole(role: BusinessRole): void {
-        if (!confirm(`Supprimer le rôle « ${role.name} » ?`)) return;
+    async deleteRole(role: BusinessRole): Promise<void> {
+        const confirmed = await this.dialog.confirm(`Supprimer le rôle « ${role.name} » ?`, {
+            title: 'Supprimer le rôle',
+            destructive: true,
+            confirmText: 'Supprimer',
+        });
+        if (!confirmed) return;
+
         this.rolesService.deleteRole(role.id).subscribe({
             next: () => {
                 this.roles.update((list) => list.filter((r) => r.id !== role.id));

@@ -7,6 +7,7 @@ import { Business, PaginatedResponse } from '../../models';
 import { BusinessModalComponent } from '../business-modal/business-modal.component';
 import { ModalService } from '../../../../core/services/modal.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
 
 const MODAL_CREATE = 'business-create';
 const MODAL_EDIT = 'business-edit';
@@ -21,6 +22,7 @@ const MODAL_EDIT = 'business-edit';
 export class BusinessListComponent implements OnInit {
   private businessService = inject(BusinessService);
   private authService = inject(AuthService);
+  private dialog = inject(SunuDialogService);
   modalService = inject(ModalService);
 
   readonly MODAL_CREATE = MODAL_CREATE;
@@ -86,9 +88,13 @@ export class BusinessListComponent implements OnInit {
     this.loadBusinesses(this.businessesPaginator()?.current_page ?? 1);
   }
 
-  toggleStatus(business: Business) {
+  async toggleStatus(business: Business) {
     const msg = `Voulez-vous vraiment ${business.is_active ? 'désactiver' : 'activer'} l'entreprise ${business.name} ?`;
-    if (!confirm(msg)) return;
+    const confirmed = await this.dialog.confirm(msg, {
+      title: business.is_active ? 'Désactiver l\'entreprise' : 'Activer l\'entreprise',
+      destructive: business.is_active,
+    });
+    if (!confirmed) return;
 
     this.businessService.toggleStatus(business.id).subscribe({
       next: (res) => {
@@ -120,13 +126,14 @@ export class BusinessListComponent implements OnInit {
     this.connectingId.set(business.id);
 
     this.authService.impersonateBusiness(business.id).subscribe({
-      error: (err) => {
+      error: async (err) => {
         this.connectingId.set(null);
         const msg =
           err?.error?.errors?.business?.[0]
           ?? err?.error?.message
           ?? 'Impossible d\'accéder à cette entreprise.';
         this.connectError.set(msg);
+        await this.dialog.alert(msg, { type: 'danger', title: 'Accès refusé' });
       },
     });
   }

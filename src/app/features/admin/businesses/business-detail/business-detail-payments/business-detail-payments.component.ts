@@ -4,6 +4,7 @@ import { BusinessService } from '../../../services/business.service';
 import { ModalService } from '../../../../../core/services/modal.service';
 import { Business, SubscriptionPayment } from '../../../models';
 import { PaymentModalComponent } from '../../payment-modal/payment-modal.component';
+import { SunuDialogService } from '../../../../../shared/services/sunu-dialog.service';
 
 const M_PAY = 'business-pay';
 const M_PAY_EDIT = 'business-pay-edit';
@@ -17,6 +18,7 @@ const M_PAY_EDIT = 'business-pay-edit';
 export class BusinessDetailPaymentsComponent {
   private businessService = inject(BusinessService);
   modalService = inject(ModalService);
+  private dialog = inject(SunuDialogService);
 
   business = input.required<Business>();
   refreshed = output<void>();
@@ -47,8 +49,14 @@ export class BusinessDetailPaymentsComponent {
     this.modalService.open(M_PAY_EDIT);
   }
 
-  deletePayment(payment: SubscriptionPayment) {
-    if (!confirm('Supprimer ce paiement définitivement ?')) return;
+  async deletePayment(payment: SubscriptionPayment) {
+    const confirmed = await this.dialog.confirm('Supprimer ce paiement définitivement ?', {
+      title: 'Supprimer le paiement',
+      destructive: true,
+      confirmText: 'Supprimer',
+    });
+    if (!confirmed) return;
+
     const business = this.business();
     this.businessService.deletePayment(business.id, payment.subscription_id, payment.id).subscribe({
       next: () => this.refreshed.emit(),

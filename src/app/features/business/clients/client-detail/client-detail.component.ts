@@ -6,6 +6,7 @@ import { FormatPricePipe, FormatDatePipe } from '../../../../core/pipes';
 import { ClientService } from '../../services/client.service';
 import { AddPaymentModalComponent, type AddPaymentPayload } from '../../../../shared/components/add-payment-modal/add-payment-modal.component';
 import type { ClientDetail } from '../../models';
+import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
 
 type TabId = 'ventes' | 'consultations' | 'montant';
 
@@ -27,6 +28,7 @@ export class ClientDetailComponent implements OnInit {
   private router = inject(Router);
   private clientService = inject(ClientService);
   private fb = inject(FormBuilder);
+  private dialog = inject(SunuDialogService);
 
   client = signal<ClientDetail | null>(null);
   isLoading = signal(true);
@@ -120,12 +122,25 @@ export class ClientDetailComponent implements OnInit {
     });
   }
 
-  deleteClient(): void {
+  async deleteClient(): Promise<void> {
     const c = this.client();
-    if (!c || !confirm(`Supprimer le client « ${c.name} » ?`)) return;
+    if (!c) return;
+
+    const confirmed = await this.dialog.confirm(`Supprimer le client « ${c.name} » ?`, {
+      title: 'Supprimer le client',
+      destructive: true,
+      confirmText: 'Supprimer',
+    });
+    if (!confirmed) return;
+
     this.clientService.delete(c.id).subscribe({
       next: () => this.router.navigate(['/business/clients']),
-      error: (err) => alert(err.error?.message ?? 'Erreur lors de la suppression.'),
+      error: async (err) => {
+        await this.dialog.alert(err.error?.message ?? 'Erreur lors de la suppression.', {
+          type: 'danger',
+          title: 'Erreur',
+        });
+      },
     });
   }
 
@@ -152,8 +167,11 @@ export class ClientDetailComponent implements OnInit {
         this.closePaymentModal();
         this.loadClient(c.id);
       },
-      error: (err) => {
-        alert(err.error?.message ?? 'Erreur paiement.');
+      error: async (err) => {
+        await this.dialog.alert(err.error?.message ?? 'Erreur paiement.', {
+          type: 'danger',
+          title: 'Erreur',
+        });
         this.isSubmittingPayment.set(false);
       },
     });

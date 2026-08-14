@@ -1,0 +1,72 @@
+@if (dialog.state(); as s) {
+<div
+  class="fixed inset-0 z-[200] flex items-center justify-center p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] bg-black/50 backdrop-blur-sm animate-sunu-dialog-backdrop"
+  (click)="onBackdropClick()"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="'sunu-dialog-title'"
+  [attr.aria-describedby]="'sunu-dialog-message'"
+>
+  <div
+    class="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-gray-100 overflow-hidden animate-sunu-dialog-panel"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="flex items-start gap-4 p-5 sm:p-6">
+      <div
+        class="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center"
+        [class]="iconWrapClasses[s.type]"
+      >
+        @switch (s.type) {
+          @case ('success') {
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          }
+          @case ('warning') {
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+          }
+          @case ('danger') {
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+          @default {
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+        }
+      </div>
+
+      <div class="min-w-0 flex-1 pt-0.5">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-primary-600 mb-1">SunuVet</p>
+        <h2 id="sunu-dialog-title" class="text-lg font-bold text-gray-900 leading-snug">{{ s.title }}</h2>
+        <p id="sunu-dialog-message" class="mt-2 text-sm text-gray-600 leading-relaxed whitespace-pre-line">{{ s.message }}</p>
+      </div>
+    </div>
+
+    <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 px-5 sm:px-6 pb-5 sm:pb-6 bg-gray-50/80 border-t border-gray-100">
+      @if (s.mode === 'confirm') {
+        <button
+          type="button"
+          (click)="dialog.dismiss()"
+          class="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+        >
+          {{ s.cancelText }}
+        </button>
+      }
+
+      <button
+        type="button"
+        (click)="dialog.accept()"
+        [class]="confirmButtonClass(s)"
+        class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-colors shadow-sm"
+      >
+        {{ s.confirmText }}
+      </button>
+    </div>
+  </div>
+</div>
+}

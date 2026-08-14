@@ -10,6 +10,7 @@ import type { Product, ProductStats } from '../../models';
 import { ProductFormComponent, type ProductFormResult } from '../product-form/product-form.component';
 import { StockAdjustmentModalComponent } from '../stock-adjustment-modal/stock-adjustment-modal.component';
 import { AddFromCatalogueModalComponent } from '../add-from-catalogue-modal/add-from-catalogue-modal.component';
+import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
 
 @Component({
   selector: 'app-product-list',
@@ -22,6 +23,7 @@ export class ProductListComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   strategyService = inject(BusinessStrategyService);
+  private dialog = inject(SunuDialogService);
 
   can(perm: string): boolean {
     return this.authService.hasPermission(perm);
@@ -219,16 +221,23 @@ export class ProductListComponent implements OnInit {
     this.selectedProduct.set(undefined);
   }
 
-  deleteProduct(product: Product): void {
-    if (confirm(`Supprimer "${product.name}" ?`)) {
-      this.service.delete(product.id).subscribe({
-        next: () => {
-          this.loadProducts();
-          this.loadStats();
-        },
-        error: () => alert('Erreur lors de la suppression.'),
-      });
-    }
+  async deleteProduct(product: Product): Promise<void> {
+    const confirmed = await this.dialog.confirm(`Supprimer « ${product.name} » ?`, {
+      title: 'Supprimer le produit',
+      destructive: true,
+      confirmText: 'Supprimer',
+    });
+    if (!confirmed) return;
+
+    this.service.delete(product.id).subscribe({
+      next: () => {
+        this.loadProducts();
+        this.loadStats();
+      },
+      error: async () => {
+        await this.dialog.alert('Erreur lors de la suppression.', { type: 'danger', title: 'Erreur' });
+      },
+    });
   }
 
   toggleStatus(product: Product): void {

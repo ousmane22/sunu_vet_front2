@@ -4,6 +4,7 @@ import { BusinessService } from '../../../services/business.service';
 import { ModalService } from '../../../../../core/services/modal.service';
 import { Business, User } from '../../../models';
 import { AdminModalComponent } from '../../admin-modal/admin-modal.component';
+import { SunuDialogService } from '../../../../../shared/services/sunu-dialog.service';
 
 const M_ADM = 'business-adm';
 const M_ADM_EDIT = 'business-adm-edit';
@@ -17,6 +18,7 @@ const M_ADM_EDIT = 'business-adm-edit';
 export class BusinessDetailAdminsComponent {
   private businessService = inject(BusinessService);
   modalService = inject(ModalService);
+  private dialog = inject(SunuDialogService);
 
   business = input.required<Business>();
   refreshed = output<void>();
@@ -42,8 +44,14 @@ export class BusinessDetailAdminsComponent {
     });
   }
 
-  deleteAdmin(userId: number) {
-    if (!confirm('Supprimer cet administrateur ?')) return;
+  async deleteAdmin(userId: number) {
+    const confirmed = await this.dialog.confirm('Supprimer cet administrateur ?', {
+      title: 'Supprimer l\'administrateur',
+      destructive: true,
+      confirmText: 'Supprimer',
+    });
+    if (!confirmed) return;
+
     const business = this.business();
     this.businessService.deleteAdmin(business.id, userId).subscribe({
       next: () => this.refreshed.emit(),

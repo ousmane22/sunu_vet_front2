@@ -7,6 +7,7 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { PAGINATION } from '../../../../core/config/pagination.config';
 import type { Expense } from '../../models';
 import { ExpenseCreateModalComponent } from '../components/expense-create-modal/expense-create-modal.component';
+import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
 
 @Component({
     selector: 'app-expenses-list',
@@ -18,6 +19,7 @@ export class ExpensesListComponent implements OnInit {
     private expenseService = inject(ExpenseService);
     private fb = inject(FormBuilder);
     private authService = inject(AuthService);
+    private dialog = inject(SunuDialogService);
 
     can(perm: string): boolean {
         return this.authService.hasPermission(perm);
@@ -106,15 +108,24 @@ export class ExpensesListComponent implements OnInit {
         this.expenses.update(list => list.map(e => e.id === updated.id ? updated : e));
     }
 
-    cancelExpense(expense: Expense): void {
+    async cancelExpense(expense: Expense): Promise<void> {
         if (expense.status === 'cancelled') return;
 
-        if (confirm(`Êtes-vous sûr de vouloir annuler cette dépense de ${expense.amount} CFA ?`)) {
-            this.expenseService.cancel(expense.id).subscribe({
-                next: () => this.loadExpenses(),
-                error: (err) => alert(err.error?.message || "Erreur lors de l'annulation")
-            });
-        }
+        const confirmed = await this.dialog.confirm(
+            `Êtes-vous sûr de vouloir annuler cette dépense de ${expense.amount} CFA ?`,
+            { title: 'Annuler la dépense', destructive: true },
+        );
+        if (!confirmed) return;
+
+        this.expenseService.cancel(expense.id).subscribe({
+            next: () => this.loadExpenses(),
+            error: async (err) => {
+                await this.dialog.alert(err.error?.message || "Erreur lors de l'annulation", {
+                    type: 'danger',
+                    title: 'Erreur',
+                });
+            },
+        });
     }
 
     getCategoryLabel(val: string): string {

@@ -12,6 +12,7 @@ import { ConsultationCreateModalComponent } from './components/consultation-crea
 import { ConsultationDetailComponent } from './components/consultation-detail.component';
 import { FormatPricePipe } from '../../../../core/pipes';
 import type { Consultation } from '../../models';
+import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
 
 type ConsultPeriod = 'today' | 'all' | 'custom';
 
@@ -34,6 +35,7 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private dialog = inject(SunuDialogService);
   private destroy$ = new Subject<void>();
 
   private static readonly listPath = '/business/consultations';
@@ -212,9 +214,13 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
     this.isLoadingDetail.set(false);
   }
 
-  cancelConsultation(c: Consultation): void {
+  async cancelConsultation(c: Consultation): Promise<void> {
     if (c.status === 'cancelled') return;
-    if (!confirm('Annuler cette consultation ?')) return;
+    const confirmed = await this.dialog.confirm('Annuler cette consultation ?', {
+      title: 'Annuler la consultation',
+      destructive: true,
+    });
+    if (!confirmed) return;
     this.consultationService.cancel(c.id).subscribe({
       next: () => {
         this.consultations.update((list) =>
@@ -222,7 +228,12 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
         );
         this.closeDetails();
       },
-      error: (err) => alert(err.error?.message ?? "Erreur lors de l'annulation"),
+      error: async (err) => {
+        await this.dialog.alert(err.error?.message ?? "Erreur lors de l'annulation", {
+          type: 'danger',
+          title: 'Erreur',
+        });
+      },
     });
   }
 
@@ -251,8 +262,11 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
         this.isSubmittingPayment.set(false);
         this.closePaymentModal();
       },
-      error: (err) => {
-        alert(err.error?.message ?? 'Erreur paiement');
+      error: async (err) => {
+        await this.dialog.alert(err.error?.message ?? 'Erreur paiement', {
+          type: 'danger',
+          title: 'Erreur',
+        });
         this.isSubmittingPayment.set(false);
       },
     });

@@ -10,6 +10,7 @@ import { PrintService } from '../../../../core/services/print.service';
 import { SaleDetailComponent } from './components/sale-detail/sale-detail.component';
 import { SalesStatsComponent, type SalesPeriod } from './components/sales-stats/sales-stats.component';
 import type { Sale, SaleListItem } from '../../models';
+import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
 
 @Component({
     selector: 'app-sales-list',
@@ -29,6 +30,7 @@ export class SalesListComponent implements OnInit {
     private fb = inject(FormBuilder);
     private authService = inject(AuthService);
     private printService = inject(PrintService);
+    private dialog = inject(SunuDialogService);
 
     can(perm: string): boolean {
         return this.authService.hasPermission(perm);
@@ -209,9 +211,12 @@ export class SalesListComponent implements OnInit {
                 this.selectedSaleForDetails.set(res.data);
                 this.isLoadingDetails.set(false);
             },
-            error: (err) => {
+            error: async (err) => {
                 this.isLoadingDetails.set(false);
-                alert(err.error?.message || 'Impossible de charger le détail de la vente');
+                await this.dialog.alert(err.error?.message || 'Impossible de charger le détail de la vente', {
+                    type: 'danger',
+                    title: 'Erreur',
+                });
             },
         });
     }
@@ -247,16 +252,23 @@ export class SalesListComponent implements OnInit {
                 this.closePaymentModal();
                 this.closeDetails();
             },
-            error: (err) => {
-                alert(err.error?.message || 'Erreur lors du paiement');
+            error: async (err) => {
+                await this.dialog.alert(err.error?.message || 'Erreur lors du paiement', {
+                    type: 'danger',
+                    title: 'Erreur',
+                });
                 this.isSubmittingPayment.set(false);
             },
         });
     }
 
-    cancelSale(sale: Sale): void {
+    async cancelSale(sale: Sale): Promise<void> {
         if (sale.status === 'cancelled') return;
-        if (!confirm('Êtes-vous sûr de vouloir annuler cette vente ? Les stocks seront restaurés.')) return;
+        const confirmed = await this.dialog.confirm(
+            'Êtes-vous sûr de vouloir annuler cette vente ? Les stocks seront restaurés.',
+            { title: 'Annuler la vente', destructive: true },
+        );
+        if (!confirmed) return;
 
         this.saleService.cancel(sale.id).subscribe({
             next: (res) => {
@@ -264,8 +276,11 @@ export class SalesListComponent implements OnInit {
                 this.loadStats();
                 this.closeDetails();
             },
-            error: (err) => {
-                alert(err.error?.message || 'Erreur lors de l\'annulation');
+            error: async (err) => {
+                await this.dialog.alert(err.error?.message || 'Erreur lors de l\'annulation', {
+                    type: 'danger',
+                    title: 'Erreur',
+                });
             }
         });
     }

@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SettingsService, SubscriptionPlanDetail } from '../../services/settings.service';
 import { ModalService } from '../../../../core/services/modal.service';
+import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
 
 const M_PLAN_CREATE = 'plan-create';
 const M_PLAN_EDIT = 'plan-edit';
@@ -15,6 +16,7 @@ const M_PLAN_EDIT = 'plan-edit';
 export class SettingsPlansComponent implements OnInit {
   private settingsService = inject(SettingsService);
   modalService = inject(ModalService);
+  private dialog = inject(SunuDialogService);
 
   readonly M_PLAN_CREATE = M_PLAN_CREATE;
   readonly M_PLAN_EDIT = M_PLAN_EDIT;
@@ -54,11 +56,22 @@ export class SettingsPlansComponent implements OnInit {
     });
   }
 
-  deletePlan(plan: SubscriptionPlanDetail) {
-    if (!confirm(`Supprimer le plan "${plan.name}" définitivement ?`)) return;
+  async deletePlan(plan: SubscriptionPlanDetail) {
+    const confirmed = await this.dialog.confirm(`Supprimer le plan « ${plan.name} » définitivement ?`, {
+      title: 'Supprimer le plan',
+      destructive: true,
+      confirmText: 'Supprimer',
+    });
+    if (!confirmed) return;
+
     this.settingsService.deletePlan(plan.id).subscribe({
       next: () => this.load(),
-      error: (err: any) => alert(err.error?.message || 'Erreur lors de la suppression.'),
+      error: async (err: any) => {
+        await this.dialog.alert(err.error?.message || 'Erreur lors de la suppression.', {
+          type: 'danger',
+          title: 'Erreur',
+        });
+      },
     });
   }
 

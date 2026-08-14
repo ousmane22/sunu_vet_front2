@@ -7,6 +7,7 @@ import { InventoryReportPdfService } from '../services/inventory-report-pdf.serv
 import { PrintService } from '../../../../core/services/print.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import type { InventorySession, InventoryLine } from '../../models';
+import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
 
 @Component({
   selector: 'app-inventory-session',
@@ -20,6 +21,7 @@ export class InventorySessionComponent implements OnInit {
   private inventoryService = inject(InventoryService);
   private printService = inject(PrintService);
   private inventoryPdfService = inject(InventoryReportPdfService);
+  private dialog = inject(SunuDialogService);
   authService = inject(AuthService);
 
   session = signal<InventorySession | null>(null);
@@ -172,7 +174,7 @@ export class InventorySessionComponent implements OnInit {
     });
   }
 
-  complete(): void {
+  async complete(): Promise<void> {
     const s = this.session();
     if (!s || s.status !== 'in_progress' || !this.canComplete()) return;
     if (this.hasChanges()) {
@@ -183,13 +185,18 @@ export class InventorySessionComponent implements OnInit {
     const uncounted = this.uncountedLinesCount();
     let treatUncountedAsZero = false;
     if (uncounted > 0) {
-      const confirmed = confirm(
-        `${uncounted} produit(s) non compté(s) seront enregistrés à 0. Confirmer la validation ?`
+      const confirmed = await this.dialog.confirm(
+        `${uncounted} produit(s) non compté(s) seront enregistrés à 0. Confirmer la validation ?`,
+        { title: 'Produits non comptés', type: 'warning' },
       );
       if (!confirmed) return;
       treatUncountedAsZero = true;
-    } else if (!confirm('Valider l\'inventaire et appliquer les écarts au stock ?')) {
-      return;
+    } else {
+      const confirmed = await this.dialog.confirm(
+        'Valider l\'inventaire et appliquer les écarts au stock ?',
+        { title: 'Valider l\'inventaire' },
+      );
+      if (!confirmed) return;
     }
 
     this.isCompleting.set(true);
@@ -208,10 +215,14 @@ export class InventorySessionComponent implements OnInit {
     });
   }
 
-  cancel(): void {
+  async cancel(): Promise<void> {
     const s = this.session();
     if (!s || s.status !== 'in_progress') return;
-    if (!confirm('Annuler cet inventaire ? Aucun mouvement de stock ne sera créé.')) return;
+    const confirmed = await this.dialog.confirm(
+      'Annuler cet inventaire ? Aucun mouvement de stock ne sera créé.',
+      { title: 'Annuler l\'inventaire', destructive: true },
+    );
+    if (!confirmed) return;
 
     this.error.set(null);
     this.inventoryService.cancel(s.id).subscribe({

@@ -2,6 +2,7 @@ import { Component, inject, input, output, signal, OnInit } from '@angular/core'
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SettingsService, RoleDetail, PermissionDetail } from '../../../services/settings.service';
+import { SunuDialogService } from '../../../../../shared/services/sunu-dialog.service';
 
 @Component({
   selector: 'app-role-permissions-modal',
@@ -11,6 +12,7 @@ import { SettingsService, RoleDetail, PermissionDetail } from '../../../services
 })
 export class RolePermissionsModalComponent implements OnInit {
   private settingsService = inject(SettingsService);
+  private dialog = inject(SunuDialogService);
 
   role = input.required<RoleDetail>();
   allPermissions = input.required<PermissionDetail[]>();
@@ -51,9 +53,12 @@ export class RolePermissionsModalComponent implements OnInit {
         this.isSaving.set(false);
         this.saved.emit();
       },
-      error: (err) => {
+      error: async (err) => {
         this.isSaving.set(false);
-        alert(err.error?.message || 'Erreur lors de la mise à jour');
+        await this.dialog.alert(err.error?.message || 'Erreur lors de la mise à jour', {
+          type: 'danger',
+          title: 'Erreur',
+        });
       },
     });
   }

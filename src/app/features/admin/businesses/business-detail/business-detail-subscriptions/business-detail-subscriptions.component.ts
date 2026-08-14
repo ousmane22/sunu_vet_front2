@@ -4,6 +4,7 @@ import { BusinessService } from '../../../services/business.service';
 import { ModalService } from '../../../../../core/services/modal.service';
 import { Business, Subscription } from '../../../models';
 import { SubscriptionModalComponent } from '../../subscription-modal/subscription-modal.component';
+import { SunuDialogService } from '../../../../../shared/services/sunu-dialog.service';
 
 const M_SUB = 'business-sub';
 const M_SUB_EDIT = 'business-sub-edit';
@@ -17,6 +18,7 @@ const M_SUB_EDIT = 'business-sub-edit';
 export class BusinessDetailSubscriptionsComponent {
   private businessService = inject(BusinessService);
   modalService = inject(ModalService);
+  private dialog = inject(SunuDialogService);
 
   business = input.required<Business>();
   refreshed = output<void>();
@@ -35,8 +37,14 @@ export class BusinessDetailSubscriptionsComponent {
     this.modalService.open(M_SUB_EDIT);
   }
 
-  deleteSubscription(subId: number) {
-    if (!confirm('Supprimer cet abonnement définitivement ?')) return;
+  async deleteSubscription(subId: number) {
+    const confirmed = await this.dialog.confirm('Supprimer cet abonnement définitivement ?', {
+      title: 'Supprimer l\'abonnement',
+      destructive: true,
+      confirmText: 'Supprimer',
+    });
+    if (!confirmed) return;
+
     const business = this.business();
     this.businessService.deleteSubscription(business.id, subId).subscribe({
       next: () => this.refreshed.emit(),

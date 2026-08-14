@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { CategoryService } from '../../services/category.service';
 import type { Category } from '../../models';
 import { CategoryFormComponent } from '../category-form/category-form.component';
+import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
 
 @Component({
   selector: 'app-category-list',
@@ -12,6 +13,7 @@ import { CategoryFormComponent } from '../category-form/category-form.component'
 })
 export class CategoryListComponent implements OnInit {
   private service = inject(CategoryService);
+  private dialog = inject(SunuDialogService);
 
   categories = signal<Category[]>([]);
   isLoading = signal(true);
@@ -49,12 +51,22 @@ export class CategoryListComponent implements OnInit {
     if (refresh) this.loadCategories();
   }
 
-  deleteCategory(category: Category): void {
-    if (confirm(`Supprimer la catégorie "${category.name}" ?`)) {
-      this.service.delete(category.id).subscribe({
-        next: () => this.loadCategories(),
-        error: (err) => alert(err.error?.message || 'Erreur lors de la suppression.'),
-      });
-    }
+  async deleteCategory(category: Category): Promise<void> {
+    const confirmed = await this.dialog.confirm(`Supprimer la catégorie « ${category.name} » ?`, {
+      title: 'Supprimer la catégorie',
+      destructive: true,
+      confirmText: 'Supprimer',
+    });
+    if (!confirmed) return;
+
+    this.service.delete(category.id).subscribe({
+      next: () => this.loadCategories(),
+      error: async (err) => {
+        await this.dialog.alert(err.error?.message || 'Erreur lors de la suppression.', {
+          type: 'danger',
+          title: 'Erreur',
+        });
+      },
+    });
   }
 }

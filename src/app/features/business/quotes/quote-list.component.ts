@@ -7,6 +7,7 @@ import { QuoteService } from '../services/quote.service';
 import { DetailSlideOverComponent } from '../../../shared/components/detail-slide-over/detail-slide-over.component';
 import { PrintService } from '../../../core/services/print.service';
 import type { Quote } from '../models';
+import { SunuDialogService } from '../../../shared/services/sunu-dialog.service';
 
 @Component({
     selector: 'app-quote-list',
@@ -19,6 +20,7 @@ export class QuoteListComponent implements OnInit {
     private fb = inject(FormBuilder);
     private router = inject(Router);
     private printService = inject(PrintService);
+    private dialog = inject(SunuDialogService);
 
     quotes = signal<Quote[]>([]);
     isLoading = signal(true);
@@ -101,8 +103,13 @@ export class QuoteListComponent implements OnInit {
         this.router.navigate(['/business/quotes', q.id, 'edit']);
     }
 
-    deleteQuote(q: Quote): void {
-        if (!confirm('Voulez-vous vraiment supprimer ce devis ?')) return;
+    async deleteQuote(q: Quote): Promise<void> {
+        const confirmed = await this.dialog.confirm('Voulez-vous vraiment supprimer ce devis ?', {
+            title: 'Supprimer le devis',
+            destructive: true,
+            confirmText: 'Supprimer',
+        });
+        if (!confirmed) return;
         this.quoteService.delete(q.id).subscribe(() => {
             this.loadQuotes();
             this.closeDetails();

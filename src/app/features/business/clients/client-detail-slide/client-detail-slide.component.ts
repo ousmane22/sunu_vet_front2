@@ -4,6 +4,7 @@ import { DetailSlideOverComponent } from '../../../../shared/components/detail-s
 import { FormatPricePipe, FormatDatePipe } from '../../../../core/pipes';
 import { ClientService } from '../../services/client.service';
 import type { Client, ClientDetail } from '../../models';
+import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
 
 type TabId = 'ventes' | 'consultations' | 'montant';
 
@@ -20,6 +21,7 @@ type TabId = 'ventes' | 'consultations' | 'montant';
 })
 export class ClientDetailSlideComponent {
   private clientService = inject(ClientService);
+  private dialog = inject(SunuDialogService);
 
   /** ID du client à afficher ; null = slide fermé. */
   clientId = input<number | null>(null);
@@ -90,15 +92,28 @@ export class ClientDetailSlideComponent {
     this.payRequested.emit(c);
   }
 
-  deleteClient(): void {
+  async deleteClient(): Promise<void> {
     const c = this.client();
-    if (!c || !confirm(`Supprimer le client « ${c.name} » ?`)) return;
+    if (!c) return;
+
+    const confirmed = await this.dialog.confirm(`Supprimer le client « ${c.name} » ?`, {
+      title: 'Supprimer le client',
+      destructive: true,
+      confirmText: 'Supprimer',
+    });
+    if (!confirmed) return;
+
     this.clientService.delete(c.id).subscribe({
       next: () => {
         this.deleted.emit(c.id);
         this.close();
       },
-      error: (err) => alert(err.error?.message ?? 'Erreur lors de la suppression.'),
+      error: async (err) => {
+        await this.dialog.alert(err.error?.message ?? 'Erreur lors de la suppression.', {
+          type: 'danger',
+          title: 'Erreur',
+        });
+      },
     });
   }
 

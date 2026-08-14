@@ -3,11 +3,13 @@ import { Sale, SaleItem, BusinessProfile, Quote, QuoteItem } from '../../feature
 import type { InventorySession } from '../../features/business/models';
 import { formatPrice } from '../utils/format.util';
 import { BusinessProfileService } from '../../features/business/services/business-profile.service';
+import { SunuDialogService } from '../../shared/services/sunu-dialog.service';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class PrintService {
     private businessService = inject(BusinessProfileService);
+    private dialog = inject(SunuDialogService);
 
     private async getBusinessInfo(): Promise<BusinessProfile | null> {
         try {
@@ -168,7 +170,10 @@ export class PrintService {
                 }, 300);
             };
         } else {
-            alert('Veuillez autoriser les pop-ups pour imprimer le reçu.');
+            await this.dialog.alert('Veuillez autoriser les pop-ups pour imprimer le reçu.', {
+                type: 'warning',
+                title: 'Impression bloquée',
+            });
         }
     }
 
@@ -315,7 +320,10 @@ export class PrintService {
                 }, 500);
             };
         } else {
-            alert('Veuillez autoriser les pop-ups pour imprimer la facture.');
+            await this.dialog.alert('Veuillez autoriser les pop-ups pour imprimer la facture.', {
+                type: 'warning',
+                title: 'Impression bloquée',
+            });
         }
     }
     /** Ouvre une fenêtre d'impression pour un devis ou une proforma. */
@@ -548,7 +556,10 @@ export class PrintService {
                 }, 500);
             };
         } else {
-            alert('Veuillez autoriser les pop-ups pour imprimer le rapport.');
+            await this.dialog.alert('Veuillez autoriser les pop-ups pour imprimer le rapport.', {
+                type: 'warning',
+                title: 'Impression bloquée',
+            });
         }
     }
 }
