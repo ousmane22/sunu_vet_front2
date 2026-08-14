@@ -8,11 +8,13 @@ import { ClientService } from '../../../services/client.service';
 import { AnimalSpeciesService } from '../../../services/animal-species.service';
 import { FormatPricePipe } from '../../../../../core/pipes';
 import type { Client, AnimalSpecies, Consultation } from '../../../models';
+import { AiTextAssistBtnComponent } from '../../../shared/components/ai-text-assist-btn/ai-text-assist-btn.component';
+import type { ConsultationAiContext, ConsultationAiField } from '../../../models/consultation-ai.types';
 
 @Component({
   selector: 'app-consultation-create-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormatPricePipe],
+  imports: [CommonModule, ReactiveFormsModule, FormatPricePipe, AiTextAssistBtnComponent],
   templateUrl: './consultation-create-modal.component.html',
 })
 export class ConsultationCreateModalComponent implements OnInit, OnDestroy {
@@ -44,6 +46,7 @@ export class ConsultationCreateModalComponent implements OnInit, OnDestroy {
   showCreateClient    = signal(false);
   isCreatingClient    = signal(false);
   createClientError   = signal<string | null>(null);
+  aiNotice            = signal<{ type: 'success' | 'error'; text: string } | null>(null);
 
   form = this.fb.group({
     client_search:   [''],
@@ -70,6 +73,17 @@ export class ConsultationCreateModalComponent implements OnInit, OnDestroy {
   amountPaid = computed(() => Number(this.amountPaidSignal() ?? 0));
   amountDue  = computed(() => Math.max(0, this.netAmount() - this.amountPaid()));
   isPartial  = computed(() => this.amountDue() > 0);
+
+  aiContext = computed<ConsultationAiContext>(() => {
+    const v = this.form.getRawValue();
+    return {
+      animal_species: v.animal_species || undefined,
+      reason_visit: v.reason_visit || undefined,
+      businessal_exam: v.businessal_exam || undefined,
+      diagnosis: v.diagnosis || undefined,
+      treatment_notes: v.treatment_notes || undefined,
+    };
+  });
 
   /** Mode édition : avertit si le nouveau montant corrige vers le bas un paiement existant */
   correctionWarning = computed(() => {
@@ -150,6 +164,15 @@ export class ConsultationCreateModalComponent implements OnInit, OnDestroy {
 
   setExactAmount(): void {
     this.form.patchValue({ amount_paid: Number(this.form.get('total_amount')?.value ?? 0) });
+  }
+
+  applyAiText(field: ConsultationAiField, text: string): void {
+    this.form.patchValue({ [field]: text });
+    this.aiNotice.set({ type: 'success', text: 'Texte proposé — vérifiez avant enregistrement.' });
+  }
+
+  onAiFailed(message: string): void {
+    this.aiNotice.set({ type: 'error', text: message });
   }
 
   openCreateClient(): void {

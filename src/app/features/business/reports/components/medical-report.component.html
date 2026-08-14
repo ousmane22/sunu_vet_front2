@@ -1,14 +1,22 @@
 <!-- Synthèse : consultations + montant -->
-<div class="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+<div class="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     <div class="bg-primary-600 p-6 rounded-3xl shadow-lg text-white">
         <p class="text-primary-100 text-sm font-bold uppercase tracking-wider">Consultations (période)</p>
         <p class="text-4xl font-black mt-1">{{ data.total_consultations }}</p>
         <p class="text-primary-200 text-sm mt-2">{{ strategyService.isVet() ? 'consultations enregistrées' : 'activités' }}</p>
+        @if (data.partial_consultations_count) {
+        <p class="text-primary-100 text-xs font-bold mt-2">{{ data.partial_consultations_count }} partielle(s)</p>
+        }
     </div>
-    <div class="bg-slate-800 p-6 rounded-3xl shadow-lg text-white">
-        <p class="text-slate-300 text-sm font-bold uppercase tracking-wider">Montant net consultations</p>
+    <div class="bg-emerald-700 p-6 rounded-3xl shadow-lg text-white">
+        <p class="text-emerald-100 text-sm font-bold uppercase tracking-wider">Encaissé consultations</p>
+        <p class="text-4xl font-black mt-1">{{ (data.total_consultations_collected ?? 0) | formatPrice }}</p>
+        <p class="text-emerald-200 text-sm mt-2">Paiements reçus sur la période</p>
+    </div>
+    <div class="bg-slate-800 p-6 rounded-3xl shadow-lg text-white sm:col-span-2 lg:col-span-1">
+        <p class="text-slate-300 text-sm font-bold uppercase tracking-wider">Facturé consultations</p>
         <p class="text-4xl font-black mt-1">{{ data.total_consultations_net | formatPrice }}</p>
-        <p class="text-slate-400 text-sm mt-2">Sur la période sélectionnée</p>
+        <p class="text-slate-400 text-sm mt-2">Montant net facturé sur la période</p>
     </div>
 </div>
 

@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { initRevealOnScroll } from '../../../../core/utils/reveal-on-scroll';
 
 interface Feature {
-  icon: string;
   title: string;
   description: string;
   color: string;
+  ring: string;
+  icon: 'consultation' | 'stock' | 'pos' | 'clients' | 'reports' | 'inventory';
 }
 
 @Component({
@@ -13,48 +15,68 @@ interface Feature {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './features.component.html',
-  styleUrl: './features.component.scss'
+  styleUrl: './features.component.scss',
 })
-export class FeaturesComponent {
+export class FeaturesComponent implements AfterViewInit, OnDestroy {
+  private host = inject(ElementRef<HTMLElement>);
+  private teardownReveal?: () => void;
+
   features: Feature[] = [
     {
-      icon: 'fas fa-stethoscope',
-      title: 'Gestion des Consultations',
-      description: 'Dossiers médicaux complets, prescriptions, et historique des soins pour chaque animal.',
-      color: 'bg-primary-100 text-primary-600'
+      icon: 'consultation',
+      title: 'Consultations',
+      description: 'Fiches complètes, paiements partiels, crédit client et aide IA pour rédiger motif, examen, diagnostic et traitement.',
+      color: 'bg-primary-100 text-primary-600',
+      ring: 'ring-primary-100 group-hover:ring-primary-200',
     },
     {
-      icon: 'fas fa-pills',
-      title: 'Gestion du Stock',
-      description: 'Suivi en temps réel, alertes de péremption, inventaires automatisés et FIFO.',
-      color: 'bg-green-100 text-green-600'
+      icon: 'stock',
+      title: 'Stock & médicaments',
+      description: 'Suivi des quantités, alertes stock bas, mouvements automatiques à chaque vente et historique par produit.',
+      color: 'bg-green-100 text-green-600',
+      ring: 'ring-green-100 group-hover:ring-green-200',
     },
     {
-      icon: 'fas fa-cash-register',
-      title: 'Point de Vente',
-      description: 'Caisse intuitive, multi-paiements, tickets et factures automatiques.',
-      color: 'bg-purple-100 text-purple-600'
+      icon: 'pos',
+      title: 'Point de vente',
+      description: 'Caisse intuitive, remises, espèces / carte / mobile money, tickets et gestion des ventes partielles.',
+      color: 'bg-purple-100 text-purple-600',
+      ring: 'ring-purple-100 group-hover:ring-purple-200',
     },
     {
-      icon: 'fas fa-users',
-      title: 'Gestion des Clients',
-      description: 'Fiches complètes, historique détaillé, programme de fidélité et rappels automatiques.',
-      color: 'bg-pink-100 text-pink-600'
+      icon: 'clients',
+      title: 'Clients & animaux',
+      description: 'Fiches clients, historique ventes et consultations, solde dû et règlements ultérieurs.',
+      color: 'bg-pink-100 text-pink-600',
+      ring: 'ring-pink-100 group-hover:ring-pink-200',
     },
     {
-      icon: 'fas fa-chart-line',
-      title: 'Rapports & Statistiques',
-      description: 'Tableaux de bord en temps réel, analyses financières et exports Excel.',
-      color: 'bg-orange-100 text-orange-600'
+      icon: 'reports',
+      title: 'Rapports & tableau de bord',
+      description: 'Encaissé vs facturé, performance, médical et trésorerie — les mêmes chiffres que dans votre activité quotidienne.',
+      color: 'bg-orange-100 text-orange-600',
+      ring: 'ring-orange-100 group-hover:ring-orange-200',
     },
     {
-      icon: 'fas fa-boxes',
-      title: 'Inventaire et facture',
-      description: 'Rapports de stock analytique, inventaire physique et gestion des factures.',
-      color: 'bg-red-100 text-red-600'
-    }
+      icon: 'inventory',
+      title: 'Inventaire physique',
+      description: 'Sessions d’inventaire, écarts de stock et clôture contrôlée pour garder un stock fiable.',
+      color: 'bg-red-100 text-red-600',
+      ring: 'ring-red-100 group-hover:ring-red-200',
+    },
   ];
+
+  delayClass(index: number): string {
+    if (index === 0) return '';
+    if (index <= 5) return `reveal-delay-${index}`;
+    return 'reveal-delay-5';
+  }
+
+  ngAfterViewInit(): void {
+    this.teardownReveal = initRevealOnScroll(this.host.nativeElement);
+  }
+
+  ngOnDestroy(): void {
+    this.teardownReveal?.();
+  }
 }
-
-
-

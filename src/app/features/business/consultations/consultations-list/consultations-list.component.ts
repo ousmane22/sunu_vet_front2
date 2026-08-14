@@ -10,6 +10,7 @@ import { AddPaymentModalComponent, type AddPaymentPayload } from '../../../../sh
 import { ConsultationsTableComponent } from './components/consultations-table.component';
 import { ConsultationCreateModalComponent } from './components/consultation-create-modal.component';
 import { ConsultationDetailComponent } from './components/consultation-detail.component';
+import { FormatPricePipe } from '../../../../core/pipes';
 import type { Consultation } from '../../models';
 
 type ConsultPeriod = 'today' | 'all' | 'custom';
@@ -24,6 +25,7 @@ type ConsultPeriod = 'today' | 'all' | 'custom';
     ConsultationsTableComponent,
     ConsultationCreateModalComponent,
     ConsultationDetailComponent,
+    FormatPricePipe,
   ],
   templateUrl: './consultations-list.component.html',
 })
@@ -48,6 +50,8 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
   currentPage = signal(1);
   totalPages = signal(1);
   totalItems = signal(0);
+  totalCollected = signal(0);
+  totalBilled = signal(0);
 
   selectedPeriod = signal<ConsultPeriod>('today');
 
@@ -62,6 +66,18 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
       case 'custom': return this.filterForm.value.date || 'Par date';
     }
   });
+
+  partialCount = computed(() =>
+    this.consultations().filter((c) => c.status === 'partial').length
+  );
+
+  totalDue = computed(() =>
+    this.consultations().reduce((sum, c) => sum + (c.amount_due ?? 0), 0)
+  );
+
+  completedCount = computed(() =>
+    this.consultations().filter((c) => c.status === 'completed').length
+  );
 
   showModal = signal(false);
   consultationToEdit = signal<Consultation | null>(null);
@@ -139,8 +155,14 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
             this.totalPages.set(1);
             this.totalItems.set(list.length);
           }
+          this.totalCollected.set(res?.summary?.total_collected ?? 0);
+          this.totalBilled.set(res?.summary?.total_amount ?? 0);
         },
-        error: () => this.consultations.set([]),
+        error: () => {
+          this.consultations.set([]);
+          this.totalCollected.set(0);
+          this.totalBilled.set(0);
+        },
       });
   }
 
@@ -225,6 +247,7 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
         this.consultations.update((list) =>
           list.map((x) => (x.id === consultation.id ? res.data : x))
         );
+        this.loadConsultations(this.currentPage());
         this.isSubmittingPayment.set(false);
         this.closePaymentModal();
       },

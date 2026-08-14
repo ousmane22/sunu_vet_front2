@@ -25,6 +25,13 @@ export function sumCashRefunds(
     return transactions?.filter(isCashRefund).reduce((s, t) => s + Number(t.amount), 0) ?? 0;
 }
 
+/** Encaissé net session = entrées − remboursements (aligné rapports / solde théorique). */
+export function sumCashNetIncome(
+    transactions: Array<{ type: string; category?: string | null; amount: number }> | null | undefined
+): number {
+    return sumCashIncome(transactions) - sumCashRefunds(transactions);
+}
+
 /** Toutes les sorties (dépenses + remboursements) pour le solde caisse. */
 export function sumCashOutflows(
     transactions: Array<{ type: string; amount: number }> | null | undefined

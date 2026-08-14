@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { CashRegisterService } from './cash-register.service';
 import type { ExpenseListResponse, CreateExpensePayload, Expense } from '../models';
 
 @Injectable({
@@ -9,6 +11,7 @@ import type { ExpenseListResponse, CreateExpensePayload, Expense } from '../mode
 })
 export class ExpenseService {
     private http = inject(HttpClient);
+    private cashRegisterService = inject(CashRegisterService);
     private apiUrl = `${environment.apiUrl}/business/expenses`;
 
     getAll(filters?: { date?: string; status?: string; category?: string; per_page?: number }): Observable<ExpenseListResponse> {
@@ -25,18 +28,20 @@ export class ExpenseService {
     }
 
     create(payload: CreateExpensePayload): Observable<{ data: Expense }> {
-        return this.http.post<{ data: Expense }>(this.apiUrl, payload);
+        return this.http.post<{ data: Expense }>(this.apiUrl, payload).pipe(
+            tap({ next: () => this.cashRegisterService.invalidateCurrent() }),
+        );
     }
 
     update(id: number, payload: Record<string, unknown>): Observable<{ message: string; data: Expense }> {
-        return this.http.put<{ message: string; data: Expense }>(`${this.apiUrl}/${id}`, payload);
+        return this.http.put<{ message: string; data: Expense }>(`${this.apiUrl}/${id}`, payload).pipe(
+            tap({ next: () => this.cashRegisterService.invalidateCurrent() }),
+        );
     }
 
     cancel(id: number): Observable<{ message: string; data: Expense }> {
-        return this.http.patch<{ message: string; data: Expense }>(`${this.apiUrl}/${id}/cancel`, {});
+        return this.http.patch<{ message: string; data: Expense }>(`${this.apiUrl}/${id}/cancel`, {}).pipe(
+            tap({ next: () => this.cashRegisterService.invalidateCurrent() }),
+        );
     }
 }
-
-
-
-

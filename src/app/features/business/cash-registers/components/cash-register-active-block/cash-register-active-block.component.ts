@@ -1,7 +1,7 @@
 import { Component, input, output, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormatPricePipe } from '../../../../../core/pipes';
-import { sumCashIncome } from '../../utils/cash-transaction.util';
+import { sumCashNetIncome, sumCashRefunds } from '../../utils/cash-transaction.util';
 import type { CashRegister } from '../../../models';
 
 @Component({
@@ -17,7 +17,10 @@ export class CashRegisterActiveBlockComponent {
     openCloseModal = output<void>();
     openMovements = output<void>();
 
-    incomeToday = computed(() => sumCashIncome(this.register()?.transactions));
+    /** Encaissé net (entrées − remboursements), aligné avec les rapports. */
+    netIncomeToday = computed(() => sumCashNetIncome(this.register()?.transactions));
+
+    refundsToday = computed(() => sumCashRefunds(this.register()?.transactions));
 
     openedAtLabel = computed(() => {
         const reg = this.register();

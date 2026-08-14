@@ -32,8 +32,13 @@
                 <p class="text-lg font-bold text-slate-800 mt-1">{{ register().opening_balance | formatPrice }}</p>
             </div>
             <div class="p-4 bg-white rounded-xl border-2 border-emerald-200">
-                <p class="text-xs font-bold text-emerald-900 uppercase tracking-wide">Encaissé aujourd'hui</p>
-                <p class="text-lg font-bold text-emerald-800 mt-1">{{ incomeToday() | formatPrice }}</p>
+                <p class="text-xs font-bold text-emerald-900 uppercase tracking-wide">Encaissé net aujourd'hui</p>
+                <p class="text-lg font-bold text-emerald-800 mt-1">{{ netIncomeToday() | formatPrice }}</p>
+                @if (refundsToday() > 0) {
+                <p class="text-[11px] font-medium text-amber-800 mt-1">
+                    Remboursements : −{{ refundsToday() | formatPrice }}
+                </p>
+                }
             </div>
             <div class="p-4 bg-white rounded-xl border-2 border-primary-200">
                 <p class="text-xs font-bold text-primary-900 uppercase tracking-wide">Total théorique</p>

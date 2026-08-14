@@ -1,9 +1,13 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../auth/services/auth.service';
 import { BusinessStrategyService } from '../../../../core/services/business-strategy.service';
+import { BusinessDashboardService } from '../../services/business-dashboard.service';
+import { BusinessProfileService } from '../../services/business-profile.service';
+import { DashboardAssistantComponent } from '../../dashboard/business-dashboard/components/dashboard-assistant.component';
+import type { BusinessDashboardStats, BusinessProfile } from '../../models';
 
 interface MenuItem {
   label: string;
@@ -20,18 +24,40 @@ interface MenuGroup {
 @Component({
   selector: 'app-business-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, DashboardAssistantComponent],
   templateUrl: './business-layout.component.html',
 })
-export class BusinessLayoutComponent {
+export class BusinessLayoutComponent implements OnInit {
   authService = inject(AuthService);
   strategyService = inject(BusinessStrategyService);
+  private dashboardService = inject(BusinessDashboardService);
+  private profileService = inject(BusinessProfileService);
   private router = inject(Router);
   user = this.authService.currentUser;
   userMenuOpen = signal(false);
   sidebarOpen = signal(true);
   isMobile = signal(false);
   isRefreshing = signal(false);
+  dashboardStats = signal<BusinessDashboardStats | null>(null);
+  profile = signal<BusinessProfile | null>(null);
+
+  daysRemaining = computed(() => {
+    const p = this.profile();
+    if (!p) return -1;
+    const sub = p.active_subscription;
+    if (sub && sub.days_remaining != null && sub.is_expired !== true) return sub.days_remaining;
+    if (p.trial_days_remaining != null) return p.trial_days_remaining;
+    return -1;
+  });
+
+  showSubscriptionAlert = computed(() => {
+    const d = this.daysRemaining();
+    return d >= 0 && d <= 5;
+  });
+
+  subscriptionEndLabel = computed(() =>
+    this.profile()?.is_on_trial ? "période d'essai" : 'abonnement'
+  );
 
   menuGroups: MenuGroup[] = [
     {
@@ -115,16 +141,26 @@ export class BusinessLayoutComponent {
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       if (this.isNavigationEnd(event)) {
-        // Auto-close sidebar on mobile after navigation
         if (this.isMobile()) {
           this.sidebarOpen.set(false);
         }
-        
-        // Specific case for POS
         if (event.urlAfterRedirects.includes('/business/pos')) {
           this.sidebarOpen.set(false);
         }
       }
+    });
+  }
+
+  ngOnInit(): void {
+    this.loadDashboardContext();
+  }
+
+  private loadDashboardContext(): void {
+    this.dashboardService.getStats().subscribe({
+      next: (res) => this.dashboardStats.set(res.data),
+    });
+    this.profileService.getProfile().subscribe({
+      next: (res) => this.profile.set(res.data),
     });
   }
 

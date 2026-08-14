@@ -1,123 +1,80 @@
-<div class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-    <!-- Welcome Banner -->
-    <div
-        class="bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl md:rounded-3xl shadow-xl p-6 md:p-8 mb-6 md:mb-8 text-white relative overflow-hidden">
-        <div class="relative z-10">
-            <h2 class="text-xl md:text-3xl font-extrabold mb-2">{{ getGreeting() }}, {{ user()?.name }} 👋</h2>
-            <p class="text-primary-100 text-sm md:text-lg max-w-2xl">
-                Bienvenue sur votre espace de gestion clinique vétérinaire. Voici un aperçu de votre journée.
-            </p>
-        </div>
-        <div class="absolute top-0 right-0 -mt-8 -mr-8 w-40 md:w-64 h-40 md:h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 right-16 md:right-32 -mb-8 w-24 md:w-40 h-24 md:h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
+<div class="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full pb-24">
+  <header class="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+    <div>
+      <p class="text-sm font-medium text-gray-500">{{ getGreeting() }}</p>
+      <h1 class="text-3xl md:text-4xl font-serif font-bold text-gray-900 tracking-tight mt-0.5">{{ user()?.name }}</h1>
     </div>
+    <p class="text-sm text-gray-400 sm:pt-2">
+      Tableau de bord · {{ strategyService.isVet() ? 'Clinique vétérinaire' : 'Pharmacie' }}
+    </p>
+  </header>
 
-    @if (isLoading()) {
-    <div class="flex justify-center py-12">
-        <svg class="animate-spin h-10 w-10 text-primary-600" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-        </svg>
+  @if (isLoading()) {
+  <div class="flex justify-center py-20">
+    <div class="h-8 w-8 rounded-full border-2 border-gray-200 border-t-primary-600 animate-spin"></div>
+  </div>
+  } @else {
+  @if (stats(); as s) {
+
+  @if (showSubscriptionAlert()) {
+  <div class="mb-5 p-3.5 rounded-xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+    <p class="text-sm font-semibold text-amber-900 flex-1">
+      {{ daysRemaining() }} jour{{ daysRemaining() > 1 ? 's' : '' }} restant{{ daysRemaining() > 1 ? 's' : '' }} — fin de {{ getSubscriptionEndLabel() }}.
+    </p>
+    <a routerLink="/business/settings" [queryParams]="{ tab: 'subscription' }"
+      class="shrink-0 text-sm font-bold text-amber-800 hover:text-amber-950">
+      Renouveler →
+    </a>
+  </div>
+  }
+
+  <!-- 4 cartes stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-5">
+    @for (config of quickStatConfig(); track config.key) {
+    <app-stat-card [label]="config.label" [route]="config.route"
+      [value]="s[config.key]" [suffix]="config.suffix" [iconPath]="config.iconPath"
+      [theme]="config.theme">
+    </app-stat-card>
+    }
+  </div>
+
+  <!-- Encaissé aujourd'hui / ce mois -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8">
+    <div class="relative overflow-hidden rounded-2xl bg-primary-700 text-white p-5 md:p-6 shadow-md">
+      <div class="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-white/10 pointer-events-none"></div>
+      <div class="absolute right-4 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-white/5 pointer-events-none"></div>
+      <p class="text-[11px] font-bold uppercase tracking-wider text-primary-100 mb-2">Encaissé aujourd'hui</p>
+      <p class="text-3xl md:text-4xl font-serif font-bold tabular-nums leading-none">{{ s.today_revenue | formatPrice }}</p>
     </div>
-    } @else {
-    @if (dashboardStats(); as s) {
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
-      @for (config of quickStatConfig(); track config.key) {
-        <app-stat-card [label]="config.label" [route]="config.route"
-            [value]="dashboardStats()?.[config.key] ?? 0" [suffix]="config.suffix" [iconPath]="config.iconPath"
-            [theme]="config.theme">
-        </app-stat-card>
+    <div class="rounded-2xl border border-amber-100 bg-[#faf6ef] p-5 md:p-6 shadow-sm">
+      <p class="text-[11px] font-bold uppercase tracking-wider text-amber-800/70 mb-2">Encaissé ce mois</p>
+      <p class="text-3xl md:text-4xl font-serif font-bold text-gray-900 tabular-nums leading-none">{{ s.month_revenue | formatPrice }}</p>
+    </div>
+  </div>
+
+  <!-- Graphique encaissements 7 jours -->
+  @if (s.revenue_last_7_days.length) {
+  <div class="mb-6 md:mb-8">
+    <app-dashboard-revenue-chart [days]="s.revenue_last_7_days" />
+  </div>
+  }
+
+  <!-- Accès rapide -->
+  <section>
+    <h2 class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">Accès rapide</h2>
+    <div class="flex flex-wrap gap-2">
+      @for (action of quickActions(); track action.label) {
+      <a [routerLink]="action.route"
+        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:border-primary-300 hover:text-primary-800 hover:bg-primary-50/40 transition-colors shadow-sm">
+        {{ action.label }}
+        <svg class="w-3.5 h-3.5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
       }
     </div>
+  </section>
 
-    <!-- Alert -->
-    @if (showSubscriptionAlert()) {
-    <div class="mb-6 md:mb-8 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-      <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 shrink-0">
-        <svg class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 17c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-      </div>
-      <div class="flex-1 min-w-0">
-        <p class="text-sm font-bold text-amber-900">
-          Il reste {{ daysRemaining() }} {{ daysRemaining() === 1 ? 'jour' : 'jours' }} avant la fin de votre {{ getSubscriptionEndLabel() }}.
-        </p>
-        <p class="text-xs text-amber-700 mt-0.5">Pensez à renouveler dans Paramètres → Abonnement.</p>
-      </div>
-      <a routerLink="/business/settings" [queryParams]="{ tab: 'subscription' }"
-        class="w-full sm:w-auto shrink-0 px-4 py-2 rounded-xl bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 transition text-center">
-        Voir l'abonnement
-      </a>
-    </div>
-    }
-
-    <!-- Revenue Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
-        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-lg p-5 md:p-6 text-white transform transition hover:scale-[1.02] duration-300">
-            <div class="flex items-center justify-between mb-4">
-                <h4 class="text-emerald-100 font-medium text-xs md:text-sm uppercase tracking-wider">Revenu Aujourd'hui</h4>
-                <div class="p-2 bg-white/10 rounded-lg">
-                    <svg class="w-5 h-5 md:w-6 md:h-6 text-emerald-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-            </div>
-            <div class="text-3xl md:text-4xl font-bold truncate">{{ s.today_revenue | currency:'XOF':'symbol-narrow' }}</div>
-        </div>
-
-        <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl shadow-lg p-5 md:p-6 text-white transform transition hover:scale-[1.02] duration-300">
-            <div class="flex items-center justify-between mb-4">
-                <h4 class="text-indigo-100 font-medium text-xs md:text-sm uppercase tracking-wider">Revenu du Mois</h4>
-                <div class="p-2 bg-white/10 rounded-lg">
-                    <svg class="w-5 h-5 md:w-6 md:h-6 text-indigo-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                </div>
-            </div>
-            <div class="text-3xl md:text-4xl font-bold truncate">{{ s.month_revenue | currency:'XOF':'symbol-narrow' }}</div>
-        </div>
-    </div>
-
-    <!-- Activities -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/60 flex items-center justify-between">
-            <h3 class="text-sm md:text-base font-bold text-gray-900">
-                Activités Récentes {{ strategyService.isVet() ? '(Ventes & Consultations)' : '(Ventes)' }}
-            </h3>
-        </div>
-        <div class="divide-y divide-gray-50">
-            @for (activity of s.recent_activities; track activity.id) {
-            <div class="px-4 md:px-6 py-4 hover:bg-gray-50/70 transition-colors flex items-start gap-3 md:gap-4">
-                <div [class]="'w-8 h-8 md:w-10 md:h-10 rounded-lg shrink-0 flex items-center justify-center ' + activity.color">
-                    @if (activity.icon === 'sale') {
-                    <svg class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    } @else {
-                    <svg class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    }
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-xs md:text-sm font-medium text-gray-900 leading-tight">{{ activity.description }}</p>
-                    <p class="text-[10px] md:text-xs text-gray-500 mt-1">{{ activity.time }}</p>
-                </div>
-            </div>
-            }
-            @if (s.recent_activities.length === 0) {
-            <div class="px-6 py-12 text-center text-sm text-gray-400 font-medium">Aucune activité récente</div>
-            }
-        </div>
-    </div>
-    }
-    }
+  }
+  }
 </div>
-
-

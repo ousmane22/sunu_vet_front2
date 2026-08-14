@@ -184,4 +184,13 @@
       <router-outlet></router-outlet>
     </div>
   </main>
+
+  <app-dashboard-assistant
+    [stats]="dashboardStats()"
+    [userName]="user()?.name ?? ''"
+    [userId]="user()?.id ?? null"
+    [isVet]="strategyService.isVet()"
+    [showSubscriptionAlert]="showSubscriptionAlert()"
+    [daysRemaining]="daysRemaining()"
+    [subscriptionEndLabel]="subscriptionEndLabel()" />
 </div>

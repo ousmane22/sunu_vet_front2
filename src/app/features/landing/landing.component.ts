@@ -1,8 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeroComponent } from './components/hero/hero.component';
+import { LandingNavComponent } from './components/landing-nav/landing-nav.component';
 import { FeaturesComponent } from './components/features/features.component';
 import { ProjectPreviewComponent } from './components/project-preview/project-preview.component';
+import { LandingAiComponent } from './components/landing-ai/landing-ai.component';
 import { PricingComponent } from './components/pricing/pricing.component';
 import { TestimonialsComponent } from './components/testimonials/testimonials.component';
 import { CtaComponent } from './components/cta/cta.component';
@@ -15,9 +17,11 @@ import { LandingService } from './services/landing.service';
   standalone: true,
   imports: [
     CommonModule,
+    LandingNavComponent,
     HeroComponent,
     FeaturesComponent,
     ProjectPreviewComponent,
+    LandingAiComponent,
     PricingComponent,
     TestimonialsComponent,
     CtaComponent,
@@ -25,17 +29,14 @@ import { LandingService } from './services/landing.service';
     ContactModalComponent,
   ],
   templateUrl: './landing.component.html',
-  styleUrl: './landing.component.scss'
+  styleUrl: './landing.component.scss',
 })
 export class LandingComponent implements OnInit {
   private landingService = inject(LandingService);
 
   ngOnInit(): void {
     this.landingService.trackVisit().subscribe({
-      error: (err) => console.error('Error tracking visit', err)
+      error: (err) => console.error('Error tracking visit', err),
     });
   }
 }
-
-
-

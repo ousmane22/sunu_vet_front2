@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { CashRegisterService } from './cash-register.service';
 import { PAGINATION } from '../../../core/config/pagination.config';
 import type {
   Consultation,
@@ -20,6 +22,7 @@ export interface ConsultationFilters {
 @Injectable({ providedIn: 'root' })
 export class ConsultationService {
   private http = inject(HttpClient);
+  private cashRegisterService = inject(CashRegisterService);
   private apiBase = `${environment.apiUrl}/business/consultations`;
 
   getAll(filters?: ConsultationFilters): Observable<ConsultationListResponse> {
@@ -38,22 +41,26 @@ export class ConsultationService {
   }
 
   create(payload: Record<string, unknown>): Observable<{ data: Consultation; message?: string }> {
-    return this.http.post<{ data: Consultation; message?: string }>(this.apiBase, payload);
+    return this.http.post<{ data: Consultation; message?: string }>(this.apiBase, payload).pipe(
+      tap({ next: () => this.cashRegisterService.invalidateCurrent() }),
+    );
   }
 
   addPayment(id: number, payload: { amount: number; payment_method: string; note?: string }): Observable<{ data: Consultation; message?: string }> {
-    return this.http.post<{ data: Consultation; message?: string }>(`${this.apiBase}/${id}/payments`, payload);
+    return this.http.post<{ data: Consultation; message?: string }>(`${this.apiBase}/${id}/payments`, payload).pipe(
+      tap({ next: () => this.cashRegisterService.invalidateCurrent() }),
+    );
   }
 
   update(id: number, payload: Record<string, unknown>): Observable<{ data: Consultation; message?: string }> {
-    return this.http.put<{ data: Consultation; message?: string }>(`${this.apiBase}/${id}`, payload);
+    return this.http.put<{ data: Consultation; message?: string }>(`${this.apiBase}/${id}`, payload).pipe(
+      tap({ next: () => this.cashRegisterService.invalidateCurrent() }),
+    );
   }
 
   cancel(id: number): Observable<{ data: Consultation; message?: string }> {
-    return this.http.patch<{ data: Consultation; message?: string }>(`${this.apiBase}/${id}/cancel`, {});
+    return this.http.patch<{ data: Consultation; message?: string }>(`${this.apiBase}/${id}/cancel`, {}).pipe(
+      tap({ next: () => this.cashRegisterService.invalidateCurrent() }),
+    );
   }
 }
-
-
-
-

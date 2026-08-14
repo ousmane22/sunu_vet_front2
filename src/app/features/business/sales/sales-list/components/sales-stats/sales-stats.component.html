@@ -7,11 +7,16 @@
         class="text-left bg-white p-5 rounded-xl border-2 transition-colors cursor-pointer hover:border-green-500">
         <p class="text-xs font-bold text-black uppercase tracking-wide mb-2 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-green-600"></span>
-            Ventes Aujourd'hui
+            Encaissé aujourd'hui
         </p>
-        <h3 class="text-2xl font-bold text-green-800">{{ statsToday().amount | formatPrice }}</h3>
+        <h3 class="text-2xl font-bold text-green-800 tabular-nums">{{ statsToday().amount | formatPrice }}</h3>
+        @if (statsToday().billed > statsToday().amount) {
+        <p class="text-xs font-semibold text-green-700 mt-1 tabular-nums">
+            Facturé : {{ statsToday().billed | formatPrice }}
+        </p>
+        }
         <p class="text-sm font-semibold text-green-700 mt-2">
-            {{ statsToday().count }} produits vendus
+            {{ statsToday().count }} produit{{ statsToday().count > 1 ? 's' : '' }} vendu{{ statsToday().count > 1 ? 's' : '' }}
         </p>
     </button>
 
@@ -23,11 +28,16 @@
         class="text-left bg-white p-5 rounded-xl border-2 transition-colors cursor-pointer hover:border-blue-500">
         <p class="text-xs font-bold text-black uppercase tracking-wide mb-2 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-            Ventes Cette Semaine
+            Encaissé cette semaine
         </p>
-        <h3 class="text-2xl font-bold text-blue-800">{{ statsWeek().amount | formatPrice }}</h3>
+        <h3 class="text-2xl font-bold text-blue-800 tabular-nums">{{ statsWeek().amount | formatPrice }}</h3>
+        @if (statsWeek().billed > statsWeek().amount) {
+        <p class="text-xs font-semibold text-blue-700 mt-1 tabular-nums">
+            Facturé : {{ statsWeek().billed | formatPrice }}
+        </p>
+        }
         <p class="text-sm font-medium text-gray-700 mt-2">
-            Chiffre d'affaires hebdomadaire
+            Paiements encaissés sur la semaine
         </p>
     </button>
 
@@ -39,11 +49,16 @@
         class="text-left bg-white p-5 rounded-xl border-2 transition-colors cursor-pointer hover:border-teal-500">
         <p class="text-xs font-bold text-black uppercase tracking-wide mb-2 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-teal-600"></span>
-            Ventes Ce Mois
+            Encaissé ce mois
         </p>
-        <h3 class="text-2xl font-bold text-teal-800">{{ statsMonth().amount | formatPrice }}</h3>
+        <h3 class="text-2xl font-bold text-teal-800 tabular-nums">{{ statsMonth().amount | formatPrice }}</h3>
+        @if (statsMonth().billed > statsMonth().amount) {
+        <p class="text-xs font-semibold text-teal-700 mt-1 tabular-nums">
+            Facturé : {{ statsMonth().billed | formatPrice }}
+        </p>
+        }
         <p class="text-sm font-medium text-gray-700 mt-2">
-            Chiffre d'affaires mensuel
+            Paiements encaissés sur le mois
         </p>
     </button>
 </div>

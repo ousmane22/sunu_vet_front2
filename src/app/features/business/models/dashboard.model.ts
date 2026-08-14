@@ -16,6 +16,12 @@ export interface DashboardAppointment {
   status: string;
 }
 
+export interface DashboardRevenueDay {
+  date: string;
+  label: string;
+  amount: number;
+}
+
 export interface BusinessDashboardStats {
   today_sales: number;
   today_consultations: number;
@@ -23,6 +29,7 @@ export interface BusinessDashboardStats {
   low_stock_items: number;
   today_revenue: number;
   month_revenue: number;
+  revenue_last_7_days: DashboardRevenueDay[];
   recent_activities: DashboardActivity[];
 }
 

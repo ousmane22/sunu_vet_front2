@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { shareReplay, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { CashRegisterService } from './cash-register.service';
 import {
     Client,
     ClientListResponse,
@@ -12,6 +13,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class ClientService {
     private http = inject(HttpClient);
+    private cashRegisterService = inject(CashRegisterService);
     private apiBase = `${environment.apiUrl}/business/clients`;
 
     /**
@@ -70,7 +72,9 @@ export class ClientService {
         clientId: number,
         payload: { amount: number; payment_method: string; note?: string }
     ): Observable<ClientSingleResponse> {
-        return this.http.post<ClientSingleResponse>(`${this.apiBase}/${clientId}/payments`, payload);
+        return this.http.post<ClientSingleResponse>(`${this.apiBase}/${clientId}/payments`, payload).pipe(
+            tap({ next: () => this.cashRegisterService.invalidateCurrent() }),
+        );
     }
 }
 

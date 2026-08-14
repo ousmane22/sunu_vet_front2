@@ -5,11 +5,16 @@
             <p class="text-gray-700 mt-1 font-medium">Consultez, filtrez et gérez les transactions de votre clinique vétérinaire.</p>
         </div>
         <div
-            class="bg-primary-900 text-white px-7 py-4 rounded-2xl border border-primary-800 flex flex-col items-center md:items-end">
-            <p class="text-xs font-bold text-white/90 uppercase tracking-wide mb-1">
-                Total ventes · {{ periodLabel() }}
+            class="mb-5 bg-primary-900 text-white px-7 py-4 rounded-2xl border border-primary-800 flex flex-col items-center md:items-end">
+            <p class="text-xs font-bold text-white/90 uppercase tracking-wide mb-3">
+                Encaissé · {{ periodLabel() }}
             </p>
-            <p class="text-3xl font-bold tracking-tight text-white">{{ filteredTotalAmount() | formatPrice }}</p>
+            <p class="text-3xl font-bold tracking-tight text-white">{{ filteredTotalCollected() | formatPrice }}</p>
+            @if (filteredTotalBilled() > filteredTotalCollected()) {
+            <p class="text-xs font-semibold text-white/80 mt-1">
+                Facturé : {{ filteredTotalBilled() | formatPrice }}
+            </p>
+            }
             <p class="text-sm font-semibold text-white mt-1">
                 {{ filteredSalesCount() }} vente{{ filteredSalesCount() > 1 ? 's' : '' }}
             </p>
@@ -143,7 +148,14 @@
                         </p>
                     </div>
                     <div class="text-right">
-                        <p class="text-base font-bold text-primary-800">{{ (sale.net_amount || sale.total_amount) | formatPrice }}</p>
+                        @if (sale.status === 'partial') {
+                        <p class="text-base font-bold text-primary-800">{{ sale.amount_paid | formatPrice }}</p>
+                        <p class="text-xs font-semibold text-gray-700 mt-0.5">
+                            sur {{ sale.net_amount | formatPrice }}
+                        </p>
+                        } @else {
+                        <p class="text-base font-bold text-primary-800">{{ sale.net_amount | formatPrice }}</p>
+                        }
                         @if (sale.payment_method) {
                             <p class="text-xs font-bold text-primary-700 uppercase mt-0.5">
                                 {{ sale.payment_method === 'cash' ? 'Espèces' : (sale.payment_method === 'card' ? 'Carte' : 'Mobile') }}
@@ -234,9 +246,18 @@
                         </td>
 
                         <td class="px-6 py-4 whitespace-nowrap text-right">
+                            @if (sale.status === 'partial') {
                             <span class="text-sm font-bold text-primary-800 tabular-nums">
-                                {{ (sale.net_amount || sale.total_amount) | formatPrice }}
+                                {{ sale.amount_paid | formatPrice }}
                             </span>
+                            <p class="text-xs text-gray-700 font-semibold tabular-nums">
+                                sur {{ sale.net_amount | formatPrice }}
+                            </p>
+                            } @else {
+                            <span class="text-sm font-bold text-primary-800 tabular-nums">
+                                {{ sale.net_amount | formatPrice }}
+                            </span>
+                            }
                             @if (sale.discount_amount > 0) {
                             <p class="text-xs text-green-700 font-semibold">(-{{ sale.discount_amount | formatPrice }})</p>
                             }

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { shareReplay, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import {
@@ -22,9 +22,10 @@ export class CashRegisterService {
      * Invalidé après open(), close() ou correctBalance().
      */
     private current$: Observable<CashRegisterSingleResponse> | null = null;
+    private readonly changed$ = new Subject<void>();
 
     getCurrent(forceRefresh = false): Observable<CashRegisterSingleResponse> {
-        if (forceRefresh) this.current$ = null;
+        if (forceRefresh) this.invalidateCurrent();
         if (!this.current$) {
             this.current$ = this.http
                 .get<CashRegisterSingleResponse>(`${this.apiBase}/current`)
@@ -36,9 +37,15 @@ export class CashRegisterService {
         return this.current$;
     }
 
+    /** Émis après annulation vente, remboursement, open/close, etc. */
+    onChanged(): Observable<void> {
+        return this.changed$.asObservable();
+    }
+
     /** Invalide le cache après toute mutation de caisse. */
     invalidateCurrent(): void {
         this.current$ = null;
+        this.changed$.next();
     }
 
     getHistory(params: any = {}): Observable<any> {

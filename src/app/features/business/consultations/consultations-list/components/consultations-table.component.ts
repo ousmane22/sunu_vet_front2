@@ -29,10 +29,16 @@ export class ConsultationsTableComponent {
 
   statusClass(status: string): string {
     switch (status) {
-      case 'completed': return 'bg-emerald-100 text-emerald-900 border-emerald-300';
-      case 'partial': return 'bg-amber-100 text-amber-900 border-amber-300';
-      case 'cancelled': return 'bg-gray-100 text-black border-gray-300';
-      default: return 'bg-gray-100 text-black border-gray-300';
+      case 'completed': return 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200';
+      case 'partial': return 'bg-amber-50 text-amber-800 ring-1 ring-amber-200';
+      case 'cancelled': return 'bg-gray-100 text-gray-600 ring-1 ring-gray-200';
+      default: return 'bg-gray-100 text-gray-600 ring-1 ring-gray-200';
     }
+  }
+
+  clientInitial(c: Consultation): string {
+    const name = c.client?.name?.trim();
+    if (!name) return '?';
+    return name.charAt(0).toUpperCase();
   }
 }

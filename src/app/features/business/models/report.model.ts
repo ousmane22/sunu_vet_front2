@@ -42,6 +42,8 @@ export interface MedicalReport {
     end_date?: string;
     total_consultations: number;
     total_consultations_net: number;
+    total_consultations_collected?: number;
+    partial_consultations_count?: number;
     by_species: {
         animal_species: string;
         count: number;
@@ -72,9 +74,14 @@ export interface PerformanceReport {
     summary: {
         sales_count: number;
         sales_net: number;
+        sales_collected: number;
+        sales_partial_count: number;
         consultations_count: number;
         consultations_net: number;
+        consultations_collected: number;
+        consultations_partial_count: number;
         total_net: number;
+        total_collected: number;
     };
     payments: {
         payment_method: string;

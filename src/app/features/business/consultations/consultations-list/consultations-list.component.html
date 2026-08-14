@@ -1,64 +1,106 @@
-<div class="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-5 md:space-y-6">
+  <!-- En-tête -->
+  <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
     <div>
-      <h1 class="text-3xl md:text-4xl font-bold text-black tracking-tight">Consultations</h1>
-      <p class="text-gray-700 mt-1 font-medium">Historique, paiements et dossiers médicaux.</p>
+      <p class="text-sm font-medium text-gray-500">Clients & soins</p>
+      <h1 class="text-3xl md:text-4xl font-serif font-bold text-gray-900 tracking-tight mt-0.5">Consultations</h1>
+      <p class="text-sm text-gray-500 mt-1">Historique, paiements et dossiers médicaux.</p>
     </div>
-    @if (can('consultations.create')) {
-    <button type="button" (click)="openModal()"
-      class="bg-slate-900 hover:bg-black text-white px-5 py-3 rounded-xl transition-colors flex items-center gap-2 font-bold text-sm self-start md:self-auto">
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-      </svg>
-      Nouvelle consultation
-    </button>
-    }
+
+    <div class="shrink-0 w-full sm:w-auto sm:min-w-[220px]">
+      <div class="relative overflow-hidden rounded-2xl bg-primary-700 text-white px-6 py-4 shadow-md flex flex-col">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-white/10 pointer-events-none"></div>
+        <p class="text-[11px] font-bold uppercase tracking-wider text-primary-100 mb-1">
+          Encaissé · {{ periodLabel() }}
+        </p>
+        <p class="text-2xl md:text-3xl font-serif font-bold tabular-nums leading-none">{{ totalCollected() | formatPrice }}</p>
+        @if (totalBilled() > totalCollected()) {
+        <p class="text-xs font-medium text-primary-100/90 mt-1.5 tabular-nums">
+          Facturé : {{ totalBilled() | formatPrice }}
+        </p>
+        }
+        <p class="text-xs font-semibold text-white/80 mt-1">
+          {{ totalItems() }} consultation{{ totalItems() > 1 ? 's' : '' }}
+        </p>
+
+        @if (can('consultations.create')) {
+        <button type="button" (click)="openModal()"
+          class="relative z-10 mt-4 w-full bg-white text-primary-800 hover:bg-primary-50 px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 font-bold text-sm shadow-sm">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Nouvelle consultation
+        </button>
+        }
+      </div>
+    </div>
   </div>
 
-  <!-- Filtres période -->
-  <div class="bg-white p-5 rounded-xl border-2 border-gray-300">
-    <form [formGroup]="filterForm" class="flex flex-wrap items-end gap-4">
-      <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+  <!-- Mini stats -->
+  @if (!isLoading() && consultations().length > 0) {
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+      <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total période</p>
+      <p class="text-2xl font-bold text-gray-900 tabular-nums">{{ totalItems() }}</p>
+      <p class="text-xs text-gray-500 mt-0.5">consultation{{ totalItems() > 1 ? 's' : '' }}</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+      <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Réglées</p>
+      <p class="text-2xl font-bold text-emerald-700 tabular-nums">{{ completedCount() }}</p>
+      <p class="text-xs text-gray-500 mt-0.5">paiement complet</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+      <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Partielles</p>
+      <p class="text-2xl font-bold text-amber-700 tabular-nums">{{ partialCount() }}</p>
+      <p class="text-xs text-gray-500 mt-0.5">crédit en cours</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+      <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Reste dû</p>
+      <p class="text-2xl font-bold tabular-nums" [class]="totalDue() > 0 ? 'text-red-600' : 'text-gray-900'">
+        {{ totalDue() | formatPrice }}
+      </p>
+      <p class="text-xs text-gray-500 mt-0.5">sur la page</p>
+    </div>
+  </div>
+  }
+
+  <!-- Filtres -->
+  <div class="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm">
+    <form [formGroup]="filterForm" class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap gap-2">
         <button type="button" (click)="onPeriodChange('today')"
-          [class.bg-primary-900]="selectedPeriod() === 'today'"
-          [class.text-white]="selectedPeriod() === 'today'"
-          [class.bg-white]="selectedPeriod() !== 'today'"
-          [class.text-black]="selectedPeriod() !== 'today'"
-          class="px-4 py-2.5 text-sm font-bold rounded-lg border-2 border-gray-300 transition-colors flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
+          class="px-4 py-2 text-sm font-semibold rounded-full border transition-colors"
+          [class]="selectedPeriod() === 'today'
+            ? 'bg-primary-700 text-white border-primary-700'
+            : 'bg-white text-gray-700 border-gray-200 hover:border-primary-300 hover:text-primary-800'">
           Aujourd'hui
         </button>
         <button type="button" (click)="onPeriodChange('all')"
-          [class.bg-primary-900]="selectedPeriod() === 'all'"
-          [class.text-white]="selectedPeriod() === 'all'"
-          [class.bg-white]="selectedPeriod() !== 'all'"
-          [class.text-black]="selectedPeriod() !== 'all'"
-          class="px-4 py-2.5 text-sm font-bold rounded-lg border-2 border-gray-300 transition-colors">
+          class="px-4 py-2 text-sm font-semibold rounded-full border transition-colors"
+          [class]="selectedPeriod() === 'all'
+            ? 'bg-primary-700 text-white border-primary-700'
+            : 'bg-white text-gray-700 border-gray-200 hover:border-primary-300 hover:text-primary-800'">
           Toutes
         </button>
         <button type="button" (click)="enableCustomPeriod()"
-          [class.bg-primary-900]="selectedPeriod() === 'custom'"
-          [class.text-white]="selectedPeriod() === 'custom'"
-          [class.bg-white]="selectedPeriod() !== 'custom'"
-          [class.text-black]="selectedPeriod() !== 'custom'"
-          class="px-4 py-2.5 text-sm font-bold rounded-lg border-2 border-gray-300 transition-colors">
+          class="px-4 py-2 text-sm font-semibold rounded-full border transition-colors"
+          [class]="selectedPeriod() === 'custom'
+            ? 'bg-primary-700 text-white border-primary-700'
+            : 'bg-white text-gray-700 border-gray-200 hover:border-primary-300 hover:text-primary-800'">
           Par date
         </button>
       </div>
 
       @if (selectedPeriod() === 'custom') {
-      <div class="flex-1 min-w-[180px]">
-        <label class="block text-xs font-bold text-black uppercase tracking-wide mb-2">Date</label>
-        <input type="date" formControlName="date"
-          class="w-full px-4 py-2.5 bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm font-semibold text-black" />
+      <div class="flex items-center gap-2">
+        <label class="sr-only" for="filter-date">Date</label>
+        <input id="filter-date" type="date" formControlName="date"
+          class="px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm font-medium text-gray-900" />
       </div>
       }
 
-      <p class="text-sm font-medium text-gray-700 ml-auto">
-        Période : <span class="font-bold text-black">{{ periodLabel() }}</span>
+      <p class="text-sm text-gray-500 ml-auto hidden sm:block">
+        Période : <span class="font-semibold text-gray-800">{{ periodLabel() }}</span>
       </p>
     </form>
   </div>
@@ -70,31 +112,35 @@
     (saved)="onSaved($event)" />
   }
 
-  <div class="bg-white rounded-xl border-2 border-gray-300 overflow-hidden">
+  <!-- Liste -->
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
     @if (isLoading()) {
     <div class="flex flex-col items-center justify-center py-24 gap-4">
-      <div class="relative h-10 w-10">
-        <div class="absolute inset-0 rounded-full border-2 border-gray-200"></div>
-        <div class="absolute inset-0 rounded-full border-2 border-primary-600 border-t-transparent animate-spin"></div>
-      </div>
-      <p class="text-black text-sm font-semibold">Chargement des consultations...</p>
+      <div class="h-9 w-9 rounded-full border-2 border-gray-200 border-t-primary-600 animate-spin"></div>
+      <p class="text-sm font-medium text-gray-600">Chargement des consultations…</p>
     </div>
     } @else if (consultations().length === 0) {
-    <div class="flex flex-col items-center justify-center py-24 text-center">
-      <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mb-5 border-2 border-gray-300">
-        <svg class="w-7 h-7 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+    <div class="flex flex-col items-center justify-center py-20 text-center px-4">
+      <div class="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center mb-4">
+        <svg class="w-7 h-7 text-primary-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
         </svg>
       </div>
-      <h3 class="text-base font-bold text-black">Aucune consultation</h3>
-      <p class="text-sm text-gray-700 mt-1.5 max-w-[260px]">
+      <h3 class="text-base font-bold text-gray-900">Aucune consultation</h3>
+      <p class="text-sm text-gray-500 mt-1 max-w-xs">
         @if (selectedPeriod() === 'today') {
         Aucune consultation aujourd'hui.
         } @else {
         Modifiez le filtre ou créez une nouvelle consultation.
         }
       </p>
+      @if (can('consultations.create')) {
+      <button type="button" (click)="openModal()"
+        class="mt-4 px-4 py-2 text-sm font-bold text-primary-800 bg-primary-50 border border-primary-200 rounded-lg hover:bg-primary-100 transition-colors">
+        + Nouvelle consultation
+      </button>
+      }
     </div>
     } @else {
     <app-consultations-table
@@ -105,26 +151,26 @@
       (edit)="openEditModal($event)"
       (cancel)="cancelConsultation($event)" />
 
-    <div class="px-6 py-4 bg-gray-50 border-t-2 border-gray-300 flex items-center justify-between">
-      <p class="text-sm text-gray-700 font-medium">
-        <span class="font-bold text-black">{{ totalItems() }}</span>
+    <div class="px-5 py-3.5 bg-gray-50/80 border-t border-gray-200 flex items-center justify-between">
+      <p class="text-sm text-gray-600">
+        <span class="font-semibold text-gray-900">{{ totalItems() }}</span>
         consultation{{ totalItems() > 1 ? 's' : '' }}
         · {{ periodLabel() }}
       </p>
       @if (totalPages() > 1) {
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1.5">
         <button type="button" (click)="prevPage()" [disabled]="currentPage() === 1"
-          class="p-1.5 text-black hover:bg-white rounded-lg disabled:opacity-40 transition-colors border border-transparent hover:border-gray-300">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          class="p-1.5 text-gray-600 hover:bg-white rounded-lg disabled:opacity-40 transition-colors border border-transparent hover:border-gray-200">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <div class="px-3 text-sm font-bold text-black bg-white border-2 border-gray-300 py-1.5 rounded-lg">
-          {{ currentPage() }} <span class="text-gray-600 font-medium mx-1">/</span> {{ totalPages() }}
-        </div>
+        <span class="px-3 py-1 text-sm font-semibold text-gray-800 bg-white border border-gray-200 rounded-lg tabular-nums">
+          {{ currentPage() }} / {{ totalPages() }}
+        </span>
         <button type="button" (click)="nextPage()" [disabled]="currentPage() === totalPages()"
-          class="p-1.5 text-black hover:bg-white rounded-lg disabled:opacity-40 transition-colors border border-transparent hover:border-gray-300">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          class="p-1.5 text-gray-600 hover:bg-white rounded-lg disabled:opacity-40 transition-colors border border-transparent hover:border-gray-200">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         </button>

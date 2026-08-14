@@ -1,0 +1,58 @@
+<section id="assistant-ia" class="scroll-mt-24 py-12 sm:py-16 md:py-20 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-white overflow-hidden relative">
+  <div class="absolute inset-0 opacity-20 pointer-events-none" aria-hidden="true">
+    <div class="absolute -top-20 -right-20 w-80 h-80 bg-primary-400 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 w-96 h-96 bg-teal-300 rounded-full blur-3xl"></div>
+  </div>
+
+  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+      <div>
+        <p class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-sm font-bold text-primary-100 mb-5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Nouveauté
+        </p>
+        <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-5">
+          Votre assistant SunuVet, intégré à la clinique
+        </h2>
+        <p class="text-lg text-primary-100/90 leading-relaxed mb-8 max-w-xl">
+          Un copilote disponible sur toutes les pages métier : comprendre vos indicateurs, préparer une consultation et gagner du temps sur la paperasse.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button
+            type="button"
+            (click)="actions.goToRegister()"
+            class="px-8 py-3.5 bg-white text-primary-800 font-bold rounded-xl hover:bg-primary-50 transition-colors shadow-lg"
+          >
+            Essayer avec mon essai gratuit
+          </button>
+          <button
+            type="button"
+            (click)="actions.openDemo()"
+            class="px-8 py-3.5 border-2 border-white/40 text-white font-bold rounded-xl hover:bg-white/10 transition-colors"
+          >
+            Voir la démo
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        @for (item of highlights; track item.title) {
+        <div class="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 p-5 sm:p-6">
+          <h3 class="font-bold text-lg mb-2 flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-300 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            {{ item.title }}
+          </h3>
+          <p class="text-primary-100/90 text-sm sm:text-base leading-relaxed">{{ item.text }}</p>
+        </div>
+        }
+
+        <div class="rounded-2xl bg-black/20 border border-white/10 p-4 font-mono text-sm text-primary-50/90">
+          <p class="text-primary-200 text-xs uppercase tracking-wider mb-2">Exemple</p>
+          <p>« Quel est mon encaissé aujourd’hui ? » → SunuVet répond à partir de vos ventes et consultations réelles.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

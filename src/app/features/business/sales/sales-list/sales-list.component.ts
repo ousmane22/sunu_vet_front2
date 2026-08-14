@@ -55,11 +55,13 @@ export class SalesListComponent implements OnInit {
     lastPage = signal(1);
     perPage = signal(50);
 
-    statsToday = signal({ amount: 0, count: 0 });
-    statsWeek = signal({ amount: 0 });
-    statsMonth = signal({ amount: 0 });
+    statsToday = signal({ amount: 0, billed: 0, count: 0 });
+    statsWeek = signal({ amount: 0, billed: 0 });
+    statsMonth = signal({ amount: 0, billed: 0 });
 
     filteredTotalAmount = signal(0);
+    filteredTotalCollected = signal(0);
+    filteredTotalBilled = signal(0);
     filteredSalesCount = signal(0);
 
     periodLabel = computed(() => {
@@ -80,9 +82,19 @@ export class SalesListComponent implements OnInit {
     loadStats(): void {
         this.saleService.getStats().subscribe({
             next: (res) => {
-                this.statsToday.set(res.today || { amount: 0, count: 0 });
-                this.statsWeek.set(res.week || { amount: 0 });
-                this.statsMonth.set(res.month || { amount: 0 });
+                this.statsToday.set({
+                    amount: res.today?.amount ?? 0,
+                    billed: res.today?.billed ?? res.today?.amount ?? 0,
+                    count: res.today?.count ?? 0,
+                });
+                this.statsWeek.set({
+                    amount: res.week?.amount ?? 0,
+                    billed: res.week?.billed ?? res.week?.amount ?? 0,
+                });
+                this.statsMonth.set({
+                    amount: res.month?.amount ?? 0,
+                    billed: res.month?.billed ?? res.month?.amount ?? 0,
+                });
             },
             error: () => {
                 console.error('Erreur lors du chargement des statistiques');
@@ -145,12 +157,16 @@ export class SalesListComponent implements OnInit {
                 }
 
                 this.filteredTotalAmount.set(res?.summary?.total_amount ?? 0);
+                this.filteredTotalCollected.set(res?.summary?.total_collected ?? res?.summary?.total_amount ?? 0);
+                this.filteredTotalBilled.set(res?.summary?.total_amount ?? 0);
                 this.filteredSalesCount.set(res?.summary?.count ?? 0);
                 this.isLoading.set(false);
             },
             error: () => {
                 this.sales.set([]);
                 this.filteredTotalAmount.set(0);
+                this.filteredTotalCollected.set(0);
+                this.filteredTotalBilled.set(0);
                 this.filteredSalesCount.set(0);
                 this.isLoading.set(false);
             }
@@ -226,6 +242,7 @@ export class SalesListComponent implements OnInit {
             next: (res) => {
                 this.patchListRow(res.data);
                 this.loadStats();
+                this.loadSales(this.currentPage());
                 this.isSubmittingPayment.set(false);
                 this.closePaymentModal();
                 this.closeDetails();

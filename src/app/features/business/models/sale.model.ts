@@ -112,6 +112,7 @@ export interface SaleListResponse {
     };
     summary?: {
         total_amount: number;
+        total_collected?: number;
         count: number;
     };
 }

@@ -1,8 +1,9 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormatPricePipe } from '../../../../core/pipes';
 import { ProductService } from '../../services/product.service';
 import { CashRegisterService } from '../../services/cash-register.service';
@@ -49,6 +50,7 @@ import type { PosProduct, PosProductListResponse, CashRegister } from '../../mod
 export class PosProductGridComponent implements OnInit {
     private productService = inject(ProductService);
     private cashRegisterService = inject(CashRegisterService);
+    private destroyRef = inject(DestroyRef);
     private cartService = inject(CartService);
     private profileService = inject(BusinessProfileService);
     private fb = inject(FormBuilder);
@@ -70,16 +72,10 @@ export class PosProductGridComponent implements OnInit {
     });
 
     ngOnInit(): void {
-        this.cashRegisterService.getCurrent().subscribe({
-            next: (res) => {
-                this.activeRegister.set(res.data);
-                this.registerChecked.set(true);
-            },
-            error: () => {
-                this.activeRegister.set(null);
-                this.registerChecked.set(true);
-            },
-        });
+        this.loadActiveRegister();
+        this.cashRegisterService.onChanged()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.loadActiveRegister());
 
         this.profileService.getProfile().subscribe({
             next: (res) => this.requireOpenRegister.set(res.data.settings?.require_open_register !== false),
@@ -90,6 +86,19 @@ export class PosProductGridComponent implements OnInit {
         this.searchControl.valueChanges
             .pipe(debounceTime(250), distinctUntilChanged())
             .subscribe(() => this.loadProducts());
+    }
+
+    private loadActiveRegister(): void {
+        this.cashRegisterService.getCurrent(true).subscribe({
+            next: (res) => {
+                this.activeRegister.set(res.data);
+                this.registerChecked.set(true);
+            },
+            error: () => {
+                this.activeRegister.set(null);
+                this.registerChecked.set(true);
+            },
+        });
     }
 
     loadProducts(page = 1): void {

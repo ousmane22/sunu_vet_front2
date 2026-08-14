@@ -96,6 +96,7 @@ export const BUSINESS_ROUTES: Routes = [
       {
         path: 'consultations',
         title: 'Consultations',
+        canActivate: [requireOpenRegisterGuard],
         loadComponent: () =>
           import('./consultations/consultations-list/consultations-list.component').then(
             (m) => m.ConsultationsListComponent

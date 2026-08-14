@@ -5,8 +5,7 @@ interface Testimonial {
   name: string;
   role: string;
   business: string;
-  avatar: string;
-  rating: number;
+  initials: string;
   comment: string;
 }
 
@@ -15,36 +14,30 @@ interface Testimonial {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './testimonials.component.html',
-  styleUrl: './testimonials.component.scss'
+  styleUrl: './testimonials.component.scss',
 })
 export class TestimonialsComponent {
   testimonials: Testimonial[] = [
     {
-      name: 'Dr. Mansour',
+      name: 'Dr. Mansour Diop',
       role: 'Vétérinaire',
-      business: 'Kossy Vet',
-      avatar: 'fas fa-user-md',
-      rating: 5,
-      comment: 'SunuVet a transformé notre façon de travailler. Plus besoin de paperasse, tout est centralisé et accessible en quelques clics.'
+      business: 'Clinique vétérinaire — Dakar',
+      initials: 'MD',
+      comment: 'SunuVet nous a permis de centraliser consultations et caisse. L’équipe gagne du temps chaque jour sur la paperasse.',
     },
     {
       name: 'Dr. Fallou Hann',
       role: 'Vétérinaire',
-      business: 'Lamp Fall vet',
-      avatar: 'fas fa-user-tie',
-      rating: 5,
-      comment: 'La gestion du stock est un vrai jeu d\'enfant. Les alertes automatiques nous évitent les ruptures et les périmés.'
+      business: 'Cabinet vétérinaire — Pikine',
+      initials: 'FH',
+      comment: 'Le suivi du stock et les alertes nous évitent les ruptures. Les rapports encaissé / facturé sont très clairs.',
     },
     {
-      name: 'Dr. Fatou Sall',
-      role: 'Directrice',
-      business: 'Clinique des Animaux',
-      avatar: 'fas fa-user-nurse',
-      rating: 5,
-      comment: 'Excellent rapport qualité-prix. Notre efficacité a augmenté de 40% depuis que nous utilisons SunuVet.'
-    }
+      name: 'Fatou Sall',
+      role: 'Gérante',
+      business: 'Clinique des Animaux — Rufisque',
+      initials: 'FS',
+      comment: 'Interface simple pour le staff, formation rapide. L’assistant IA aide déjà sur les fiches consultation.',
+    },
   ];
 }
-
-
-

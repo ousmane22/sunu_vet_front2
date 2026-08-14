@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -10,6 +10,8 @@ import { CashRegisterCloseModalComponent } from './components/cash-register-clos
 import { CashRegisterHistoryTableComponent } from './components/cash-register-history-table/cash-register-history-table.component';
 import { CashRegisterDetailsModalComponent } from './components/cash-register-details-modal/cash-register-details-modal.component';
 import type { CashRegister, CashTransaction } from '../models';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { sumCashIncome, sumCashOutflows } from './utils/cash-transaction.util';
 
 @Component({
     selector: 'app-cash-registers',
@@ -30,6 +32,7 @@ export class CashRegistersComponent implements OnInit {
     private cashRegisterService = inject(CashRegisterService);
     private reportPdf = inject(CashRegisterReportPdfService);
     private route = inject(ActivatedRoute);
+    private destroyRef = inject(DestroyRef);
 
     /** Redirection depuis une route protégée (consultations / dépenses) sans caisse ouverte. */
     openRegisterRequiredNotice = signal(false);
@@ -53,9 +56,9 @@ export class CashRegistersComponent implements OnInit {
         const active = this.activeRegister();
         if (!active) return 0;
         const opening = Number(active.opening_balance) || 0;
-        const income = active.transactions?.filter((t: CashTransaction) => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0) ?? 0;
-        const expense = active.transactions?.filter((t: CashTransaction) => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0) ?? 0;
-        return opening + income - expense;
+        const income = sumCashIncome(active.transactions);
+        const outflows = sumCashOutflows(active.transactions);
+        return opening + income - outflows;
     });
 
     ngOnInit(): void {
@@ -64,6 +67,13 @@ export class CashRegistersComponent implements OnInit {
         }
         this.checkCurrentRegister();
         this.loadHistory();
+
+        this.cashRegisterService.onChanged()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => {
+                this.checkCurrentRegister();
+                this.loadHistory();
+            });
     }
 
     loadHistory(): void {

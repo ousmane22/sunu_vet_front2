@@ -15,6 +15,11 @@ export const requireOpenRegisterGuard: CanActivateFn = () => {
   const profileService = inject(BusinessProfileService);
   const cashRegisterService = inject(CashRegisterService);
 
+  const redirect = () =>
+    router.createUrlTree(['/business/cash-registers'], {
+      queryParams: { reason: 'open_register_required' },
+    });
+
   return forkJoin({
     profile: profileService.getProfile(true),
     register: cashRegisterService.getCurrent(true),
@@ -27,10 +32,8 @@ export const requireOpenRegisterGuard: CanActivateFn = () => {
       if (register.data != null) {
         return true;
       }
-      return router.createUrlTree(['/business/cash-registers'], {
-        queryParams: { reason: 'open_register_required' },
-      });
+      return redirect();
     }),
-    catchError(() => of(true)),
+    catchError(() => of(redirect())),
   );
 };

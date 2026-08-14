@@ -1,26 +1,61 @@
-<section id="features" class="scroll-mt-20 py-12 sm:py-16 md:py-20 bg-white">
-  <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="text-center mb-10 sm:mb-14 md:mb-16">
-      <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-3 sm:mb-4 px-1">
-        Toutes les fonctionnalités dont vous avez besoin
+<section id="features" class="scroll-mt-24 relative overflow-hidden py-16 sm:py-20 md:py-24 bg-gradient-to-b from-white via-gray-50/80 to-white">
+  <!-- Décorations douces -->
+  <div class="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary-100/50 blur-3xl" aria-hidden="true"></div>
+  <div class="pointer-events-none absolute -bottom-20 -right-16 h-80 w-80 rounded-full bg-emerald-100/40 blur-3xl" aria-hidden="true"></div>
+
+  <div class="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="reveal mx-auto mb-12 sm:mb-16 md:mb-20 max-w-3xl text-center">
+      <p class="mb-4 text-xs sm:text-sm font-bold uppercase tracking-[0.2em] text-primary-700">
+        Fonctionnalités
+      </p>
+      <h2 class="font-serif text-3xl sm:text-4xl md:text-[2.75rem] font-bold text-gray-900 tracking-tight leading-tight mb-4 sm:mb-5">
+        Toutes les fonctionnalités
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-400">
+          dont vous avez besoin
+        </span>
       </h2>
-      <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-1">
+      <p class="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
         Une solution complète pour gérer efficacement votre clinique vétérinaire au quotidien
       </p>
     </div>
-    
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-      @for (feature of features; track feature.title) {
-        <div class="group p-6 sm:p-8 bg-gray-50 rounded-2xl hover:shadow-xl transition-all hover:-translate-y-1 min-w-0">
-          <div class="w-16 h-16 rounded-2xl {{feature.color}} flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">
-            <i class="{{feature.icon}}"></i>
-          </div>
-          <h3 class="text-xl font-bold text-gray-800 mb-3">{{feature.title}}</h3>
-          <p class="text-gray-600">{{feature.description}}</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
+      @for (feature of features; track feature.title; let i = $index) {
+      <article
+        class="reveal feature-card group relative p-6 sm:p-8 bg-white rounded-2xl sm:rounded-3xl min-w-0 border border-gray-100 shadow-sm ring-1 ring-gray-900/[0.04] hover:shadow-xl hover:border-primary-100"
+        [ngClass]="[delayClass(i), feature.ring]"
+      >
+        <div
+          class="feature-icon w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm ring-1 ring-inset ring-white/50"
+          [ngClass]="feature.color"
+        >
+          @switch (feature.icon) {
+            @case ('consultation') {
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            }
+            @case ('stock') {
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            }
+            @case ('pos') {
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            }
+            @case ('clients') {
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            }
+            @case ('reports') {
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            }
+            @case ('inventory') {
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+            }
+          }
         </div>
+        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2.5 group-hover:text-primary-800 transition-colors">
+          {{ feature.title }}
+        </h3>
+        <p class="text-gray-600 text-sm sm:text-base leading-relaxed">{{ feature.description }}</p>
+      </article>
       }
     </div>
   </div>
 </section>
-
-

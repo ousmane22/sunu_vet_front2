@@ -11,9 +11,9 @@ export type SalesPeriod = 'today' | 'week' | 'month' | 'custom';
     templateUrl: './sales-stats.component.html',
 })
 export class SalesStatsComponent {
-    statsToday = input({ amount: 0, count: 0 });
-    statsWeek = input({ amount: 0 });
-    statsMonth = input({ amount: 0 });
+    statsToday = input({ amount: 0, billed: 0, count: 0 });
+    statsWeek = input({ amount: 0, billed: 0 });
+    statsMonth = input({ amount: 0, billed: 0 });
     selectedPeriod = input<SalesPeriod>('today');
 
     periodChange = output<SalesPeriod>();

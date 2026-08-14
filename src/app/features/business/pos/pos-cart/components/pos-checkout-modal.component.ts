@@ -7,6 +7,7 @@ import { CartService } from '../../../services/cart.service';
 import { ClientService } from '../../../services/client.service';
 import { SaleService } from '../../../services/sale.service';
 import { FormatPricePipe } from '../../../../../core/pipes';
+import { calculateDiscountAmount, calculateNetAmount } from '../../../../../core/utils/format.util';
 import { PosCartClientSelectorComponent } from './pos-cart-client-selector.component';
 import type { Client, CreateSalePayload, Sale } from '../../../models';
 
@@ -165,15 +166,11 @@ export class PosCheckoutModalComponent implements OnInit, OnDestroy {
     // Computed properties
     subtotal = computed(() => this.cartService.totalAmount());
 
-    discountAmount = computed(() => {
-        const type = this.discountTypeSignal() as DiscountType | null;
-        const value = +(this.discountValueSignal() ?? 0);
-        if (!type || value <= 0) return 0;
-        if (type === 'percent') return Math.round(this.subtotal() * (value / 100));
-        return Math.min(value, this.subtotal());
-    });
+    discountAmount = computed(() =>
+        calculateDiscountAmount(this.subtotal(), this.discountTypeSignal() as DiscountType | null, +(this.discountValueSignal() ?? 0)),
+    );
 
-    netAmount = computed(() => Math.round(Math.max(0, this.subtotal() - this.discountAmount())));
+    netAmount = computed(() => calculateNetAmount(this.subtotal(), this.discountAmount()));
 
     /** En édition : on se base sur le déjà encaissé de la vente (pas le champ « montant reçu »). */
     amountPaid = computed(() => {

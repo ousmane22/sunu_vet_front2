@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { BusinessStrategyService } from '../../../../core/services/business-strategy.service';
 import { formatPrice } from '../../../../core/utils/format.util';
 import { CartService } from '../../services/cart.service';
@@ -46,14 +46,21 @@ export class PosCartComponent implements OnInit, OnDestroy {
     saleResult = signal<any | null>(null);
 
     ngOnInit(): void {
-        this.cashRegService.getCurrent().subscribe({
-            next: res => this.activeRegister.set(res.data),
-            error: () => this.activeRegister.set(null),
-        });
+        this.loadActiveRegister();
+        this.cashRegService.onChanged()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(() => this.loadActiveRegister());
 
         this.profileService.getProfile().subscribe({
             next: (res) => this.requireOpenRegister.set(res.data.settings?.require_open_register !== false),
             error: () => this.requireOpenRegister.set(true),
+        });
+    }
+
+    private loadActiveRegister(): void {
+        this.cashRegService.getCurrent(true).subscribe({
+            next: res => this.activeRegister.set(res.data),
+            error: () => this.activeRegister.set(null),
         });
     }
 

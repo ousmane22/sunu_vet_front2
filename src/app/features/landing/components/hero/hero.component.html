@@ -1,4 +1,4 @@
-<section class="relative bg-white text-gray-900 overflow-x-hidden pt-10 pb-20 sm:pt-14 sm:pb-28 md:pt-16 md:pb-32">
+<section class="relative bg-white text-gray-900 overflow-x-hidden pt-6 pb-20 sm:pb-28 md:pb-32">
   <!-- Decorative background elements -->
   <div class="absolute inset-0 z-0">
     <!-- Grid pattern -->
@@ -11,20 +11,6 @@
   </div>
 
   <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-    <!-- Header / Navbar (espacement explicite pour éviter logo + bouton collés sur mobile) -->
-    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-12 lg:mb-20 w-full">
-      <a routerLink="/" class="inline-flex shrink-0 self-center sm:self-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 rounded-lg"
-        aria-label="SunuVet — retour à l'accueil">
-        <img src="assets/images/logo_vet.png" alt="" width="160" height="80" class="h-16 lg:h-20 w-auto object-contain" role="presentation">
-      </a>
-      <nav class="flex justify-center sm:justify-end w-full sm:w-auto" aria-label="Connexion">
-        <button type="button" (click)="goToMyAccount()"
-          class="w-full sm:w-auto px-6 py-2.5 bg-white text-primary-600 font-bold rounded-xl hover:bg-primary-50 transition-colors border-2 border-primary-100 shadow-sm cursor-pointer">
-          Mon compte
-        </button>
-      </nav>
-    </header>
-
     <div class="flex flex-col lg:flex-row items-center justify-between gap-10 sm:gap-14 lg:gap-20 min-w-0">
       <!-- Left Content -->
       <div class="flex-1 min-w-0 text-center lg:text-left max-w-2xl w-full">
@@ -37,7 +23,7 @@
           Solution complète pour cliniques vétérinaires
         </div>
 
-        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-6 sm:mb-8 tracking-tight leading-[1.12] px-1">
+        <h1 class="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold mb-6 sm:mb-8 tracking-tight leading-[1.12] px-1">
           Gérez votre clinique vétérinaire
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-400"> avec excellence</span>
         </h1>
@@ -49,7 +35,7 @@
         </p>
 
         <div class="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
-          <button type="button" (click)="goToRegister()"
+          <button type="button" (click)="actions.goToRegister()"
             class="group relative px-8 sm:px-10 py-4 sm:py-5 bg-primary-600 text-white rounded-2xl font-bold text-base sm:text-lg hover:bg-primary-500 transition-all shadow-xl shadow-primary-600/30 transform hover:-translate-y-1 overflow-hidden inline-flex items-center justify-center text-center cursor-pointer border-0 w-full sm:w-auto">
             <span class="relative z-10 flex items-center justify-center gap-2">
               Essai gratuit 15 jours
@@ -59,7 +45,7 @@
               </svg>
             </span>
           </button>
-          <button type="button" (click)="openDemo()"
+          <button type="button" (click)="actions.openDemo()"
             class="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-white border-2 border-gray-200 text-gray-700 rounded-2xl font-bold text-base sm:text-lg hover:border-primary-600 hover:text-primary-600 transition-all transform hover:-translate-y-1 inline-flex items-center justify-center cursor-pointer">
             Voir la démo
           </button>

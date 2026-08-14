@@ -38,12 +38,16 @@ export interface Consultation {
 
 export interface ConsultationListResponse {
   data: Consultation[];
-  /** Absent si réponse incomplète ou ancienne API — géré côté liste. */
   meta?: {
     current_page: number;
     last_page: number;
     total: number;
     per_page: number;
+  };
+  summary?: {
+    total_amount: number;
+    total_collected?: number;
+    count: number;
   };
 }
 
