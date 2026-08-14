@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans relative overflow-hidden">
+<div class="h-dvh max-h-dvh bg-gray-50 flex flex-col md:flex-row font-sans relative overflow-hidden">
   <!-- Backdrop for mobile when sidebar is open -->
   @if (isMobile() && sidebarOpen()) {
     <div 
@@ -9,12 +9,12 @@
 
   <!-- Sidebar -->
   <aside 
-    class="bg-primary-900 text-white flex flex-col shadow-2xl transition-all duration-300 ease-in-out shrink-0 overflow-hidden z-40"
+    class="bg-primary-900 text-white flex flex-col shadow-2xl transition-all duration-300 ease-in-out shrink-0 overflow-hidden z-40 max-h-dvh"
     [ngClass]="[
-      isMobile() ? 'fixed inset-y-0 left-0 h-full' : 'relative h-screen',
+      isMobile() ? 'fixed inset-y-0 left-0 h-dvh' : 'relative h-dvh',
       sidebarOpen() ? 'w-64 translate-x-0' : 'w-20 -translate-x-full md:translate-x-0'
     ]">
-    <div class="h-20 flex items-center justify-center border-b border-primary-800 px-6 shrink-0 relative flex-col">
+    <div class="h-14 flex items-center justify-center border-b border-primary-800 px-4 shrink-0 relative flex-col">
       <img src="assets/images/logo_vet.png" alt="SunuVet Logo" 
         class="h-10 object-contain brightness-0 invert opacity-90 transition-all duration-300 transform"
         [ngClass]="sidebarOpen() ? 'scale-100 opacity-100' : 'scale-0 opacity-0 absolute'">
@@ -23,11 +23,11 @@
       </svg>
     </div>
     
-    <div class="flex-1 min-h-0 py-6 px-4 space-y-2 overflow-y-auto no-scrollbar">
+    <div class="flex-1 min-h-0 py-2 px-2 space-y-1 overflow-y-auto overflow-x-hidden sidebar-nav-scroll">
       @if (authService.hasPermission('view-dashboard')) {
       <a routerLink="/super-admin" routerLinkActive="bg-primary-800 text-white" [routerLinkActiveOptions]="{exact: true}" 
-        class="nav-item flex items-center text-primary-200 hover:bg-primary-800 hover:text-white rounded-xl font-medium transition-all duration-300 whitespace-nowrap"
-        [ngClass]="sidebarOpen() ? 'px-4 py-3' : 'px-0 py-3 justify-center'"
+        class="nav-item flex items-center text-sm text-primary-200 hover:bg-primary-800 hover:text-white rounded-lg font-medium transition-all duration-300 whitespace-nowrap"
+        [ngClass]="sidebarOpen() ? 'px-3 py-2' : 'px-0 py-2 justify-center'"
         [title]="!sidebarOpen() ? 'Vue d\'ensemble' : ''">
         <svg class="w-5 h-5 shrink-0" [ngClass]="sidebarOpen() ? 'mr-3' : 'mx-auto'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
@@ -36,8 +36,8 @@
       </a>
       }
       <a routerLink="/super-admin/businesses" routerLinkActive="bg-primary-800 text-white" 
-        class="nav-item flex items-center text-primary-200 hover:bg-primary-800 hover:text-white rounded-xl font-medium transition-all duration-300 whitespace-nowrap"
-        [ngClass]="sidebarOpen() ? 'px-4 py-3' : 'px-0 py-3 justify-center'"
+        class="nav-item flex items-center text-sm text-primary-200 hover:bg-primary-800 hover:text-white rounded-lg font-medium transition-all duration-300 whitespace-nowrap"
+        [ngClass]="sidebarOpen() ? 'px-3 py-2' : 'px-0 py-2 justify-center'"
         [title]="!sidebarOpen() ? 'Entreprises' : ''">
         <svg class="w-5 h-5 shrink-0" [ngClass]="sidebarOpen() ? 'mr-3' : 'mx-auto'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
@@ -45,8 +45,8 @@
         <span class="transition-opacity duration-300" [ngClass]="sidebarOpen() ? 'opacity-100' : 'opacity-0 w-0 hidden'">Entreprises</span>
       </a>
       <a routerLink="/super-admin/business-admins" routerLinkActive="bg-primary-800 text-white" 
-        class="nav-item flex items-center text-primary-200 hover:bg-primary-800 hover:text-white rounded-xl font-medium transition-all duration-300 whitespace-nowrap"
-        [ngClass]="sidebarOpen() ? 'px-4 py-3' : 'px-0 py-3 justify-center'"
+        class="nav-item flex items-center text-sm text-primary-200 hover:bg-primary-800 hover:text-white rounded-lg font-medium transition-all duration-300 whitespace-nowrap"
+        [ngClass]="sidebarOpen() ? 'px-3 py-2' : 'px-0 py-2 justify-center'"
         [title]="!sidebarOpen() ? 'Admin entreprise' : ''">
         <svg class="w-5 h-5 shrink-0" [ngClass]="sidebarOpen() ? 'mr-3' : 'mx-auto'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -55,8 +55,8 @@
       </a>
       @if (authService.hasPermission('view-revenue')) {
       <a routerLink="/super-admin/revenue" routerLinkActive="bg-primary-800 text-white" 
-        class="nav-item flex items-center text-primary-200 hover:bg-primary-800 hover:text-white rounded-xl font-medium transition-all duration-300 whitespace-nowrap"
-        [ngClass]="sidebarOpen() ? 'px-4 py-3' : 'px-0 py-3 justify-center'"
+        class="nav-item flex items-center text-sm text-primary-200 hover:bg-primary-800 hover:text-white rounded-lg font-medium transition-all duration-300 whitespace-nowrap"
+        [ngClass]="sidebarOpen() ? 'px-3 py-2' : 'px-0 py-2 justify-center'"
         [title]="!sidebarOpen() ? 'Revenu' : ''">
         <svg class="w-5 h-5 shrink-0" [ngClass]="sidebarOpen() ? 'mr-3' : 'mx-auto'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -65,8 +65,8 @@
       </a>
       }
       <a routerLink="/super-admin/settings" routerLinkActive="bg-primary-800 text-white" 
-        class="nav-item flex items-center text-primary-200 hover:bg-primary-800 hover:text-white rounded-xl font-medium transition-all duration-300 whitespace-nowrap"
-        [ngClass]="sidebarOpen() ? 'px-4 py-3' : 'px-0 py-3 justify-center'"
+        class="nav-item flex items-center text-sm text-primary-200 hover:bg-primary-800 hover:text-white rounded-lg font-medium transition-all duration-300 whitespace-nowrap"
+        [ngClass]="sidebarOpen() ? 'px-3 py-2' : 'px-0 py-2 justify-center'"
         [title]="!sidebarOpen() ? 'Paramètres' : ''">
         <svg class="w-5 h-5 shrink-0" [ngClass]="sidebarOpen() ? 'mr-3' : 'mx-auto'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
@@ -77,19 +77,21 @@
     </div>
 
     <!-- User & Logout -->
-    <div class="p-4 border-t border-primary-800 shrink-0">
-      <div class="flex items-center mb-4 transition-all duration-300" [ngClass]="sidebarOpen() ? 'space-x-3' : 'justify-center'">
-        <div class="h-10 w-10 shrink-0 rounded-full bg-primary-600 flex items-center justify-center text-white font-bold text-lg">
+    <div class="p-2 border-t border-primary-800 shrink-0">
+      @if (sidebarOpen()) {
+      <div class="flex items-center gap-2 px-2 py-1.5 mb-1.5 min-w-0">
+        <div class="h-8 w-8 shrink-0 rounded-full bg-primary-600 flex items-center justify-center text-white font-bold text-sm">
           {{ user()?.name?.charAt(0) | uppercase }}
         </div>
-        <div class="flex-1 min-w-0 transition-all duration-300" [ngClass]="sidebarOpen() ? 'opacity-100' : 'opacity-0 w-0 hidden'">
-          <p class="text-sm font-medium text-white truncate">{{ user()?.name }}</p>
-          <p class="text-xs text-primary-300 truncate">{{ user()?.email }}</p>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-medium text-white truncate">{{ user()?.name }}</p>
+          <p class="text-[10px] text-primary-300 truncate">{{ user()?.email }}</p>
         </div>
       </div>
+      }
       <button (click)="logout()" 
-        class="w-full flex items-center px-4 py-2 border border-primary-700 rounded-lg text-sm font-medium text-white hover:bg-primary-800 transition-colors"
-        [ngClass]="sidebarOpen() ? 'justify-center' : 'justify-center p-2'"
+        class="w-full flex items-center justify-center px-3 py-1.5 border border-primary-700 rounded-lg text-xs font-medium text-white hover:bg-primary-800 transition-colors"
+        [ngClass]="!sidebarOpen() ? 'p-2' : ''"
         [title]="!sidebarOpen() ? 'Déconnexion' : ''">
         <svg class="h-4 w-4 shrink-0 transition-all duration-300" [ngClass]="sidebarOpen() ? 'mr-2' : 'm-0'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -100,7 +102,7 @@
   </aside>
 
   <!-- Main content -->
-  <main class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto relative">
+  <main class="flex-1 flex flex-col min-w-0 h-dvh max-h-dvh overflow-y-auto relative">
     <!-- Topbar -->
     <header class="h-16 md:h-20 bg-white shadow-sm flex items-center justify-between px-4 md:px-8 z-20 sticky top-0 transition-shadow">
       <div class="flex items-center gap-2 md:gap-4">
