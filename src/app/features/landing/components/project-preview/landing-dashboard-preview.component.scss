@@ -1,0 +1,109 @@
+:host {
+  display: block;
+}
+
+.preview-shell {
+  animation: preview-float 0.9s ease-out 0.15s both;
+}
+
+.preview-shell--hero {
+  animation-delay: 0.28s;
+}
+
+.preview-viewport--section {
+  max-height: 17rem;
+}
+
+.preview-viewport--hero {
+  max-height: 19rem;
+}
+
+.preview-scale {
+  width: 132%;
+  transform: scale(0.76);
+  transform-origin: top left;
+}
+
+.preview-scale--hero {
+  width: 124%;
+  transform: scale(0.81);
+}
+
+@media (min-width: 640px) {
+  .preview-viewport--section {
+    max-height: 22rem;
+  }
+
+  .preview-viewport--hero {
+    max-height: 26rem;
+  }
+
+  .preview-scale {
+    width: 118%;
+    transform: scale(0.85);
+  }
+
+  .preview-scale--hero {
+    width: 110%;
+    transform: scale(0.91);
+  }
+}
+
+@media (min-width: 1024px) {
+  .preview-viewport--section {
+    max-height: 24rem;
+  }
+
+  .preview-viewport--hero {
+    max-height: 28rem;
+  }
+
+  .preview-scale {
+    width: 112%;
+    transform: scale(0.89);
+  }
+
+  .preview-scale--hero {
+    width: 105%;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes preview-float {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-bar {
+  animation: chart-grow 1s ease-out both;
+}
+
+@for $i from 1 through 7 {
+  .chart-bar:nth-child(#{$i}) {
+    animation-delay: #{0.08 + $i * 0.06}s;
+  }
+}
+
+@keyframes chart-grow {
+  from {
+    transform: scaleY(0.2);
+    opacity: 0.5;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preview-shell,
+  .chart-bar {
+    animation: none !important;
+  }
+}
