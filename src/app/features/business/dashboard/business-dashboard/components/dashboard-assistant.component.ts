@@ -183,7 +183,7 @@ export class DashboardAssistantComponent {
     const s = this.stats();
 
     const isDiscovery = !this.hasSeenIntro();
-    let intro = `Bonjour ${name} ! SunuVet vous répond${isDiscovery ? ' — nouvelle fonctionnalité' : ''}.\n\n`;
+    let intro = `Bonjour ${name} ! SunuVet Assistant vous répond${isDiscovery ? ' — nouvelle fonctionnalité' : ''}.\n\n`;
     intro += 'Posez une question sur vos ventes';
     if (this.isVet()) intro += ', consultations';
     intro += ' ou stock. Les réponses sont basées sur vos chiffres du jour, pas sur des estimations.';
@@ -220,7 +220,7 @@ export class DashboardAssistantComponent {
     ]);
   }
 
-  /** Son doux quand SunuVet répond. */
+  /** Son doux quand SunuVet Assistant répond. */
   private playResponseSound(): void {
     this.playChime([
       { frequency: 587.33, delay: 0, duration: 0.1, volume: 0.04 },

@@ -37,7 +37,7 @@ export class TestimonialsComponent {
       role: 'Gérante',
       business: 'Clinique des Animaux — Rufisque',
       initials: 'FS',
-      comment: 'Interface simple pour le staff, formation rapide. L’assistant IA aide déjà sur les fiches consultation.',
+      comment: 'Interface simple pour le staff, formation rapide. SunuVet Assistant aide déjà sur les fiches consultation.',
     },
   ];
 }

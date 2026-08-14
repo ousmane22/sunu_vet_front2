@@ -13,7 +13,7 @@ export class LandingAiComponent {
 
   highlights = [
     {
-      title: 'Chat SunuVet',
+      title: 'SunuVet Assistant',
       text: 'Posez vos questions sur ventes, consultations et stock — réponses basées sur vos chiffres du jour.',
     },
     {
@@ -22,7 +22,7 @@ export class LandingAiComponent {
     },
     {
       title: 'Encaissé vs facturé',
-      text: 'L’assistant distingue ce qui est payé de ce qui reste dû, comme dans vos rapports.',
+      text: 'SunuVet Assistant distingue ce qui est payé de ce qui reste dû, comme dans vos rapports.',
     },
   ];
 }

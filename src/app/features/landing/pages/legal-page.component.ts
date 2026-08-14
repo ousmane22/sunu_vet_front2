@@ -136,9 +136,9 @@ const LEGAL_CONTENT: Record<LegalPageSlug, LegalPageContent> = {
         ],
       },
       {
-        title: '4. Rapports & assistant IA',
+        title: '4. Rapports & SunuVet Assistant',
         paragraphs: [
-          'Consultez les rapports Performance, Médical et Trésorerie. Utilisez le chat SunuVet pour interroger vos indicateurs du jour.',
+          'Consultez les rapports Performance, Médical et Trésorerie. Utilisez SunuVet Assistant pour interroger vos indicateurs du jour.',
         ],
       },
       {
