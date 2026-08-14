@@ -44,15 +44,6 @@
         </svg>
         <span class="transition-opacity duration-300" [ngClass]="sidebarOpen() ? 'opacity-100' : 'opacity-0 w-0 hidden'">Entreprises</span>
       </a>
-      <a routerLink="/super-admin/business-admins" routerLinkActive="bg-primary-800 text-white" 
-        class="nav-item flex items-center text-sm text-primary-200 hover:bg-primary-800 hover:text-white rounded-lg font-medium transition-all duration-300 whitespace-nowrap"
-        [ngClass]="sidebarOpen() ? 'px-3 py-2' : 'px-0 py-2 justify-center'"
-        [title]="!sidebarOpen() ? 'Admin entreprise' : ''">
-        <svg class="w-5 h-5 shrink-0" [ngClass]="sidebarOpen() ? 'mr-3' : 'mx-auto'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-        </svg>
-        <span class="transition-opacity duration-300" [ngClass]="sidebarOpen() ? 'opacity-100' : 'opacity-0 w-0 hidden'">Admin entreprise</span>
-      </a>
       @if (authService.hasPermission('view-revenue')) {
       <a routerLink="/super-admin/revenue" routerLinkActive="bg-primary-800 text-white" 
         class="nav-item flex items-center text-sm text-primary-200 hover:bg-primary-800 hover:text-white rounded-lg font-medium transition-all duration-300 whitespace-nowrap"

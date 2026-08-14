@@ -22,6 +22,8 @@ export interface AuthResponse {
 
 import { environment } from '../../../../environments/environment';
 
+const IMPERSONATION_BACKUP_KEY = 'super_admin_impersonation_backup';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -34,6 +36,7 @@ export class AuthService {
   // State management using Signals
   currentUser = signal<User | null>(null);
   isAuthenticated = signal<boolean>(false);
+  isImpersonating = signal<boolean>(false);
 
   constructor() {
     this.checkInitialState();
@@ -48,10 +51,17 @@ export class AuthService {
         const user = JSON.parse(userStr);
         this.currentUser.set(user);
         this.isAuthenticated.set(true);
+        this.syncImpersonationState();
       } catch (e) {
         this.clearAuthData();
       }
+    } else {
+      this.syncImpersonationState();
     }
+  }
+
+  private syncImpersonationState(): void {
+    this.isImpersonating.set(!!sessionStorage.getItem(IMPERSONATION_BACKUP_KEY));
   }
 
   login(credentials: { email: string; password: string }): Observable<AuthResponse> {
@@ -104,6 +114,49 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password`, payload);
   }
 
+  /** Connexion Super Admin vers l'espace d'une entreprise. */
+  impersonateBusiness(businessId: number): Observable<AuthResponse> {
+    const token = localStorage.getItem('auth_token');
+    const userStr = localStorage.getItem('auth_user');
+
+    return this.http.post<AuthResponse>(
+      `${environment.apiUrl}/super-admin/businesses/${businessId}/impersonate`,
+      {}
+    ).pipe(
+      tap((response) => {
+        if (token && userStr) {
+          sessionStorage.setItem(IMPERSONATION_BACKUP_KEY, JSON.stringify({ token, user: userStr }));
+        }
+        this.setAuthData(response.token, response.user);
+        this.isImpersonating.set(true);
+        this.router.navigate(['/business']);
+      }),
+      catchError((error) => throwError(() => error))
+    );
+  }
+
+  /** Quitter l'impersonation et revenir au Super Admin. */
+  stopImpersonation(): void {
+    const backupStr = sessionStorage.getItem(IMPERSONATION_BACKUP_KEY);
+    if (!backupStr) {
+      this.router.navigate(['/super-admin']);
+      return;
+    }
+
+    try {
+      const backup = JSON.parse(backupStr) as { token: string; user: string | User };
+      const user = typeof backup.user === 'string' ? JSON.parse(backup.user) as User : backup.user;
+      sessionStorage.removeItem(IMPERSONATION_BACKUP_KEY);
+      this.setAuthData(backup.token, user);
+      this.isImpersonating.set(false);
+      this.router.navigate(['/super-admin']);
+    } catch {
+      sessionStorage.removeItem(IMPERSONATION_BACKUP_KEY);
+      this.clearAuthData();
+      this.router.navigate(['/login']);
+    }
+  }
+
   logout(): Observable<any> {
     const token = localStorage.getItem('auth_token');
 
@@ -115,10 +168,14 @@ export class AuthService {
 
     return request$.pipe(
       tap(() => {
+        sessionStorage.removeItem(IMPERSONATION_BACKUP_KEY);
+        this.isImpersonating.set(false);
         this.clearAuthData();
         this.router.navigate(['/login']);
       }),
       catchError(error => {
+        sessionStorage.removeItem(IMPERSONATION_BACKUP_KEY);
+        this.isImpersonating.set(false);
         // Even if the backend call fails, clear local state
         this.clearAuthData();
         this.router.navigate(['/login']);
@@ -132,13 +189,16 @@ export class AuthService {
     localStorage.setItem('auth_user', JSON.stringify(user));
     this.currentUser.set(user);
     this.isAuthenticated.set(true);
+    this.syncImpersonationState();
   }
 
   private clearAuthData() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
+    sessionStorage.removeItem(IMPERSONATION_BACKUP_KEY);
     this.currentUser.set(null);
     this.isAuthenticated.set(false);
+    this.isImpersonating.set(false);
   }
 
   /** Rafraîchit les données de l'utilisateur depuis le backend. */

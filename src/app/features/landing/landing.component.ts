@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HeroComponent } from './components/hero/hero.component';
 import { LandingNavComponent } from './components/landing-nav/landing-nav.component';
@@ -10,7 +10,6 @@ import { TestimonialsComponent } from './components/testimonials/testimonials.co
 import { CtaComponent } from './components/cta/cta.component';
 import { DemoModalComponent } from './components/demo-modal/demo-modal.component';
 import { ContactModalComponent } from './components/contact-modal/contact-modal.component';
-import { LandingService } from './services/landing.service';
 
 @Component({
   selector: 'app-landing',
@@ -31,12 +30,4 @@ import { LandingService } from './services/landing.service';
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
 })
-export class LandingComponent implements OnInit {
-  private landingService = inject(LandingService);
-
-  ngOnInit(): void {
-    this.landingService.trackVisit().subscribe({
-      error: (err) => console.error('Error tracking visit', err),
-    });
-  }
-}
+export class LandingComponent {}

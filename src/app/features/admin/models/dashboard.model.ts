@@ -1,26 +1,33 @@
 export interface DashboardStats {
-    active_businesses: number;
-    pending_businesses: number;
-    total_users: number;
-    total_visits: number;
-    unique_visitors: number;
-    monthly_revenue: number;
-    recent_visits: SiteVisit[];
+  active_businesses: number;
+  pending_businesses: number;
+  total_users: number;
+  monthly_revenue: number;
+  yearly_revenue: number;
+  revenue_last_7_days: DashboardRevenueDay[];
+  businesses_growth: DashboardBusinessGrowthMonth[];
+  recent_businesses: RecentBusiness[];
 }
 
-export interface SiteVisit {
-    id: number;
-    ip_address: string;
-    user_agent: string;
-    path: string;
-    referer: string;
-    created_at: string;
+export interface DashboardRevenueDay {
+  date: string;
+  label: string;
+  amount: number;
+}
+
+export interface DashboardBusinessGrowthMonth {
+  month: string;
+  label: string;
+  count: number;
+}
+
+export interface RecentBusiness {
+  id: number;
+  name: string;
+  is_active: boolean;
+  created_at: string;
 }
 
 export interface StatsResponse {
-    data: DashboardStats;
+  data: DashboardStats;
 }
-
-
-
-

@@ -1,42 +1,93 @@
-<div class="max-w-2xl">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 class="text-base font-bold text-gray-900 mb-5">Coordonnées</h3>
-        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-            <div>
-                <dt class="text-xs font-semibold uppercase text-gray-400 mb-0.5">Nom</dt>
-                <dd class="text-gray-900 font-medium">{{ business().name }}</dd>
-            </div>
-            <div>
-                <dt class="text-xs font-semibold uppercase text-gray-400 mb-0.5">Email</dt>
-                <dd>
-                    <a href="mailto:{{ business().email }}" class="text-primary-600 hover:underline">{{ business().email }}</a>
-                </dd>
-            </div>
-            <div>
-                <dt class="text-xs font-semibold uppercase text-gray-400 mb-0.5">Téléphone</dt>
-                <dd class="text-gray-900 font-medium">{{ business().phone || '—' }}</dd>
-            </div>
-            <div>
-                <dt class="text-xs font-semibold uppercase text-gray-400 mb-0.5">Statut</dt>
-                <dd>
-                    @if (business().is_active) {
-                        <span class="text-green-700 font-semibold">✓ Active</span>
-                    } @else {
-                        <span class="text-red-600 font-semibold">✗ Désactivée</span>
-                    }
-                </dd>
-            </div>
-            <div class="sm:col-span-2">
-                <dt class="text-xs font-semibold uppercase text-gray-400 mb-0.5">Adresse</dt>
-                <dd class="text-gray-900 font-medium">{{ business().address }}, {{ business().city }}, {{ business().country }}</dd>
-            </div>
-            <div>
-                <dt class="text-xs font-semibold uppercase text-gray-400 mb-0.5">Créée le</dt>
-                <dd class="text-gray-900 font-medium">{{ business().created_at | date:'dd MMMM yyyy' }}</dd>
-            </div>
-        </dl>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+  <!-- Coordonnées principales -->
+  <section class="lg:col-span-2 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+    <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/60">
+      <h2 class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Coordonnées</h2>
+      <p class="text-sm font-semibold text-gray-900 mt-0.5">Informations générales</p>
     </div>
+    <dl class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="rounded-xl bg-gray-50 p-4">
+        <dt class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Nom</dt>
+        <dd class="text-sm font-semibold text-gray-900">{{ business().name }}</dd>
+      </div>
+      <div class="rounded-xl bg-gray-50 p-4">
+        <dt class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Email</dt>
+        <dd>
+          <a href="mailto:{{ business().email }}" class="text-sm font-semibold text-primary-700 hover:underline break-all">
+            {{ business().email }}
+          </a>
+        </dd>
+      </div>
+      <div class="rounded-xl bg-gray-50 p-4">
+        <dt class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Téléphone</dt>
+        <dd class="text-sm font-semibold text-gray-900">{{ business().phone || '—' }}</dd>
+      </div>
+      <div class="rounded-xl bg-gray-50 p-4">
+        <dt class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Type</dt>
+        <dd class="text-sm font-semibold text-gray-900">
+          @if (business().business_type === 'veterinary') {
+            Clinique vétérinaire
+          } @else if (business().business_type === 'retail') {
+            Pharmacie
+          } @else {
+            {{ business().business_type || '—' }}
+          }
+        </dd>
+      </div>
+      <div class="sm:col-span-2 rounded-xl bg-gray-50 p-4">
+        <dt class="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Adresse</dt>
+        <dd class="text-sm font-semibold text-gray-900">
+          {{ business().address || '—' }}, {{ business().city || '—' }}, {{ business().country || '—' }}
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- Panneau latéral -->
+  <aside class="space-y-4">
+    <div class="rounded-2xl border border-gray-100 bg-white shadow-sm p-5">
+      <h3 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-3">Statut plateforme</h3>
+      @if (business().is_active) {
+      <div class="flex items-start gap-3 rounded-xl bg-emerald-50 border border-emerald-100 p-4">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-emerald-900">Entreprise active</p>
+          <p class="text-xs text-emerald-700/80 mt-0.5">Accès autorisé à l'espace métier.</p>
+        </div>
+      </div>
+      } @else {
+      <div class="flex items-start gap-3 rounded-xl bg-amber-50 border border-amber-100 p-4">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-amber-900">En attente de validation</p>
+          <p class="text-xs text-amber-700/80 mt-0.5">Activez l'entreprise depuis la liste.</p>
+        </div>
+      </div>
+      }
+    </div>
+
+    <div class="rounded-2xl border border-gray-100 bg-white shadow-sm p-5">
+      <h3 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-3">Historique</h3>
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between gap-2">
+          <span class="text-gray-500">Inscription</span>
+          <span class="font-semibold text-gray-900">{{ business().created_at | date:'dd/MM/yyyy' }}</span>
+        </div>
+        @if (business().is_on_trial && business().trial_days_remaining != null) {
+        <div class="flex justify-between gap-2">
+          <span class="text-gray-500">Essai restant</span>
+          <span class="font-semibold text-amber-700">{{ business().trial_days_remaining }} jour(s)</span>
+        </div>
+        }
+      </div>
+    </div>
+  </aside>
 </div>
-
-
-

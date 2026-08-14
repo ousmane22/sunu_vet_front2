@@ -1,8 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { Business, PaginatedResponse, Subscription, SubscriptionPayment, SubscriptionPlan, User } from '../models';
+
+interface BusinessesApiResponse {
+  data: Business[];
+  meta: {
+    current_page: number;
+    last_page: number;
+    total: number;
+  };
+}
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +25,15 @@ export class BusinessService {
 
   getBusinesses(page = 1, perPage = 15): Observable<PaginatedResponse<Business>> {
     const params = new HttpParams().set('page', page).set('per_page', perPage);
-    return this.http.get<PaginatedResponse<Business>>(this.apiUrl, { params });
+    return this.http.get<BusinessesApiResponse>(this.apiUrl, { params }).pipe(
+      map((res) => ({
+        data: res.data ?? [],
+        current_page: res.meta?.current_page ?? page,
+        last_page: res.meta?.last_page ?? 1,
+        total: res.meta?.total ?? res.data?.length ?? 0,
+        per_page: perPage,
+      }))
+    );
   }
 
   getBusinessDetails(id: number): Observable<{ data: Business }> {
