@@ -53,9 +53,45 @@ export class InventorySessionComponent implements OnInit {
     return Object.keys(counts).length > 0;
   });
 
+  uncountedLinesCount = computed(() => {
+    const s = this.session();
+    if (!s?.lines || s.status !== 'in_progress') return 0;
+    const counts = this.editedCounts();
+    return s.lines.filter((line) => {
+      const edited = counts[line.id];
+      const value = edited !== undefined ? edited : line.quantity_counted;
+      return value === null || value === undefined;
+    }).length;
+  });
+
   canComplete = computed(() => {
     const s = this.session();
     return s?.status === 'in_progress' && this.authService.hasPermission('stock.inventory.validate');
+  });
+
+  totalLines = computed(() => this.session()?.lines?.length ?? 0);
+
+  countedLinesCount = computed(() => {
+    const s = this.session();
+    if (!s?.lines) return 0;
+    const counts = this.editedCounts();
+    return s.lines.filter((line) => {
+      const edited = counts[line.id];
+      const value = edited !== undefined ? edited : line.quantity_counted;
+      return value !== null && value !== undefined;
+    }).length;
+  });
+
+  progressPercent = computed(() => {
+    const total = this.totalLines();
+    if (total === 0) return 0;
+    return Math.round((this.countedLinesCount() / total) * 100);
+  });
+
+  linesWithDifference = computed(() => {
+    const s = this.session();
+    if (!s?.lines) return 0;
+    return s.lines.filter((l) => l.quantity_difference != null && l.quantity_difference !== 0).length;
   });
 
   showDifferenceColumn(s: InventorySession): boolean {
@@ -144,9 +180,21 @@ export class InventorySessionComponent implements OnInit {
       return;
     }
 
+    const uncounted = this.uncountedLinesCount();
+    let treatUncountedAsZero = false;
+    if (uncounted > 0) {
+      const confirmed = confirm(
+        `${uncounted} produit(s) non compté(s) seront enregistrés à 0. Confirmer la validation ?`
+      );
+      if (!confirmed) return;
+      treatUncountedAsZero = true;
+    } else if (!confirm('Valider l\'inventaire et appliquer les écarts au stock ?')) {
+      return;
+    }
+
     this.isCompleting.set(true);
     this.error.set(null);
-    this.inventoryService.complete(s.id).subscribe({
+    this.inventoryService.complete(s.id, { treat_uncounted_as_zero: treatUncountedAsZero }).subscribe({
       next: () => {
         this.isCompleting.set(false);
         this.load(s.id);
@@ -174,10 +222,10 @@ export class InventorySessionComponent implements OnInit {
 
   diffClass(line: InventoryLine): string {
     const d = line.quantity_difference;
-    if (d == null) return '';
-    if (d > 0) return 'text-emerald-600 font-semibold';
-    if (d < 0) return 'text-red-600 font-semibold';
-    return 'text-slate-500';
+    if (d == null) return 'text-slate-700';
+    if (d > 0) return 'text-emerald-700 font-black';
+    if (d < 0) return 'text-red-700 font-black';
+    return 'text-slate-800 font-bold';
   }
 
   statusLabel(status: string): string {

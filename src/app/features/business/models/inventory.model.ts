@@ -28,6 +28,8 @@ export interface InventorySession {
   business_id: number;
   user_id: number;
   user?: InventorySessionUser;
+  validated_by?: number | null;
+  validator?: InventorySessionUser;
   status: InventorySessionStatus;
   started_at: string;
   completed_at: string | null;

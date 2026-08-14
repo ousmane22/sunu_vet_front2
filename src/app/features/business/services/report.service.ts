@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { TreasuryReport, StockReport, MedicalReport, DebtsReport, PerformanceReport, StockAnalyticalReport } from '../models/report.model';
+import { TreasuryReport, StockReport, MedicalReport, DebtsReport, PerformanceReport, StockAnalyticalReportResponse } from '../models/report.model';
 
 @Injectable({
     providedIn: 'root'
@@ -21,14 +21,24 @@ export class ReportService {
             .pipe(map(res => res.data));
     }
 
-    getStockAnalytical(params: { period?: string; start_date?: string; end_date?: string; product_id?: number } = {}): Observable<StockAnalyticalReport> {
-        const p: Record<string, string | number> = {};
+    getStockAnalytical(params: {
+        period?: string;
+        start_date?: string;
+        end_date?: string;
+        product_id?: number;
+        page?: number;
+        per_page?: number;
+        all?: boolean;
+    } = {}): Observable<StockAnalyticalReportResponse> {
+        const p: Record<string, string | number | boolean> = {};
         if (params.period != null) p['period'] = params.period;
         if (params.start_date) p['start_date'] = params.start_date;
         if (params.end_date) p['end_date'] = params.end_date;
         if (params.product_id != null && params.product_id > 0) p['product_id'] = params.product_id;
-        return this.http.get<{ data: StockAnalyticalReport }>(`${this.apiBase}/stock-analytical`, { params: p })
-            .pipe(map(res => res.data));
+        if (params.page != null) p['page'] = params.page;
+        if (params.per_page != null) p['per_page'] = params.per_page;
+        if (params.all) p['all'] = 1;
+        return this.http.get<StockAnalyticalReportResponse>(`${this.apiBase}/stock-analytical`, { params: p });
     }
 
     getMedical(params: any = {}): Observable<MedicalReport> {

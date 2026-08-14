@@ -18,7 +18,7 @@ export const VETERINARY_STRATEGY: BusinessStrategy = {
     productCategory: 'Catégorie',
     consultations: 'Consultations'
   },
-  visibleMenus: ['Point de vente', 'Historique Ventes', 'Paiements', 'Gestion Caisses', 'Devis & Proformas', 'Clients', 'Consultations', 'Médicaments', 'Catégories', 'Mouvements Stock', 'Inventaire', 'Dépenses', 'Personnel', 'Rapports', 'Paramètres'],
+  visibleMenus: ['Point de vente', 'Historique Ventes', 'Paiements', 'Gestion Caisses', 'Devis & Proformas', 'Clients', 'Consultations', 'Médicaments', 'Catégories', 'Mouvements Stock', 'Inventaire physique', 'Rapport de stock', 'Dépenses', 'Personnel', 'Rapports', 'Paramètres'],
   visibleFormFields: ['name', 'sku', 'type', 'description', 'purchase_price', 'selling_price', 'stock_quantity', 'low_stock_threshold', 'expiry_date']
 };
 
@@ -29,7 +29,7 @@ export const RETAIL_STRATEGY: BusinessStrategy = {
     productType: 'Type',
     productCategory: 'Catégorie'
   },
-  visibleMenus: ['Point de vente', 'Historique Ventes', 'Paiements', 'Gestion Caisses', 'Devis & Proformas', 'Clients', 'Médicaments', 'Catégories', 'Mouvements Stock', 'Inventaire', 'Dépenses', 'Personnel', 'Rapports', 'Paramètres'],
+  visibleMenus: ['Point de vente', 'Historique Ventes', 'Paiements', 'Gestion Caisses', 'Devis & Proformas', 'Clients', 'Médicaments', 'Catégories', 'Mouvements Stock', 'Inventaire physique', 'Rapport de stock', 'Dépenses', 'Personnel', 'Rapports', 'Paramètres'],
   visibleFormFields: ['name', 'sku', 'category', 'unit', 'allow_fractional_quantity', 'description', 'purchase_price', 'selling_price', 'stock_quantity', 'low_stock_threshold', 'expiry_date']
 };
 
@@ -40,6 +40,6 @@ export const RESTAURANT_STRATEGY: BusinessStrategy = {
     productType: 'Type',
     productCategory: 'Catégorie'
   },
-  visibleMenus: ['Point de vente', 'Historique Ventes', 'Paiements', 'Gestion Caisses', 'Devis & Proformas', 'Clients', 'Médicaments', 'Catégories', 'Mouvements Stock', 'Inventaire', 'Dépenses', 'Personnel', 'Rapports', 'Paramètres'],
+  visibleMenus: ['Point de vente', 'Historique Ventes', 'Paiements', 'Gestion Caisses', 'Devis & Proformas', 'Clients', 'Médicaments', 'Catégories', 'Mouvements Stock', 'Inventaire physique', 'Rapport de stock', 'Dépenses', 'Personnel', 'Rapports', 'Paramètres'],
   visibleFormFields: ['name', 'sku', 'category', 'description', 'purchase_price', 'selling_price', 'stock_quantity', 'low_stock_threshold', 'expiry_date']
 };

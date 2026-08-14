@@ -31,10 +31,26 @@ export interface StockAnalyticalLine {
     valeur_stock: number;
 }
 
+export interface StockAnalyticalTotals {
+    quantity_stock: number;
+    valeur_stock: number;
+}
+
 export interface StockAnalyticalReport {
     period: { start: string; end: string };
     period_type: string;
     lines: StockAnalyticalLine[];
+    totals?: StockAnalyticalTotals;
+}
+
+export interface StockAnalyticalReportResponse {
+    data: StockAnalyticalReport;
+    meta: {
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
 }
 
 export interface MedicalReport {

@@ -60,8 +60,11 @@ export const BUSINESS_ROUTES: Routes = [
       },
       {
         path: 'inventory',
-        redirectTo: 'stock-report',
-        pathMatch: 'full',
+        title: 'Inventaire physique',
+        loadComponent: () =>
+          import('./inventory/inventory-list/inventory-list.component').then(
+            (m) => m.InventoryListComponent
+          ),
       },
       {
         path: 'inventory/:id',

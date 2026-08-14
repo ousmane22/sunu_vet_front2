@@ -62,6 +62,9 @@ export class StockReportPageComponent implements OnInit {
   productSearchQuery = signal('');
   productDropdownOpen = signal(false);
   report = signal<StockAnalyticalReport | null>(null);
+  currentPage = signal(1);
+  lastPage = signal(1);
+  total = signal(0);
   isLoading = signal(false);
   error = signal<string | null>(null);
 
@@ -95,17 +98,9 @@ export class StockReportPageComponent implements OnInit {
     return labels[p];
   });
 
-  totalQuantityStock = computed(() => {
-    const r = this.report();
-    if (!r?.lines?.length) return 0;
-    return r.lines.reduce((sum, l) => sum + l.stock_restant, 0);
-  });
+  totalQuantityStock = computed(() => this.report()?.totals?.quantity_stock ?? 0);
 
-  totalValeurStock = computed(() => {
-    const r = this.report();
-    if (!r?.lines?.length) return 0;
-    return r.lines.reduce((sum, l) => sum + l.valeur_stock, 0);
-  });
+  totalValeurStock = computed(() => this.report()?.totals?.valeur_stock ?? 0);
 
   ngOnInit(): void {
     const now = new Date();
@@ -129,18 +124,18 @@ export class StockReportPageComponent implements OnInit {
     const { start, end } = periodRange(p);
     this.startDate.set(start);
     this.endDate.set(end);
-    this.load();
+    this.load(1);
   }
 
   applyCustomDates(): void {
     const start = this.startDate();
     const end = this.endDate();
     this.period.set(null);
-    if (start && end) this.load();
+    if (start && end) this.load(1);
   }
 
   onProductChange(): void {
-    this.load();
+    this.load(1);
   }
 
   openProductDropdown(): void {
@@ -156,14 +151,14 @@ export class StockReportPageComponent implements OnInit {
     this.productId.set(p?.id ?? null);
     this.productSearchQuery.set('');
     this.productDropdownOpen.set(false);
-    this.load();
+    this.load(1);
   }
 
   onProductComboboxBlur(): void {
     setTimeout(() => this.closeProductDropdown(), 150);
   }
 
-  load(): void {
+  load(page: number = this.currentPage()): void {
     const start = this.startDate();
     const end = this.endDate();
     if (!start || !end) {
@@ -176,12 +171,26 @@ export class StockReportPageComponent implements OnInit {
     }
     this.isLoading.set(true);
     this.error.set(null);
-    const params: { start_date: string; end_date: string; product_id?: number } = { start_date: start, end_date: end };
+    const params: {
+      start_date: string;
+      end_date: string;
+      product_id?: number;
+      page: number;
+      per_page: number;
+    } = {
+      start_date: start,
+      end_date: end,
+      page,
+      per_page: PAGINATION.DEFAULT,
+    };
     const pid = this.productId();
     if (pid != null && pid > 0) params.product_id = pid;
     this.reportService.getStockAnalytical(params).subscribe({
-      next: (data) => {
-        this.report.set(data);
+      next: (res) => {
+        this.report.set(res.data);
+        this.currentPage.set(res.meta.current_page);
+        this.lastPage.set(res.meta.last_page);
+        this.total.set(res.meta.total);
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -191,13 +200,54 @@ export class StockReportPageComponent implements OnInit {
     });
   }
 
+  private buildReportParams(options?: { page?: number; perPage?: number; all?: boolean }) {
+    const params: {
+      start_date: string;
+      end_date: string;
+      product_id?: number;
+      page?: number;
+      per_page?: number;
+      all?: boolean;
+    } = {
+      start_date: this.startDate(),
+      end_date: this.endDate(),
+    };
+    const pid = this.productId();
+    if (pid != null && pid > 0) params.product_id = pid;
+    if (options?.all) {
+      params.all = true;
+      return params;
+    }
+    params.page = options?.page ?? 1;
+    params.per_page = options?.perPage ?? PAGINATION.DEFAULT;
+    return params;
+  }
+
   trackByProductId(_: number, line: StockAnalyticalLine): number {
     return line.product_id;
   }
 
   exportPdf(): void {
-    const r = this.report();
-    if (!r?.lines?.length) return;
+    this.reportService.getStockAnalytical({ ...this.buildReportParams({ all: true }) }).subscribe((res) => {
+      const r = res.data;
+      if (!r?.lines?.length) return;
+      this.generatePdf(r, r.totals?.quantity_stock ?? 0, r.totals?.valeur_stock ?? 0);
+    });
+  }
+
+  exportExcel(): void {
+    this.reportService.getStockAnalytical({ ...this.buildReportParams({ all: true }) }).subscribe((res) => {
+      const r = res.data;
+      if (!r?.lines?.length) return;
+      this.generateExcel(r, r.totals?.quantity_stock ?? 0, r.totals?.valeur_stock ?? 0);
+    });
+  }
+
+  private generatePdf(
+    r: StockAnalyticalReport,
+    totalQty: number,
+    totalVal: number
+  ): void {
     const pdfPrice = (v: number) => formatPrice(v).replace(/\u202f/g, ' ');
     const doc = new jsPDF();
     doc.setFontSize(14);
@@ -228,15 +278,17 @@ export class StockReportPageComponent implements OnInit {
     doc.text('Totaux', 14, y);
     y += 6;
     doc.setFont('helvetica', 'normal');
-    doc.text(`Quantité totale en stock : ${this.totalQuantityStock()}`, 14, y);
+    doc.text(`Quantité totale en stock : ${totalQty}`, 14, y);
     y += 6;
-    doc.text(`Valeur totale du stock : ${pdfPrice(this.totalValeurStock())}`, 14, y);
+    doc.text(`Valeur totale du stock : ${pdfPrice(totalVal)}`, 14, y);
     doc.save(`inventaire_analytique_${r.period.start.slice(0, 10)}_${r.period.end.slice(0, 10)}.pdf`);
   }
 
-  exportExcel(): void {
-    const r = this.report();
-    if (!r?.lines?.length) return;
+  private generateExcel(
+    r: StockAnalyticalReport,
+    totalQty: number,
+    totalVal: number
+  ): void {
     const rows: (string | number)[][] = [
       ['Produit', 'On avait', 'Acheté', 'Vendu', 'Il reste', 'Prix achat', 'Valeur stock'],
       ...r.lines.map((l) => [
@@ -250,8 +302,8 @@ export class StockReportPageComponent implements OnInit {
       ]),
       [],
       ['Indicateur', 'Valeur'],
-      ['Quantité totale en stock', this.totalQuantityStock()],
-      ['Valeur totale du stock (FCFA)', this.totalValeurStock()],
+      ['Quantité totale en stock', totalQty],
+      ['Valeur totale du stock (FCFA)', totalVal],
     ];
     const ws = XLSX.utils.aoa_to_sheet(rows);
     const wb = XLSX.utils.book_new();

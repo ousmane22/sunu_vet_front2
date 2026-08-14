@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { InventoryService } from '../../services/inventory.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import type { InventorySession } from '../../models';
@@ -13,13 +13,21 @@ import type { InventorySession } from '../../models';
 })
 export class InventoryListComponent implements OnInit {
   private inventoryService = inject(InventoryService);
+  private router = inject(Router);
   authService = inject(AuthService);
+
+  readonly statusOptions = [
+    { value: '', label: 'Tous' },
+    { value: 'in_progress', label: 'En cours' },
+    { value: 'completed', label: 'Terminés' },
+    { value: 'cancelled', label: 'Annulés' },
+  ] as const;
 
   sessions = signal<InventorySession[]>([]);
   isLoading = signal(true);
   isStarting = signal(false);
   error = signal<string | null>(null);
-  statusFilter = signal<string>('');
+  statusFilter = signal('');
   currentPage = signal(1);
   lastPage = signal(1);
   total = signal(0);
@@ -55,7 +63,7 @@ export class InventoryListComponent implements OnInit {
         this.isLoading.set(false);
       },
       error: (err) => {
-        this.error.set(err.error?.message ?? 'Erreur lors du chargement.');
+        this.error.set(this.extractErrorMessage(err));
         this.isLoading.set(false);
       },
     });
@@ -68,10 +76,14 @@ export class InventoryListComponent implements OnInit {
     this.inventoryService.start().subscribe({
       next: (res) => {
         this.isStarting.set(false);
+        if (res.data?.id) {
+          this.router.navigate(['/business/inventory', res.data.id]);
+          return;
+        }
         this.load(1);
       },
       error: (err) => {
-        this.error.set(err.error?.message ?? 'Impossible de démarrer l\'inventaire.');
+        this.error.set(this.extractErrorMessage(err) ?? 'Impossible de démarrer l\'inventaire.');
         this.isStarting.set(false);
         if (err.error?.message?.includes('déjà en cours')) {
           this.statusFilter.set('');
@@ -81,8 +93,13 @@ export class InventoryListComponent implements OnInit {
     });
   }
 
-  onFilterChange(): void {
+  setStatusFilter(value: string): void {
+    this.statusFilter.set(value);
     this.load(1);
+  }
+
+  formatSessionId(id: number): string {
+    return `#${id.toString().padStart(5, '0')}`;
   }
 
   statusLabel(status: string): string {
@@ -105,5 +122,11 @@ export class InventoryListComponent implements OnInit {
 
   can(perm: string): boolean {
     return this.authService.hasPermission(perm);
+  }
+
+  private extractErrorMessage(err: { error?: { message?: string; errors?: Record<string, string[]> } }): string {
+    const errors = err.error?.errors;
+    if (errors?.['status']?.[0]) return errors['status'][0];
+    return err.error?.message ?? 'Erreur lors du chargement.';
   }
 }
