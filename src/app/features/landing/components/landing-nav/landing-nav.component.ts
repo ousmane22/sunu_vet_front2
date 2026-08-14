@@ -1,4 +1,12 @@
-import { Component, inject, signal, HostListener } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  HostListener,
+  ElementRef,
+  AfterViewInit,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LandingActionsService } from '../../services/landing-actions.service';
@@ -9,14 +17,39 @@ import { LandingActionsService } from '../../services/landing-actions.service';
   imports: [CommonModule, RouterLink],
   templateUrl: './landing-nav.component.html',
 })
-export class LandingNavComponent {
+export class LandingNavComponent implements AfterViewInit, OnDestroy {
   actions = inject(LandingActionsService);
+  private host = inject(ElementRef<HTMLElement>);
+
   menuOpen = signal(false);
   scrolled = signal(false);
 
+  private scrollRoot: HTMLElement | null = null;
+  private readonly onScrollRoot = (): void => this.syncScrollState();
+
+  ngAfterViewInit(): void {
+    this.scrollRoot = this.host.nativeElement.closest('app-landing');
+    this.scrollRoot?.addEventListener('scroll', this.onScrollRoot, { passive: true });
+    this.syncScrollState();
+  }
+
+  ngOnDestroy(): void {
+    this.scrollRoot?.removeEventListener('scroll', this.onScrollRoot);
+  }
+
   @HostListener('window:scroll')
-  onScroll(): void {
-    this.scrolled.set(window.scrollY > 24);
+  onWindowScroll(): void {
+    this.syncScrollState();
+  }
+
+  private syncScrollState(): void {
+    const y = this.scrollRoot?.scrollTop ?? window.scrollY;
+    this.scrolled.set(y > 24);
+  }
+
+  scrollToSection(sectionId: string, event: Event): void {
+    this.actions.scrollToSection(sectionId, event);
+    this.closeMenu();
   }
 
   closeMenu(): void {

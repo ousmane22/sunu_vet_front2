@@ -67,9 +67,9 @@
       <div>
         <h4 class="text-white font-semibold mb-4">Produit</h4>
         <ul class="space-y-2 text-sm">
-          <li><a href="/#features" class="hover:text-white transition">Fonctionnalités</a></li>
-          <li><a href="/#assistant-ia" class="hover:text-white transition">SunuVet Assistant</a></li>
-          <li><a href="/#tarifs" class="hover:text-white transition">Tarifs</a></li>
+          <li><a href="/#features" (click)="actions.scrollToSection('features', $event)" class="hover:text-white transition no-underline">Fonctionnalités</a></li>
+          <li><a href="/#assistant-ia" (click)="actions.scrollToSection('assistant-ia', $event)" class="hover:text-white transition no-underline">SunuVet Assistant</a></li>
+          <li><a href="/#tarifs" (click)="actions.scrollToSection('tarifs', $event)" class="hover:text-white transition no-underline">Tarifs</a></li>
           <li><button type="button" (click)="actions.openDemo()" class="hover:text-white transition text-left w-full bg-transparent border-none cursor-pointer font-inherit p-0">Démo</button></li>
         </ul>
       </div>

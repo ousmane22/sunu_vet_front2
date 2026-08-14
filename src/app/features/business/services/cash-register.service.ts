@@ -25,7 +25,7 @@ export class CashRegisterService {
     private readonly changed$ = new Subject<void>();
 
     getCurrent(forceRefresh = false): Observable<CashRegisterSingleResponse> {
-        if (forceRefresh) this.invalidateCurrent();
+        if (forceRefresh) this.current$ = null;
         if (!this.current$) {
             this.current$ = this.http
                 .get<CashRegisterSingleResponse>(`${this.apiBase}/current`)

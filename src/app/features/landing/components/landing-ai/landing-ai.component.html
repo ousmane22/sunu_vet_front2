@@ -1,12 +1,12 @@
 <section id="assistant-ia" class="scroll-mt-24 py-12 sm:py-16 md:py-20 bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 text-white overflow-hidden relative">
   <div class="absolute inset-0 opacity-20 pointer-events-none" aria-hidden="true">
-    <div class="absolute -top-20 -right-20 w-80 h-80 bg-primary-400 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-0 left-0 w-96 h-96 bg-teal-300 rounded-full blur-3xl"></div>
+    <div class="ai-orb absolute -top-20 -right-20 w-80 h-80 bg-primary-400 rounded-full blur-3xl"></div>
+    <div class="ai-orb ai-orb--slow absolute bottom-0 left-0 w-96 h-96 bg-teal-300 rounded-full blur-3xl"></div>
   </div>
 
   <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-      <div>
+      <div class="reveal">
         <p class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-sm font-bold text-primary-100 mb-5">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           Nouveauté
@@ -36,10 +36,10 @@
       </div>
 
       <div class="space-y-4">
-        @for (item of highlights; track item.title) {
-        <div class="rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 p-5 sm:p-6">
+        @for (item of highlights; track item.title; let i = $index) {
+        <div class="reveal highlight-card rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 p-5 sm:p-6 {{ delayClass(i) }}">
           <h3 class="font-bold text-lg mb-2 flex items-center gap-2">
-            <svg class="w-5 h-5 text-emerald-300 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="w-5 h-5 text-emerald-300 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
             </svg>
             {{ item.title }}
@@ -48,9 +48,60 @@
         </div>
         }
 
-        <div class="rounded-2xl bg-black/20 border border-white/10 p-4 font-mono text-sm text-primary-50/90">
-          <p class="text-primary-200 text-xs uppercase tracking-wider mb-2">Exemple</p>
-          <p>« Quel est mon encaissé aujourd’hui ? » → SunuVet Assistant répond à partir de vos ventes et consultations réelles.</p>
+        <div class="ai-chat-panel rounded-2xl bg-white text-gray-900 overflow-hidden border border-white/20" aria-label="Démonstration animée de SunuVet Assistant">
+          <div class="px-4 py-3 border-b border-gray-100 flex items-center gap-3 bg-white">
+            <div class="ai-chat-icon w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-white" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true">
+                <ellipse cx="22" cy="18" rx="8" ry="10" opacity="0.9"/>
+                <ellipse cx="42" cy="18" rx="8" ry="10" opacity="0.9"/>
+                <circle cx="32" cy="36" r="18"/>
+                <circle cx="24" cy="34" r="2.5" fill="white"/>
+                <circle cx="40" cy="34" r="2.5" fill="white"/>
+                <ellipse cx="32" cy="42" rx="4" ry="3" fill="white" opacity="0.85"/>
+              </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-bold text-gray-900 leading-tight">SunuVet Assistant</p>
+              <p class="text-xs text-gray-500 truncate">En ligne · données de votre clinique</p>
+            </div>
+            <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Live
+            </span>
+          </div>
+
+          <div class="p-4 space-y-3 min-h-[11.5rem] bg-gray-50/80">
+            @if (sectionVisible()) {
+              <div class="flex justify-end ai-bubble-enter">
+                <div class="max-w-[88%] rounded-2xl rounded-br-md bg-primary-700 text-white px-3.5 py-2.5 text-[13px] leading-relaxed shadow-sm">
+                  Quel est mon encaissé aujourd’hui ?
+                </div>
+              </div>
+
+              @if (chatPhase() === 1) {
+                <div class="flex ai-bubble-enter">
+                  <div class="rounded-2xl rounded-bl-md bg-white border border-gray-200 px-3.5 py-3 shadow-sm flex items-center gap-1.5">
+                    <span class="ai-dot w-2 h-2 rounded-full bg-gray-400"></span>
+                    <span class="ai-dot w-2 h-2 rounded-full bg-gray-400"></span>
+                    <span class="ai-dot w-2 h-2 rounded-full bg-gray-400"></span>
+                  </div>
+                </div>
+              }
+
+              @if (chatPhase() >= 2) {
+                <div class="flex ai-bubble-enter">
+                  <div class="max-w-[92%] rounded-2xl rounded-bl-md bg-white border border-gray-200 text-gray-900 px-3.5 py-2.5 text-[13px] leading-relaxed shadow-sm">
+                    Aujourd’hui vous avez encaissé <strong class="text-primary-700">847&nbsp;500&nbsp;F&nbsp;CFA</strong> (12 ventes).
+                    Il reste <strong class="text-amber-700">125&nbsp;000&nbsp;F&nbsp;CFA</strong> à recouvrer sur 3 consultations.
+                  </div>
+                </div>
+              }
+            } @else {
+              <div class="flex items-center justify-center min-h-[8rem] text-sm text-gray-400">
+                Démo SunuVet Assistant…
+              </div>
+            }
+          </div>
         </div>
       </div>
     </div>

@@ -49,4 +49,29 @@ export class LandingActionsService {
   openContact(): void {
     this.contactModal.open();
   }
+
+  /** Scroll vers une section de la landing (conteneur app-landing, pas window). */
+  scrollToSection(sectionId: string, event?: Event): void {
+    event?.preventDefault();
+
+    const performScroll = (): void => {
+      const target = document.getElementById(sectionId);
+      const root = document.querySelector('app-landing');
+      if (!target || !root) return;
+
+      const headerOffset = 72;
+      const top = target.getBoundingClientRect().top + root.scrollTop - headerOffset;
+      root.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    };
+
+    const onLanding = this.router.url === '/' || this.router.url.startsWith('/#');
+    if (onLanding) {
+      performScroll();
+      return;
+    }
+
+    void this.router.navigate(['/'], { fragment: sectionId }).then(() => {
+      requestAnimationFrame(() => requestAnimationFrame(performScroll));
+    });
+  }
 }

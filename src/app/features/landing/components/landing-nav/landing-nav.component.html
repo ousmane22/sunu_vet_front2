@@ -19,9 +19,9 @@
       </a>
 
       <nav class="hidden lg:flex items-center gap-8 text-sm font-semibold text-gray-700" aria-label="Navigation principale">
-        <a href="#features" class="hover:text-primary-600 transition-colors">Fonctionnalités</a>
-        <a href="#assistant-ia" class="hover:text-primary-600 transition-colors">SunuVet Assistant</a>
-        <a href="#tarifs" class="hover:text-primary-600 transition-colors">Tarifs</a>
+        <a href="#features" (click)="scrollToSection('features', $event)" class="no-underline hover:text-primary-600 transition-colors">Fonctionnalités</a>
+        <a href="#assistant-ia" (click)="scrollToSection('assistant-ia', $event)" class="no-underline hover:text-primary-600 transition-colors">SunuVet Assistant</a>
+        <a href="#tarifs" (click)="scrollToSection('tarifs', $event)" class="no-underline hover:text-primary-600 transition-colors">Tarifs</a>
         <button type="button" (click)="actions.openDemo()" class="hover:text-primary-600 transition-colors bg-transparent border-none cursor-pointer font-inherit p-0">
           Démo
         </button>
@@ -61,9 +61,9 @@
 
     @if (menuOpen()) {
     <nav class="lg:hidden pb-4 border-t border-gray-100 pt-3 space-y-1" aria-label="Navigation mobile">
-      <a href="#features" (click)="closeMenu()" class="block px-3 py-2.5 rounded-xl text-gray-800 font-semibold hover:bg-gray-50">Fonctionnalités</a>
-      <a href="#assistant-ia" (click)="closeMenu()" class="block px-3 py-2.5 rounded-xl text-gray-800 font-semibold hover:bg-gray-50">SunuVet Assistant</a>
-      <a href="#tarifs" (click)="closeMenu()" class="block px-3 py-2.5 rounded-xl text-gray-800 font-semibold hover:bg-gray-50">Tarifs</a>
+      <a href="#features" (click)="scrollToSection('features', $event)" class="block px-3 py-2.5 rounded-xl text-gray-800 font-semibold hover:bg-gray-50 no-underline">Fonctionnalités</a>
+      <a href="#assistant-ia" (click)="scrollToSection('assistant-ia', $event)" class="block px-3 py-2.5 rounded-xl text-gray-800 font-semibold hover:bg-gray-50 no-underline">SunuVet Assistant</a>
+      <a href="#tarifs" (click)="scrollToSection('tarifs', $event)" class="block px-3 py-2.5 rounded-xl text-gray-800 font-semibold hover:bg-gray-50 no-underline">Tarifs</a>
       <button type="button" (click)="actions.openDemo(); closeMenu()" class="block w-full text-left px-3 py-2.5 rounded-xl text-gray-800 font-semibold hover:bg-gray-50 bg-transparent border-none cursor-pointer">
         Démo
       </button>

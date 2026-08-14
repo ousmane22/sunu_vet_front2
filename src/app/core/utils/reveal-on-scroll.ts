@@ -1,9 +1,26 @@
-function isPartiallyVisible(el: HTMLElement): boolean {
+function findScrollRoot(el: HTMLElement): HTMLElement | null {
+  let node: HTMLElement | null = el;
+  while (node) {
+    const { overflowY } = getComputedStyle(node);
+    if (/(auto|scroll|overlay)/.test(overflowY) && node.scrollHeight > node.clientHeight) {
+      return node;
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
+
+function isPartiallyVisible(el: HTMLElement, scrollRoot: HTMLElement | null): boolean {
   const rect = el.getBoundingClientRect();
   if (rect.width <= 0 || rect.height <= 0) return false;
 
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-  return rect.bottom > 0 && rect.top < viewportHeight;
+  if (!scrollRoot) {
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    return rect.bottom > 0 && rect.top < viewportHeight;
+  }
+
+  const rootRect = scrollRoot.getBoundingClientRect();
+  return rect.bottom > rootRect.top && rect.top < rootRect.bottom;
 }
 
 function getScrollParents(root: HTMLElement): Array<HTMLElement | Window> {
@@ -35,9 +52,11 @@ export function initRevealOnScroll(root: HTMLElement): () => void {
     observer?.unobserve(el);
   };
 
+  const scrollRoot = findScrollRoot(root);
+
   const scan = () => {
     root.querySelectorAll('.reveal:not(.is-visible)').forEach((node) => {
-      if (isPartiallyVisible(node as HTMLElement)) {
+      if (isPartiallyVisible(node as HTMLElement, scrollRoot)) {
         markVisible(node);
       }
     });
@@ -69,12 +88,16 @@ export function initRevealOnScroll(root: HTMLElement): () => void {
         }
       }
     },
-    { threshold: 0.01, rootMargin: '80px 0px 80px 0px' },
+    {
+      root: scrollRoot,
+      threshold: 0.08,
+      rootMargin: scrollRoot ? '0px 0px -5% 0px' : '80px 0px 80px 0px',
+    },
   );
 
   nodes.forEach((node) => {
     observer!.observe(node);
-    if (isPartiallyVisible(node as HTMLElement)) {
+    if (isPartiallyVisible(node as HTMLElement, scrollRoot)) {
       markVisible(node);
     }
   });
