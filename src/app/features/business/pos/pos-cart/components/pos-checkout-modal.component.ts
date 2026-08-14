@@ -1,4 +1,4 @@
-import { Component, input, output, inject, signal, computed, effect, OnInit, OnDestroy } from '@angular/core';
+import { Component, input, output, inject, signal, computed, effect, untracked, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -7,7 +7,7 @@ import { CartService } from '../../../services/cart.service';
 import { ClientService } from '../../../services/client.service';
 import { SaleService } from '../../../services/sale.service';
 import { FormatPricePipe } from '../../../../../core/pipes';
-import { calculateDiscountAmount, calculateNetAmount } from '../../../../../core/utils/format.util';
+import { calculateDiscountAmount, calculateNetAmount, formatPrice } from '../../../../../core/utils/format.util';
 import { PosCartClientSelectorComponent } from './pos-cart-client-selector.component';
 import type { Client, CreateSalePayload, Sale } from '../../../models';
 
@@ -118,6 +118,9 @@ export class PosCheckoutModalComponent implements OnInit, OnDestroy {
     // local state
     isSubmitting = signal(false);
     errorMessage = signal<string | null>(null);
+    discountPanelOpen = signal(true);
+
+    readonly quickCashAmounts = [5_000, 10_000, 25_000, 50_000, 100_000, 200_000];
 
     paymentMethods = [
         { id: 'cash' as PaymentMethod, label: 'Espèces', sub: 'Liquide' },
@@ -172,7 +175,9 @@ export class PosCheckoutModalComponent implements OnInit, OnDestroy {
 
     netAmount = computed(() => calculateNetAmount(this.subtotal(), this.discountAmount()));
 
-    /** En édition : on se base sur le déjà encaissé de la vente (pas le champ « montant reçu »). */
+    isCashPayment = computed(() => this.paymentMethodSignal() === 'cash');
+
+    /** Montant saisi (ou déjà encaissé en édition). */
     amountPaid = computed(() => {
         if (this.isEditMode()) {
             return Number(this.editingSale()?.amount_paid ?? 0);
@@ -205,6 +210,26 @@ export class PosCheckoutModalComponent implements OnInit, OnDestroy {
         !this.canSubmit() || (!this.isEditMode() && this.isPartial() && !this.selectedClient())
     );
 
+    submitHint = computed((): string | null => {
+        if (!this.submitBlocked() || this.isSubmitting()) return null;
+        if (this.cartService.cart().length === 0) return 'Ajoutez au moins un article au panier.';
+        if (!this.isEditMode() && this.isPartial() && !this.selectedClient()) {
+            return 'Sélectionnez ou créez un client pour enregistrer un crédit.';
+        }
+        if (this.requireOpenRegister() && !this.activeRegister()) {
+            return 'Ouvrez une caisse pour encaisser.';
+        }
+        return null;
+    });
+
+    ctaLabel = computed((): string => {
+        if (this.isEditMode()) return 'Enregistrer les modifications';
+        if (this.isPartial()) {
+            return `Encaisser ${formatPrice(this.amountPaid())} (partiel)`;
+        }
+        return `Encaisser ${formatPrice(this.netAmount())}`;
+    });
+
     get paymentMethod(): PaymentMethod {
         return (this.form.get('payment_method')?.value ?? 'cash') as PaymentMethod;
     }
@@ -218,19 +243,55 @@ export class PosCheckoutModalComponent implements OnInit, OnDestroy {
     }
 
     constructor() {
+        /** Init à l’ouverture uniquement — pas de suivi de netAmount (évite boucles / crash navigateur). */
         effect(() => {
             if (!this.isOpen()) return;
             const sale = this.editingSale();
-            if (sale) {
-                this.applyEditingSale(sale);
-            } else {
-                // Remise ouverte par défaut (montant FCFA)
-                if (!this.form.get('discount_type')!.value) {
-                    this.form.get('discount_type')!.setValue('amount');
+            untracked(() => {
+                if (sale) {
+                    this.applyEditingSale(sale);
+                } else {
+                    if (!this.form.get('discount_type')!.value) {
+                        this.form.get('discount_type')!.setValue('amount');
+                    }
+                    this.discountPanelOpen.set(true);
+                    this.prefillExactAmount();
                 }
-                this.prefillExactAmount();
-            }
+            });
         });
+    }
+
+    @HostListener('document:keydown', ['$event'])
+    onDocumentKeydown(event: KeyboardEvent): void {
+        if (!this.isOpen() || this.isSubmitting()) return;
+
+        const target = event.target as HTMLElement | null;
+        const inField = !!target?.closest('input, textarea, select');
+
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            this.close.emit();
+            return;
+        }
+
+        if (event.key === 'Enter' && !inField && !event.shiftKey && !this.submitBlocked()) {
+            event.preventDefault();
+            this.finalizeSale();
+            return;
+        }
+
+        if (inField) return;
+
+        if (event.key === 'F1') {
+            event.preventDefault();
+            this.setPaymentMethod('cash');
+        } else if (event.key === 'F2') {
+            event.preventDefault();
+            this.setPaymentMethod('card');
+        } else if (event.key === 'F3') {
+            event.preventDefault();
+            this.setPaymentMethod('mobile_money');
+        }
     }
 
     ngOnInit() {
@@ -244,6 +305,14 @@ export class PosCheckoutModalComponent implements OnInit, OnDestroy {
             } else {
                 this.clientSearchResults.set([]);
                 this.showClientDropdown.set(false);
+            }
+        });
+
+        this.form.get('discount_value')!.valueChanges.pipe(
+            takeUntil(this.destroy$)
+        ).subscribe(() => {
+            if (this.isOpen() && !this.isEditMode()) {
+                this.prefillExactAmount();
             }
         });
     }
@@ -267,6 +336,7 @@ export class PosCheckoutModalComponent implements OnInit, OnDestroy {
         this.errorMessage.set(null);
         this.showCreateClient.set(false);
         this.showEditClientForm.set(false);
+        this.discountPanelOpen.set(true);
     }
 
     ngOnDestroy() {
@@ -388,6 +458,14 @@ export class PosCheckoutModalComponent implements OnInit, OnDestroy {
         this.form.get('amount_paid')!.setValue(this.netAmount());
     }
 
+    setQuickCashAmount(amount: number): void {
+        this.form.get('amount_paid')!.setValue(amount);
+    }
+
+    toggleDiscountPanel(): void {
+        this.discountPanelOpen.update(v => !v);
+    }
+
     setPaymentMethod(m: PaymentMethod): void {
         this.form.get('payment_method')!.setValue(m);
         if (!this.isEditMode()) {
@@ -398,6 +476,13 @@ export class PosCheckoutModalComponent implements OnInit, OnDestroy {
     setDiscountType(t: DiscountType | null): void {
         this.form.get('discount_type')!.setValue(t);
         if (!t) this.form.get('discount_value')!.setValue(0);
+        this.prefillExactAmount();
+    }
+
+    paymentMethodShortcut(id: PaymentMethod): string {
+        if (id === 'cash') return 'F1';
+        if (id === 'card') return 'F2';
+        return 'F3';
     }
 
     /** Retire une ligne du panier sans fermer le modal ni revenir au POS. */
