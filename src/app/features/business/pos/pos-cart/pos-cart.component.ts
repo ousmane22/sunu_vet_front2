@@ -41,7 +41,7 @@ export class PosCartComponent implements OnInit, OnDestroy {
     // ── État ─────────────────────────────────────────────────────────────────
     isSubmitting = signal(false);
     activeRegister = signal<CashRegister | null>(null);
-    requireOpenRegister = signal(true);
+    requireOpenRegister = signal(false);
     showPaymentModal = signal(false);
     saleResult = signal<any | null>(null);
 
@@ -52,8 +52,8 @@ export class PosCartComponent implements OnInit, OnDestroy {
             .subscribe(() => this.loadActiveRegister());
 
         this.profileService.getProfile().subscribe({
-            next: (res) => this.requireOpenRegister.set(res.data.settings?.require_open_register !== false),
-            error: () => this.requireOpenRegister.set(true),
+            next: (res) => this.requireOpenRegister.set(res.data.settings?.require_open_register === true),
+            error: () => this.requireOpenRegister.set(false),
         });
     }
 

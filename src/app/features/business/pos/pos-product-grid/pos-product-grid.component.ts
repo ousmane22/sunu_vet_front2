@@ -10,6 +10,7 @@ import { CashRegisterService } from '../../services/cash-register.service';
 import { CartService } from '../../services/cart.service';
 import { BusinessProfileService } from '../../services/business-profile.service';
 import { BusinessStrategyService } from '../../../../core/services/business-strategy.service';
+import { OpenRegisterSessionService } from '../../services/open-register-session.service';
 import { PAGINATION } from '../../../../core/config/pagination.config';
 import type { PosProduct, PosProductListResponse, CashRegister } from '../../models';
 
@@ -53,6 +54,7 @@ export class PosProductGridComponent implements OnInit {
     private destroyRef = inject(DestroyRef);
     private cartService = inject(CartService);
     private profileService = inject(BusinessProfileService);
+    registerSession = inject(OpenRegisterSessionService);
     private fb = inject(FormBuilder);
     strategyService = inject(BusinessStrategyService);
 
@@ -61,7 +63,7 @@ export class PosProductGridComponent implements OnInit {
     activeRegister = signal<CashRegister | null>(null);
     /** True une fois que getCurrent() a répondu (évite d'afficher "Caisse fermée" pendant le chargement). */
     registerChecked = signal(false);
-    requireOpenRegister = signal(true);
+    requireOpenRegister = signal(false);
 
     searchControl = this.fb.control('');
 
@@ -78,8 +80,8 @@ export class PosProductGridComponent implements OnInit {
             .subscribe(() => this.loadActiveRegister());
 
         this.profileService.getProfile().subscribe({
-            next: (res) => this.requireOpenRegister.set(res.data.settings?.require_open_register !== false),
-            error: () => this.requireOpenRegister.set(true),
+            next: (res) => this.requireOpenRegister.set(res.data.settings?.require_open_register === true),
+            error: () => this.requireOpenRegister.set(false),
         });
 
         this.loadProducts();
@@ -130,7 +132,7 @@ export class PosProductGridComponent implements OnInit {
     }
 
     addToCart(med: PosProduct): void {
-        if (this.requireOpenRegister() && !this.activeRegister()) return;
+        if (this.registerSession.shouldBlock(this.requireOpenRegister(), !!this.activeRegister(), 'pos')) return;
         if (med.stock_quantity <= 0) return;
         this.cartService.add(med);
         this.playAddSound();

@@ -1,5 +1,11 @@
 <div #posFullscreenRef class="flex flex-col h-full overflow-hidden bg-zinc-100/70">
 
+  <app-open-register-prompt
+    [open]="showRegisterPrompt()"
+    activityLabel="une vente"
+    (openRegister)="onOpenRegister()"
+  />
+
   <!-- Barre supérieure : onglets mobile + plein écran -->
   <div class="flex items-stretch border-b border-zinc-200 bg-white shrink-0 z-20">
     <div class="lg:hidden flex flex-1 min-w-0 divide-x divide-zinc-200">

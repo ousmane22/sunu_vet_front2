@@ -174,7 +174,10 @@ export class DashboardAssistantComponent {
     if (this.isVet()) {
       actions.push({ label: 'Consultation', route: ['/business/consultations'] });
     }
-    actions.push({ label: 'Ventes', route: ['/business/sales'] });
+    actions.push(
+      { label: 'Clients', route: ['/business/clients'] },
+      { label: 'Ventes', route: ['/business/sales'] },
+    );
     return actions;
   });
 

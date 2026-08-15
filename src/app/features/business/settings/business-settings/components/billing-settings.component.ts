@@ -45,9 +45,13 @@ import type { BusinessProfile } from '../../../models';
                             Exiger l'ouverture d'une caisse
                         </label>
                         <p class="mt-1 text-sm text-gray-500">
-                            Si désactivé, les vétérinaires pourront vendre et encaisser des consultations de manière
-                            flexible sans qu'une caisse physique ne soit préalablement ouverte. Les paiements seront
-                            enregistrés globalement.
+                            Si <strong>activé</strong>, une caisse doit être ouverte avant toute vente ou consultation encaissée
+                            (popup au POS et aux consultations).
+                        </p>
+                        <p class="mt-2 text-sm text-gray-500">
+                            Si <strong>désactivé</strong>, les vétérinaires peuvent vendre et encaisser des consultations sans
+                            ouvrir de caisse au préalable. Les paiements sont enregistrés dans l'historique global ; seuls
+                            les encaissements liés à une session caisse ouverte apparaissent dans le journal caisse.
                         </p>
                     </div>
                     <div class="flex items-center h-5 mt-1">

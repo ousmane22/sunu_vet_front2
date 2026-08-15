@@ -6,6 +6,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { CartService } from '../../../services/cart.service';
 import { ClientService } from '../../../services/client.service';
 import { SaleService } from '../../../services/sale.service';
+import { OpenRegisterSessionService } from '../../../services/open-register-session.service';
 import { FormatPricePipe } from '../../../../../core/pipes';
 import { calculateDiscountAmount, calculateNetAmount, formatPrice } from '../../../../../core/utils/format.util';
 import { PosCartClientSelectorComponent } from './pos-cart-client-selector.component';
@@ -100,11 +101,12 @@ export class PosCheckoutModalComponent implements OnInit, OnDestroy {
     private clientService = inject(ClientService);
     private saleService = inject(SaleService);
     cartService = inject(CartService);
+    private registerSession = inject(OpenRegisterSessionService);
     private destroy$ = new Subject<void>();
 
     // Inputs
     isOpen = input.required<boolean>();
-    requireOpenRegister = input<boolean>(true);
+    requireOpenRegister = input<boolean>(false);
     activeRegister = input<any | null>(null);
     /** Mode modification : même formulaire que la vente, appel update. */
     editingSale = input<Sale | null>(null);
@@ -200,8 +202,13 @@ export class PosCheckoutModalComponent implements OnInit, OnDestroy {
     canSubmit = computed(() => {
         if (this.isSubmitting()) return false;
         if (this.isEditMode()) return this.cartService.cart().length > 0;
+        const registerBlocked = this.registerSession.shouldBlock(
+            this.requireOpenRegister(),
+            !!this.activeRegister(),
+            'pos',
+        );
         return this.cartService.cart().length > 0
-            && (!this.requireOpenRegister() || !!this.activeRegister())
+            && !registerBlocked
             && this.amountPaid() >= 0;
     });
 
@@ -216,7 +223,7 @@ export class PosCheckoutModalComponent implements OnInit, OnDestroy {
         if (!this.isEditMode() && this.isPartial() && !this.selectedClient()) {
             return 'Sélectionnez ou créez un client pour enregistrer un crédit.';
         }
-        if (this.requireOpenRegister() && !this.activeRegister()) {
+        if (this.registerSession.shouldBlock(this.requireOpenRegister(), !!this.activeRegister(), 'pos')) {
             return 'Ouvrez une caisse pour encaisser.';
         }
         return null;

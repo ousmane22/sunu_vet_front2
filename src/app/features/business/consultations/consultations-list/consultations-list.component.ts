@@ -13,6 +13,8 @@ import { ConsultationDetailComponent } from './components/consultation-detail.co
 import { FormatPricePipe } from '../../../../core/pipes';
 import type { Consultation } from '../../models';
 import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
+import { OpenRegisterPromptComponent } from '../../../../shared/components/open-register-prompt/open-register-prompt.component';
+import { OpenRegisterPromptService } from '../../services/open-register-prompt.service';
 
 type ConsultPeriod = 'today' | 'all' | 'custom';
 
@@ -27,6 +29,7 @@ type ConsultPeriod = 'today' | 'all' | 'custom';
     ConsultationCreateModalComponent,
     ConsultationDetailComponent,
     FormatPricePipe,
+    OpenRegisterPromptComponent,
   ],
   templateUrl: './consultations-list.component.html',
 })
@@ -36,6 +39,7 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private dialog = inject(SunuDialogService);
+  private registerPrompt = inject(OpenRegisterPromptService);
   private destroy$ = new Subject<void>();
 
   private static readonly listPath = '/business/consultations';
@@ -89,8 +93,14 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
 
   selectedForPayment = signal<Consultation | null>(null);
   isSubmittingPayment = signal(false);
+  showRegisterPrompt = signal(false);
 
   ngOnInit(): void {
+    this.registerPrompt.evaluatePrompt('consultations', (open) => this.showRegisterPrompt.set(open));
+    this.registerPrompt.watchRegisterChanges('consultations', (open) => this.showRegisterPrompt.set(open))
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.registerPrompt.evaluatePrompt('consultations', (open) => this.showRegisterPrompt.set(open)));
+
     this.loadConsultations();
 
     this.filterForm.valueChanges
@@ -113,6 +123,12 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.registerPrompt.leavePage('consultations');
+  }
+
+  onOpenRegister(): void {
+    this.showRegisterPrompt.set(false);
+    this.registerPrompt.openRegisterPage('/business/consultations');
   }
 
   onPeriodChange(period: ConsultPeriod): void {

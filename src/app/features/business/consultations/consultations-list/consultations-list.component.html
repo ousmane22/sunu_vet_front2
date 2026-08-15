@@ -1,4 +1,10 @@
 <div class="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-5 md:space-y-6">
+  <app-open-register-prompt
+    [open]="showRegisterPrompt()"
+    activityLabel="une consultation"
+    (openRegister)="onOpenRegister()"
+  />
+
   <!-- En-tête -->
   <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
     <div>

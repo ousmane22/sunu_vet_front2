@@ -25,7 +25,7 @@ export const requireOpenRegisterGuard: CanActivateFn = () => {
     register: cashRegisterService.getCurrent(true),
   }).pipe(
     map(({ profile, register }) => {
-      const requireOpen = profile.data.settings?.require_open_register !== false;
+      const requireOpen = profile.data.settings?.require_open_register === true;
       if (!requireOpen) {
         return true;
       }
