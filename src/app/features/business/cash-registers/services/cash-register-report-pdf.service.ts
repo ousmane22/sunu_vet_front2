@@ -5,10 +5,12 @@ import { formatDate as formatDateUtil, formatPrice } from '../../../../core/util
 import type { CashRegister, CashTransaction } from '../../models';
 import {
     isCashRefund,
+    paymentMethodLabel,
     sumCashBusinessExpenses,
     sumCashIncome,
-    sumCashOutflows,
     sumCashRefunds,
+    sumIncomeByMethod,
+    sumPhysicalCashTheoreticalBalance,
 } from '../utils/cash-transaction.util';
 
 /** Remplace les espaces Unicode (ex. U+202F) par un espace standard pour un rendu PDF correct. */
@@ -35,8 +37,7 @@ export class CashRegisterReportPdfService {
     }
 
     private theoreticalBalance(register: CashRegister): number {
-        const opening = Number(register.opening_balance) || 0;
-        return opening + this.totalIncome(register) - sumCashOutflows(register.transactions);
+        return sumPhysicalCashTheoreticalBalance(register.opening_balance, register.transactions);
     }
 
     exportSessionPdf(register: CashRegister): void {
@@ -51,6 +52,9 @@ export class CashRegisterReportPdfService {
 
         const opening = Number(register.opening_balance) || 0;
         const income = this.totalIncome(register);
+        const cashIncome = sumIncomeByMethod(register.transactions, 'cash');
+        const cardIncome = sumIncomeByMethod(register.transactions, 'card');
+        const mobileIncome = sumIncomeByMethod(register.transactions, 'mobile_money');
         const expense = this.totalExpense(register);
         const refund = this.totalRefund(register);
         const theoretical = this.theoreticalBalance(register);
@@ -60,10 +64,13 @@ export class CashRegisterReportPdfService {
             head: [['Rubrique', 'Montant (FCFA)']],
             body: [
                 ['Fond d\'ouverture', pdfSafePrice(opening)],
-                ['Encaissements', `+ ${pdfSafePrice(income)}`],
+                ['Encaissements (total)', `+ ${pdfSafePrice(income)}`],
+                ['— Espèces', `+ ${pdfSafePrice(cashIncome)}`],
+                ['— Carte', `+ ${pdfSafePrice(cardIncome)}`],
+                ['— Mobile', `+ ${pdfSafePrice(mobileIncome)}`],
                 ['Dépenses', `- ${pdfSafePrice(expense)}`],
                 ['Remboursements', `- ${pdfSafePrice(refund)}`],
-                ['Solde théorique final', pdfSafePrice(theoretical)],
+                ['Solde théorique tiroir (espèces)', pdfSafePrice(theoretical)],
             ],
             styles: { fontSize: 10 },
             headStyles: { fillColor: [71, 85, 105] },
@@ -91,11 +98,14 @@ export class CashRegisterReportPdfService {
                 const montant = tx.type === 'income'
                     ? `+ ${pdfSafePrice(Number(tx.amount))}`
                     : `- ${pdfSafePrice(Number(tx.amount))}`;
-                return [heure, libelle, tx.user?.name ?? '—', montant];
+                const mode = tx.type === 'income' && tx.payment_method
+                    ? paymentMethodLabel(tx.payment_method)
+                    : '—';
+                return [heure, libelle, mode, tx.user?.name ?? '—', montant];
             });
             autoTable(doc, {
                 startY: finalY,
-                head: [['Heure', 'Libellé', 'Opérateur', 'Montant']],
+                head: [['Heure', 'Libellé', 'Mode', 'Opérateur', 'Montant']],
                 body: rows,
                 styles: { fontSize: 8 },
                 headStyles: { fillColor: [71, 85, 105] },

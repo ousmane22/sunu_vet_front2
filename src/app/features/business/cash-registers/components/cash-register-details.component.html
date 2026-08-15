@@ -13,7 +13,7 @@
             <p class="text-2xl font-bold mt-1 tabular-nums text-emerald-300">{{ theoreticalBalance() | formatPrice }}</p>
             <p class="text-xs font-medium text-white/70 mt-1">
                 Fond {{ register().opening_balance | formatPrice }}
-                + encaissements − sorties
+                + espèces encaissées − sorties
             </p>
         </div>
         <div class="w-12 h-12 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
@@ -126,6 +126,18 @@
                         <span class="px-1.5 py-0.5 rounded bg-red-100 text-red-900 font-bold border border-red-300">Dépense</span>
                         } @else {
                         <span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-900 font-bold border border-emerald-300">Encaissement</span>
+                        <span class="px-1.5 py-0.5 rounded font-bold border"
+                            [class.bg-gray-100]="(tx.payment_method ?? 'cash') === 'cash'"
+                            [class.text-gray-800]="(tx.payment_method ?? 'cash') === 'cash'"
+                            [class.border-gray-300]="(tx.payment_method ?? 'cash') === 'cash'"
+                            [class.bg-indigo-100]="tx.payment_method === 'card'"
+                            [class.text-indigo-900]="tx.payment_method === 'card'"
+                            [class.border-indigo-300]="tx.payment_method === 'card'"
+                            [class.bg-violet-100]="tx.payment_method === 'mobile_money'"
+                            [class.text-violet-900]="tx.payment_method === 'mobile_money'"
+                            [class.border-violet-300]="tx.payment_method === 'mobile_money'">
+                            {{ paymentMethodLabel(tx.payment_method ?? 'cash') }}
+                        </span>
                         }
                     </p>
                 </div>

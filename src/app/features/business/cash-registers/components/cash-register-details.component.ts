@@ -4,10 +4,11 @@ import { FormatPricePipe } from '../../../../core/pipes';
 import { CashRegisterReportPdfService } from '../services/cash-register-report-pdf.service';
 import {
     isCashRefund,
+    paymentMethodLabel,
     sumCashBusinessExpenses,
     sumCashIncome,
-    sumCashOutflows,
     sumCashRefunds,
+    sumPhysicalCashTheoreticalBalance,
 } from '../utils/cash-transaction.util';
 import type { CashRegister } from '../../models';
 
@@ -36,11 +37,11 @@ export class CashRegisterDetailsComponent {
     theoreticalBalance = computed(() => {
         const reg = this.register();
         if (!reg) return 0;
-        const opening = Number(reg.opening_balance) || 0;
-        return opening + this.totalIncome() - sumCashOutflows(reg.transactions);
+        return sumPhysicalCashTheoreticalBalance(reg.opening_balance, reg.transactions);
     });
 
     isRefund = isCashRefund;
+    paymentMethodLabel = paymentMethodLabel;
 
     downloadReportPdf(): void {
         const reg = this.register();

@@ -9,9 +9,9 @@ import { CashRegisterActiveBlockComponent } from './components/cash-register-act
 import { CashRegisterCloseModalComponent } from './components/cash-register-close-modal/cash-register-close-modal.component';
 import { CashRegisterHistoryTableComponent } from './components/cash-register-history-table/cash-register-history-table.component';
 import { CashRegisterDetailsModalComponent } from './components/cash-register-details-modal/cash-register-details-modal.component';
-import type { CashRegister, CashTransaction } from '../models';
+import type { CashRegister } from '../models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { sumCashIncome, sumCashOutflows } from './utils/cash-transaction.util';
+import { sumPhysicalCashTheoreticalBalance } from './utils/cash-transaction.util';
 
 @Component({
     selector: 'app-cash-registers',
@@ -55,10 +55,7 @@ export class CashRegistersComponent implements OnInit {
     theoreticalBalance = computed(() => {
         const active = this.activeRegister();
         if (!active) return 0;
-        const opening = Number(active.opening_balance) || 0;
-        const income = sumCashIncome(active.transactions);
-        const outflows = sumCashOutflows(active.transactions);
-        return opening + income - outflows;
+        return sumPhysicalCashTheoreticalBalance(active.opening_balance, active.transactions);
     });
 
     ngOnInit(): void {
@@ -148,9 +145,7 @@ export class CashRegistersComponent implements OnInit {
     }
 
     getTheoreticalFinal(register: CashRegister): number {
-        const income = register.transactions?.filter((t) => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
-        const expense = register.transactions?.filter((t) => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0) ?? 0;
-        return Number(register.opening_balance) + income - expense;
+        return sumPhysicalCashTheoreticalBalance(register.opening_balance, register.transactions);
     }
 
     getDifference(register: CashRegister): number {

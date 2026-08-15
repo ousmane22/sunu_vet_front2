@@ -5,6 +5,7 @@ export interface CashTransaction {
     amount: number;
     description?: string;
     date: string;
+    payment_method?: 'cash' | 'card' | 'mobile_money' | null;
     user?: {
         id: number;
         name: string;

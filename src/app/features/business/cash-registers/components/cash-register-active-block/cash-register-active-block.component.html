@@ -39,10 +39,16 @@
                     Remboursements : −{{ refundsToday() | formatPrice }}
                 </p>
                 }
+                <div class="mt-2 flex flex-wrap gap-1.5 text-[10px] font-semibold">
+                    <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 border border-gray-200">Espèces {{ cashIncomeToday() | formatPrice }}</span>
+                    <span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200">Carte {{ cardIncomeToday() | formatPrice }}</span>
+                    <span class="px-2 py-0.5 rounded-full bg-violet-50 text-violet-800 border border-violet-200">Mobile {{ mobileIncomeToday() | formatPrice }}</span>
+                </div>
             </div>
             <div class="p-4 bg-white rounded-xl border-2 border-primary-200">
-                <p class="text-xs font-bold text-primary-900 uppercase tracking-wide">Total théorique</p>
+                <p class="text-xs font-bold text-primary-900 uppercase tracking-wide">Solde théorique tiroir</p>
                 <p class="text-lg font-bold text-primary-800 mt-1">{{ theoreticalBalance() | formatPrice }}</p>
+                <p class="text-[11px] font-medium text-primary-700/80 mt-1">Espèces uniquement (clôture caisse)</p>
             </div>
         </div>
 
