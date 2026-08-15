@@ -1,73 +1,50 @@
 <div class="space-y-6">
-    <div class="bg-amber-100 border border-amber-200 p-4 rounded-3xl flex items-center gap-4">
-        <div
-            class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-amber-200">
-            <i class="fas fa-info-circle"></i>
+    <div class="rounded-2xl bg-amber-50 ring-1 ring-amber-200/80 p-4 flex items-start gap-3">
+        <div class="shrink-0 w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center">
+            <i class="fas fa-circle-info text-sm"></i>
         </div>
-        <p class="text-sm font-medium text-amber-800 leading-tight">
-            <strong>NB:</strong> Le rapport des créances affiche l'état actuel des dettes clients, indépendamment de la
-            période sélectionnée ci-dessus.
+        <p class="text-sm text-amber-900 leading-relaxed">
+            <strong>Créances :</strong> état actuel des impayés clients, indépendamment de la période sélectionnée en haut de page.
         </p>
     </div>
 
-    <div class="bg-rose-600 p-6 md:p-8 rounded-3xl md:rounded-4xl shadow-2xl shadow-rose-200 relative overflow-hidden group">
-        <i
-            class="fas fa-hand-holding-dollar absolute -right-4 -bottom-4 text-white/10 text-[120px] md:text-[200px] group-hover:scale-110 transition-all duration-700"></i>
-        <div class="relative z-10">
-            <p class="text-rose-100 text-[9px] md:text-[11px] font-black uppercase tracking-widest flex items-center gap-2">
-                <i class="fas fa-triangle-exclamation"></i> Créances Totales
-            </p>
-            <p class="text-4xl md:text-6xl font-black text-white mt-1 leading-none">{{ data.total_outstanding | formatPrice }}</p>
-            <p class="text-rose-100 text-xs md:text-sm mt-4 opacity-90 font-medium tracking-tight">
-                <span class="bg-white/20 px-2 md:px-2.5 py-1 rounded-xl mr-1.5 font-black">{{ displayedDebtors.length ? data.debtors_count : 0 }}</span>
-                client{{ (displayedDebtors.length ? data.debtors_count : 0) !== 1 ? 's' : '' }} avec impayés.
-            </p>
-        </div>
+    <div class="rounded-2xl bg-gradient-to-br from-rose-600 to-rose-700 text-white p-6 md:p-8 relative overflow-hidden">
+        <i class="fas fa-hand-holding-dollar absolute -right-6 -bottom-6 text-[8rem] text-white/10"></i>
+        <p class="text-[11px] font-bold uppercase tracking-wider text-rose-100">Créances totales</p>
+        <p class="mt-2 text-4xl md:text-5xl font-black leading-none">{{ data.total_outstanding | formatPrice }}</p>
+        <p class="mt-4 text-sm text-rose-100">
+            <span class="inline-flex items-center rounded-lg bg-white/15 px-2.5 py-1 font-black mr-2">{{ debtorCount }}</span>
+            client{{ debtorCount !== 1 ? 's' : '' }} avec solde impayé
+        </p>
     </div>
 
-    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        <div class="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
-            <h3 class="text-lg font-bold text-slate-900">Top des Débiteurs</h3>
-        </div>
+    <app-report-panel title="Principaux débiteurs" subtitle="Classement par montant dû" icon="fas fa-users">
         @if (displayedDebtors.length) {
-        <div class="p-4 md:p-6 h-72 overflow-hidden">
+        <div class="h-64 mb-5">
             <canvas baseChart [type]="'bar'" [data]="debtorsChartData" [options]="debtorsChartOptions"></canvas>
         </div>
-        }
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[500px] text-left border-collapse">
+            <table class="w-full min-w-[480px] text-left">
                 <thead>
-                    <tr class="bg-slate-50">
-                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Client
-                        </th>
-                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Contact
-                        </th>
-                        <th
-                            class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right text-rose-600">
-                            Solde Dû</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="pb-3 pr-4 text-[10px] font-black uppercase tracking-wider text-slate-400">Client</th>
+                        <th class="pb-3 pr-4 text-[10px] font-black uppercase tracking-wider text-slate-400">Contact</th>
+                        <th class="pb-3 text-[10px] font-black uppercase tracking-wider text-rose-600 text-right">Solde dû</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
                     @for (client of displayedDebtors; track client.id) {
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-6 py-4">
-                            <p class="text-sm font-bold text-slate-900">{{ client.name }}</p>
-                        </td>
-                        <td class="px-6 py-4 text-slate-500 text-sm italic">{{ client.phone || '—' }}</td>
-                        <td class="px-6 py-4 text-right">
-                            <span class="text-sm font-black text-rose-600">{{ client.balance_due | formatPrice }}</span>
-                        </td>
-                    </tr>
-                    } @empty {
-                    <tr>
-                        <td colspan="3" class="px-6 py-12 text-center text-slate-400 italic">Aucune créance enregistrée.
-                            Félicitations !</td>
+                    <tr class="hover:bg-rose-50/40">
+                        <td class="py-3 pr-4 font-semibold text-slate-900">{{ client.name }}</td>
+                        <td class="py-3 pr-4 text-sm text-slate-500">{{ client.phone || '—' }}</td>
+                        <td class="py-3 text-right font-black text-rose-600">{{ client.balance_due | formatPrice }}</td>
                     </tr>
                     }
                 </tbody>
             </table>
         </div>
-    </div>
+        } @else {
+        <app-report-empty-state message="Aucune créance enregistrée. Félicitations !" icon="fas fa-check-circle" />
+        }
+    </app-report-panel>
 </div>
-
-

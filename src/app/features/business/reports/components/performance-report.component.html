@@ -1,69 +1,122 @@
-<div class="space-y-8 animate-in fade-in duration-500">
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6"
-         [ngClass]="strategyService.isVet() ? 'lg:grid-cols-4' : 'lg:grid-cols-3'">
-        <div class="bg-white p-4 md:p-6 rounded-3xl border border-slate-200 shadow-sm">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-xl">
-                    <i class="fas fa-money-bill-wave"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Encaissé (période)</p>
-                    <p class="text-2xl font-black text-emerald-700">{{ data.summary.total_collected | formatPrice }}</p>
-                </div>
-            </div>
-            @if (data.summary.total_net > data.summary.total_collected) {
-            <p class="text-xs text-slate-500 mt-2 font-semibold">
-                Facturé : {{ data.summary.total_net | formatPrice }}
-            </p>
-            }
+<div class="space-y-6">
+    <!-- Bandeau synthèse -->
+    <div class="rounded-2xl bg-slate-900 text-white p-5 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 overflow-hidden relative">
+        <div class="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-primary-500/20 blur-2xl"></div>
+        <div class="relative">
+            <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Période analysée</p>
+            <p class="mt-1 text-2xl md:text-3xl font-black">{{ data.summary.total_collected | formatPrice }}</p>
+            <p class="text-sm text-slate-400 mt-1">encaissé sur {{ data.summary.total_net | formatPrice }} facturé</p>
         </div>
-
-        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-xl">
-                    <i class="fas fa-shopping-cart"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Ventes</p>
-                    <p class="text-2xl font-black text-slate-900">{{ data.summary.sales_count }} <span class="text-sm text-slate-400 font-medium">factures</span></p>
-                </div>
+        <div class="relative flex items-center gap-4">
+            <div class="text-right">
+                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Taux d'encaissement</p>
+                <p class="text-3xl font-black text-emerald-400">{{ collectionRate }}%</p>
             </div>
-            <p class="text-xs text-emerald-700 mt-2 font-bold">{{ data.summary.sales_collected | formatPrice }} encaissé</p>
-            <p class="text-xs text-slate-400 font-semibold">Facturé : {{ data.summary.sales_net | formatPrice }}</p>
-            @if (data.summary.sales_partial_count > 0) {
-            <p class="text-xs text-amber-700 mt-1 font-bold">{{ data.summary.sales_partial_count }} partielle(s)</p>
-            }
-        </div>
-
-        @if (strategyService.isVet()) {
-        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-xl">
-                    <i class="fas fa-stethoscope"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Consultations</p>
-                    <p class="text-2xl font-black text-slate-900">{{ data.summary.consultations_count }} <span class="text-sm text-slate-400 font-medium">actes</span></p>
-                </div>
+            <div class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center ring-1 ring-white/20">
+                <i class="fas fa-chart-pie text-2xl text-primary-300"></i>
             </div>
-            <p class="text-xs text-emerald-700 mt-2 font-bold">{{ data.summary.consultations_collected | formatPrice }} encaissé</p>
-            <p class="text-xs text-slate-400 font-semibold">Facturé : {{ data.summary.consultations_net | formatPrice }}</p>
-            @if (data.summary.consultations_partial_count > 0) {
-            <p class="text-xs text-amber-700 mt-1 font-bold">{{ data.summary.consultations_partial_count }} partielle(s)</p>
-            }
-        </div>
-        }
-
-        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-xl">
-                    <i class="fas fa-user-clock"></i>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Nouveaux crédits</p>
-                    <p class="text-2xl font-black text-slate-900">{{ data.new_debts | formatPrice }}</p>
-                </div>
-            </div>
-            <p class="text-xs text-slate-400 mt-2 font-medium">Reste dû sur ventes/consultations partielles créées sur la période</p>
         </div>
     </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4"
+         [ngClass]="strategyService.isVet() ? 'lg:grid-cols-4' : 'lg:grid-cols-3'">
+        <app-report-kpi-card
+            accent="emerald"
+            icon="fas fa-money-bill-wave"
+            label="Encaissé"
+            [value]="data.summary.total_collected | formatPrice"
+            [hint]="data.summary.total_net > data.summary.total_collected ? 'Facturé : ' + (data.summary.total_net | formatPrice) : '100% de la période encaissée'"
+        />
+        <app-report-kpi-card
+            accent="blue"
+            icon="fas fa-shopping-cart"
+            label="Ventes"
+            [value]="data.summary.sales_count + ' factures'"
+            [hint]="(data.summary.sales_collected | formatPrice) + ' encaissé · ' + (data.summary.sales_net | formatPrice) + ' facturé'"
+            [badge]="data.summary.sales_partial_count > 0 ? data.summary.sales_partial_count + ' partielle(s)' : ''"
+        />
+        @if (strategyService.isVet()) {
+        <app-report-kpi-card
+            accent="violet"
+            icon="fas fa-stethoscope"
+            label="Consultations"
+            [value]="data.summary.consultations_count + ' actes'"
+            [hint]="(data.summary.consultations_collected | formatPrice) + ' encaissé · ' + (data.summary.consultations_net | formatPrice) + ' facturé'"
+            [badge]="data.summary.consultations_partial_count > 0 ? data.summary.consultations_partial_count + ' partielle(s)' : ''"
+        />
+        }
+        <app-report-kpi-card
+            accent="rose"
+            icon="fas fa-user-clock"
+            label="Nouveaux crédits"
+            [value]="data.new_debts | formatPrice"
+            hint="Reste dû sur factures partielles créées sur la période"
+        />
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <app-report-panel title="Modes de paiement" subtitle="Répartition des encaissements" icon="fas fa-wallet">
+            @if (data.payments.length) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+                <div class="h-52 sm:h-56">
+                    <canvas baseChart [type]="'doughnut'" [data]="paymentChartData" [options]="paymentChartOptions"></canvas>
+                </div>
+                <div class="space-y-3">
+                    @for (pay of data.payments; track pay.payment_method) {
+                    <div class="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-100">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                <span class="w-2.5 h-2.5 rounded-full" [class]="paymentColor(pay.payment_method)"></span>
+                                {{ getPaymentLabel(pay.payment_method) }}
+                            </span>
+                            <span class="text-sm font-black text-slate-900">{{ pay.total | formatPrice }}</span>
+                        </div>
+                        <div class="h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                            <div class="h-full rounded-full bg-primary-500 transition-all" [style.width.%]="paymentShare(pay.total)"></div>
+                        </div>
+                        <p class="text-[10px] font-bold text-slate-400 mt-1 text-right">{{ paymentShare(pay.total) }}%</p>
+                    </div>
+                    }
+                </div>
+            </div>
+            } @else {
+            <app-report-empty-state message="Aucun encaissement sur cette période." icon="fas fa-wallet" />
+            }
+        </app-report-panel>
+
+        <app-report-panel title="Top ventes" subtitle="Articles et prestations les plus performants" icon="fas fa-medal">
+            @if (data.top_articles.length) {
+            <div class="h-56 mb-5">
+                <canvas baseChart [type]="'bar'" [data]="topArticlesChartData" [options]="topArticlesChartOptions"></canvas>
+            </div>
+            <div class="overflow-x-auto -mx-1">
+                <table class="w-full min-w-[420px] text-left">
+                    <thead>
+                        <tr class="border-b border-slate-100">
+                            <th class="pb-3 pr-4 text-[10px] font-black uppercase tracking-wider text-slate-400">#</th>
+                            <th class="pb-3 pr-4 text-[10px] font-black uppercase tracking-wider text-slate-400">Produit</th>
+                            <th class="pb-3 pr-4 text-[10px] font-black uppercase tracking-wider text-slate-400 text-center">Qté</th>
+                            <th class="pb-3 text-[10px] font-black uppercase tracking-wider text-slate-400 text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        @for (art of data.top_articles; track art.name; let i = $index) {
+                        <tr class="hover:bg-slate-50/80">
+                            <td class="py-3 pr-4">
+                                <span class="inline-flex w-7 h-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-black text-slate-600">{{ i + 1 }}</span>
+                            </td>
+                            <td class="py-3 pr-4 font-semibold text-slate-800 text-sm">{{ art.name }}</td>
+                            <td class="py-3 pr-4 text-center text-sm font-bold text-slate-600">{{ art.qty | number:'1.0-0' }}</td>
+                            <td class="py-3 text-right text-sm font-black text-slate-900">{{ art.total | formatPrice }}</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            } @else {
+            <app-report-empty-state message="Aucune vente enregistrée." icon="fas fa-box-open" />
+            }
+        </app-report-panel>
+    </div>
+</div>

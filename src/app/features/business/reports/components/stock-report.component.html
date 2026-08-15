@@ -1,65 +1,52 @@
 <div class="space-y-6">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        <div class="bg-slate-900 p-5 md:p-6 rounded-3xl shadow-xl">
-            <p class="text-xs font-black text-slate-400 uppercase tracking-widest">{{ strategyService.isVet() ? 'Valorisation Pharmacie' : 'Valorisation Stock' }}</p>
-            <p class="text-2xl md:text-3xl font-black text-white mt-2">{{ data.total_valuation | formatPrice }}</p>
-            <p class="text-xs text-slate-500 mt-1">Valeur totale en prix de vente</p>
-        </div>
-        <div class="bg-amber-50 border border-amber-100 p-5 md:p-6 rounded-3xl shadow-sm">
-            <p class="text-xs font-black text-amber-500 uppercase tracking-widest">Stocks Bas</p>
-            <p class="text-2xl md:text-3xl font-black text-amber-900 mt-2">{{ data.low_stock_count }}</p>
-            <p class="text-xs text-amber-600 mt-1">Articles à commander</p>
-        </div>
-        <div class="bg-rose-50 border border-rose-100 p-5 md:p-6 rounded-3xl shadow-sm">
-            <p class="text-xs font-black text-rose-500 uppercase tracking-widest">Péremption (30j)</p>
-            <p class="text-2xl md:text-3xl font-black text-rose-900 mt-2">{{ data.expiring_soon_count }}</p>
-            <p class="text-xs text-rose-600 mt-1">Articles bientôt périmés</p>
-        </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <app-report-kpi-card
+            accent="slate"
+            icon="fas fa-warehouse"
+            [label]="strategyService.isVet() ? 'Valorisation pharmacie' : 'Valorisation stock'"
+            [value]="data.total_valuation | formatPrice"
+            hint="Valeur totale au prix de vente"
+        />
+        <app-report-kpi-card accent="amber" icon="fas fa-triangle-exclamation" label="Stocks bas" [value]="'' + data.low_stock_count" hint="Articles à réapprovisionner" />
+        <app-report-kpi-card accent="rose" icon="fas fa-hourglass-half" label="Péremption (30 j)" [value]="'' + data.expiring_soon_count" hint="Lots à surveiller" />
     </div>
 
-    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        <div class="px-6 py-5 border-b border-slate-50">
-            <h3 class="text-lg font-bold text-slate-900 text-center md:text-left">Top 10 : Meilleures Ventes</h3>
-        </div>
+    <app-report-panel
+        [title]="strategyService.isVet() ? 'Top médicaments vendus' : 'Top produits vendus'"
+        subtitle="Classement par volume sur la période"
+        icon="fas fa-ranking-star">
         @if (data.top_sellers.length) {
-        <div class="p-6 h-80 overflow-hidden">
+        <div class="h-72 mb-5">
             <canvas baseChart [type]="'bar'" [data]="topSellersChartData" [options]="topSellersChartOptions"></canvas>
         </div>
-        }
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[500px] text-left border-collapse">
+            <table class="w-full min-w-[480px] text-left">
                 <thead>
-                    <tr class="bg-slate-50">
-                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rang</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ strategyService.isVet() ? 'Médicament' : 'Produit' }}
-                        </th>
-                        <th
-                            class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
-                            Unités vendues</th>
+                    <tr class="border-b border-slate-100">
+                        <th class="pb-3 pr-4 text-[10px] font-black uppercase tracking-wider text-slate-400">Rang</th>
+                        <th class="pb-3 pr-4 text-[10px] font-black uppercase tracking-wider text-slate-400">{{ strategyService.isVet() ? 'Médicament' : 'Produit' }}</th>
+                        <th class="pb-3 text-[10px] font-black uppercase tracking-wider text-slate-400 text-right">Unités</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
-                    @for (med of data.top_sellers; track $index) {
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-6 py-4">
-                            <span
-                                class="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 text-xs font-black text-slate-600">
-                                #{{ $index + 1 }}
-                            </span>
+                    @for (med of data.top_sellers; track med.name; let i = $index) {
+                    <tr class="hover:bg-slate-50/80">
+                        <td class="py-3 pr-4">
+                            <span class="inline-flex w-8 h-8 items-center justify-center rounded-lg text-xs font-black"
+                                [class.bg-amber-100]="i === 0"
+                                [class.text-amber-800]="i === 0"
+                                [class.bg-slate-100]="i !== 0"
+                                [class.text-slate-600]="i !== 0">#{{ i + 1 }}</span>
                         </td>
-                        <td class="px-6 py-4 font-bold text-slate-900">{{ med.name }}</td>
-                        <td class="px-6 py-4 text-right font-black text-primary-600">{{ med.total_sold | number:'1.0-0' }}</td>
-                    </tr>
-                    } @empty {
-                    <tr>
-                        <td colspan="3" class="px-6 py-12 text-center text-slate-400 italic">Aucune vente enregistrée.
-                        </td>
+                        <td class="py-3 pr-4 font-semibold text-slate-800">{{ med.name }}</td>
+                        <td class="py-3 text-right font-black text-emerald-700">{{ med.total_sold | number:'1.0-0' }}</td>
                     </tr>
                     }
                 </tbody>
             </table>
         </div>
-    </div>
+        } @else {
+        <app-report-empty-state message="Aucune vente enregistrée sur la période." icon="fas fa-pills" />
+        }
+    </app-report-panel>
 </div>
-
-

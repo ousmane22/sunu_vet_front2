@@ -45,6 +45,14 @@ export class ReportsComponent implements OnInit {
 
     businessName = signal<string>('Votre clinique');
 
+    readonly tabs: { id: ReportTab; label: string; icon: string }[] = [
+        { id: 'performance', label: 'Performance', icon: 'fas fa-chart-line' },
+        { id: 'treasury', label: 'Trésorerie', icon: 'fas fa-cash-register' },
+        { id: 'stock', label: 'Stock', icon: 'fas fa-pills' },
+        { id: 'medical', label: 'Soins', icon: 'fas fa-stethoscope' },
+        { id: 'debts', label: 'Créances', icon: 'fas fa-user-clock' },
+    ];
+
     activeTab = signal<ReportTab>('performance');
     isLoading = signal(false);
 
@@ -59,6 +67,10 @@ export class ReportsComponent implements OnInit {
     performanceData = signal<PerformanceReport | null>(null);
 
     ngOnInit(): void {
+        this.tabs[2].label = this.strategyService.isVet() ? 'Pharmacie' : 'Stock';
+        this.tabs[2].icon = this.strategyService.isVet() ? 'fas fa-pills' : 'fas fa-boxes';
+        this.tabs[3].label = this.strategyService.isVet() ? 'Soins' : 'Activité';
+        this.tabs[3].icon = this.strategyService.isVet() ? 'fas fa-stethoscope' : 'fas fa-chart-line';
         this.loadProfile();
         this.switchTab('performance');
     }
