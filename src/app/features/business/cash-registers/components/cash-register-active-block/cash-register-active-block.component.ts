@@ -1,6 +1,7 @@
-import { Component, input, output, computed } from '@angular/core';
+import { Component, input, output, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormatPricePipe } from '../../../../../core/pipes';
+import { AuthService } from '../../../../auth/services/auth.service';
 import { sumCashNetIncome, sumCashRefunds, sumIncomeByMethod } from '../../utils/cash-transaction.util';
 import type { CashRegister } from '../../../models';
 
@@ -11,11 +12,21 @@ import type { CashRegister } from '../../../models';
     templateUrl: './cash-register-active-block.component.html',
 })
 export class CashRegisterActiveBlockComponent {
+    private auth = inject(AuthService);
+
     register = input.required<CashRegister>();
     theoreticalBalance = input.required<number>();
 
     openCloseModal = output<void>();
     openMovements = output<void>();
+
+    isOwnRegister = computed(() => {
+        const reg = this.register();
+        const userId = this.auth.currentUser()?.id;
+        return !!reg?.user?.id && reg.user.id === userId;
+    });
+
+    cashierLabel = computed(() => this.register()?.user?.name ?? 'Caissier');
 
     /** Encaissé net (entrées − remboursements), aligné avec les rapports. */
     netIncomeToday = computed(() => sumCashNetIncome(this.register()?.transactions));

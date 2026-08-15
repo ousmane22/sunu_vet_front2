@@ -41,7 +41,11 @@ export interface BusinessProfile {
   description: string | null;
   website: string | null;
   status: string;
-  settings?: { require_open_register?: boolean;[key: string]: any; };
+  settings?: {
+    require_open_register?: boolean;
+    shared_cash_register?: boolean;
+    [key: string]: any;
+  };
   is_active: boolean;
   is_on_trial?: boolean;
   trial_ends_at: string | null;
