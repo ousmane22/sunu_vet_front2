@@ -7,8 +7,8 @@
     "start:no-proxy": "ng serve --open",
     "build": "ng build",
     "build:prod": "ng build --configuration production",
-    "build:server": "ng build --configuration production --base-href /sunuvet/",
-    "deploy:server": "bash scripts/deploy-frontend.sh",
+    "build:vps-pro": "ng build --configuration vps-pro --base-href /pro/",
+    "deploy:vps-pro": "bash scripts/deploy-frontend.sh",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

@@ -1,66 +1,46 @@
 #!/usr/bin/env bash
-# Déploie le build Angular statique sur le serveur (dossier sunuvet).
+# Préprod SunuVet sur VPS — stack isolé, prod Infomaniak inchangée.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
-DEPLOY_HOST="${DEPLOY_HOST:-h2web397.ftp.infomaniak.com}"
-DEPLOY_USER="${DEPLOY_USER:-uid279578}"
-DEPLOY_PATH="${DEPLOY_PATH:-sunuvet}"
-BASE_HREF="${BASE_HREF:-/sunuvet/}"
+DEPLOY_HOST="${DEPLOY_HOST:-180.149.198.229}"
+DEPLOY_USER="${DEPLOY_USER:-ousmane}"
+DEPLOY_BASE="${DEPLOY_BASE:-/var/www/projects/sunuvet-pro}"
+DEPLOY_STATIC="${DEPLOY_STATIC:-${DEPLOY_BASE}/static}"
+BASE_HREF="${BASE_HREF:-/pro/}"
+BUILD_CONFIG="${BUILD_CONFIG:-vps-pro}"
 SSH_KEY="${SSH_KEY:-$HOME/.ssh/id_ed25519}"
+PRO_PORT="${PRO_PORT:-8090}"
 
 DIST_DIR="$ROOT_DIR/dist/frontend2/browser"
-REMOTE="${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/"
+REMOTE="${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_STATIC}/"
 
-echo "→ Build production (base-href=${BASE_HREF})"
-npm run build -- --configuration production --base-href "${BASE_HREF}"
-
-echo "→ .htaccess adapté au sous-dossier"
-cat > "${DIST_DIR}/.htaccess" <<EOF
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase ${BASE_HREF}
-  RewriteRule ^index\\.html$ - [L]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . ${BASE_HREF}index.html [L]
-</IfModule>
-
-<IfModule mod_mime.c>
-  AddType application/manifest+json .webmanifest
-</IfModule>
-
-<IfModule mod_headers.c>
-  <FilesMatch "index\\.html$">
-    Header set Cache-Control "no-cache, no-store, must-revalidate"
-  </FilesMatch>
-
-  <FilesMatch "manifest\\.webmanifest$">
-    Header set Cache-Control "public, max-age=86400"
-    Header set Content-Type "application/manifest+json"
-  </FilesMatch>
-
-  <FilesMatch "\\.(js|css)$">
-    Header set Cache-Control "public, max-age=31536000, immutable"
-  </FilesMatch>
-
-  <Files "ngsw-worker.js">
-    Header set Cache-Control "no-cache, no-store, must-revalidate"
-  </Files>
-
-  <Files "ngsw.json">
-    Header set Cache-Control "no-cache, no-store, must-revalidate"
-  </Files>
-</IfModule>
-EOF
+echo "→ Build ${BUILD_CONFIG} (base-href=${BASE_HREF})"
+npm run build -- --configuration "${BUILD_CONFIG}" --base-href "${BASE_HREF}"
 
 echo "→ Sync vers ${REMOTE}"
+ssh -i "${SSH_KEY}" -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
+  "${DEPLOY_USER}@${DEPLOY_HOST}" "mkdir -p '${DEPLOY_STATIC}'"
+
 rsync -avz --delete \
   -e "ssh -i ${SSH_KEY} -o StrictHostKeyChecking=accept-new" \
   "${DIST_DIR}/" \
   "${REMOTE}"
 
-echo "✓ Déploiement terminé"
-echo "  URL probable : https://${DEPLOY_HOST%/}/${BASE_HREF#/}"
+echo "→ Fichiers stack SunuVet (docker-compose, nginx)"
+scp -i "${SSH_KEY}" -o StrictHostKeyChecking=accept-new \
+  "${ROOT_DIR}/deploy/vps-pro/docker-compose.yml" \
+  "${ROOT_DIR}/deploy/vps-pro/nginx.conf" \
+  "${ROOT_DIR}/deploy/vps-pro/setup-sunuvet-once.sh" \
+  "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_BASE}/"
+
+ssh -i "${SSH_KEY}" -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
+  "${DEPLOY_USER}@${DEPLOY_HOST}" \
+  "chmod +x '${DEPLOY_BASE}/setup-sunuvet-once.sh' && cd '${DEPLOY_BASE}' && docker compose up -d"
+
+echo ""
+echo "✓ SunuVet déployé (stack isolé)"
+echo "  URL préprod : http://${DEPLOY_HOST}:${PRO_PORT}${BASE_HREF}"
+echo "  Prod Infomaniak : https://sunuvet.com (inchangée)"
