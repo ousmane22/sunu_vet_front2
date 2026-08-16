@@ -1,8 +1,11 @@
 :host {
   display: block;
+  width: 100%;
 }
 
 .preview-shell {
+  container-type: inline-size;
+  width: 100%;
   animation: preview-float 0.9s ease-out 0.15s both;
 }
 
@@ -10,62 +13,79 @@
   animation-delay: 0.28s;
 }
 
-.preview-viewport--section {
-  max-height: 17rem;
+.preview-viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #f3f4f6;
+  aspect-ratio: 16 / 10;
+  max-height: min(72vw, 22rem);
 }
 
 .preview-viewport--hero {
-  max-height: 19rem;
+  max-height: min(78vw, 26rem);
+}
+
+.preview-viewport--section {
+  max-height: min(68vw, 24rem);
 }
 
 .preview-scale {
-  width: 132%;
-  transform: scale(0.76);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 920px;
   transform-origin: top left;
+  transform: scale(calc(100cqw / 920px));
 }
 
 .preview-scale--hero {
-  width: 124%;
-  transform: scale(0.81);
+  width: 920px;
 }
 
-@media (min-width: 640px) {
-  .preview-viewport--section {
-    max-height: 22rem;
+.preview-aside {
+  width: 11.5rem;
+}
+
+.preview-stats-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.preview-bottom-grid {
+  grid-template-columns: 1fr;
+}
+
+@container (min-width: 420px) {
+  .preview-stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .preview-bottom-grid {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+@container (min-width: 640px) {
+  .preview-viewport {
+    max-height: min(52vw, 28rem);
   }
 
   .preview-viewport--hero {
-    max-height: 26rem;
+    max-height: min(56vw, 32rem);
   }
 
-  .preview-scale {
-    width: 118%;
-    transform: scale(0.85);
-  }
-
-  .preview-scale--hero {
-    width: 110%;
-    transform: scale(0.91);
+  .preview-viewport--section {
+    max-height: min(50vw, 30rem);
   }
 }
 
-@media (min-width: 1024px) {
-  .preview-viewport--section {
-    max-height: 24rem;
-  }
-
+@container (min-width: 1024px) {
   .preview-viewport--hero {
-    max-height: 28rem;
+    max-height: 32rem;
   }
 
-  .preview-scale {
-    width: 112%;
-    transform: scale(0.89);
-  }
-
-  .preview-scale--hero {
-    width: 105%;
-    transform: scale(0.95);
+  .preview-viewport--section {
+    max-height: 30rem;
   }
 }
 

@@ -75,14 +75,15 @@ export class PosProductGridComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadActiveRegister();
+        this.loadRequireOpenRegister();
+
         this.cashRegisterService.onChanged()
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe(() => this.loadActiveRegister());
 
-        this.profileService.getProfile().subscribe({
-            next: (res) => this.requireOpenRegister.set(res.data.settings?.require_open_register === true),
-            error: () => this.requireOpenRegister.set(false),
-        });
+        this.profileService.onChanged()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(() => this.loadRequireOpenRegister());
 
         this.loadProducts();
         this.searchControl.valueChanges
@@ -100,6 +101,13 @@ export class PosProductGridComponent implements OnInit {
                 this.activeRegister.set(null);
                 this.registerChecked.set(true);
             },
+        });
+    }
+
+    private loadRequireOpenRegister(): void {
+        this.profileService.getProfile(true).subscribe({
+            next: (res) => this.requireOpenRegister.set(res.data.settings?.require_open_register === true),
+            error: () => this.requireOpenRegister.set(false),
         });
     }
 

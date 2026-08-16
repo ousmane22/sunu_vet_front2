@@ -102,6 +102,14 @@
           class="flex-1 py-2 px-2 rounded-lg text-xs font-bold transition-colors">
           Consult. ({{ consultations().length }})
         </button>
+        <button type="button" (click)="setTab('clinique')"
+          [class.bg-white]="activeTab() === 'clinique'"
+          [class.text-black]="activeTab() === 'clinique'"
+          [class.shadow-sm]="activeTab() === 'clinique'"
+          [class.text-gray-700]="activeTab() !== 'clinique'"
+          class="flex-1 py-2 px-2 rounded-lg text-xs font-bold transition-colors">
+          Clinique ({{ clientAnimals().length }})
+        </button>
         <button type="button" (click)="setTab('montant')"
           [class.bg-white]="activeTab() === 'montant'"
           [class.text-black]="activeTab() === 'montant'"
@@ -157,6 +165,33 @@
             </span>
           </div>
         </div>
+        }
+      </div>
+      }
+      }
+      @case ('clinique') {
+      @if (animalsLoading()) {
+      <div class="py-10 text-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50">
+        <p class="text-sm font-medium text-gray-600">Chargement…</p>
+      </div>
+      } @else if (clientAnimals().length === 0) {
+      <div class="py-10 text-center rounded-xl border-2 border-dashed border-gray-300 bg-gray-50">
+        <p class="text-sm font-bold text-black">Aucun dossier</p>
+        <p class="text-xs text-gray-600 mt-1">Créez un dossier depuis la fiche client complète.</p>
+      </div>
+      } @else {
+      <div class="rounded-xl border-2 border-gray-300 overflow-hidden divide-y divide-gray-200 bg-white">
+        @for (a of clientAnimals(); track a.id) {
+        <a [routerLink]="['/business/clinique', a.id]"
+          class="px-4 py-3.5 flex items-center justify-between gap-3 hover:bg-gray-50 transition-colors">
+          <div class="min-w-0">
+            <p class="text-sm font-bold text-black">{{ displayAnimalName(a) }}</p>
+            <p class="text-xs text-gray-700 font-medium mt-0.5">
+              {{ a.species_name || '—' }}@if (a.breed_name) { · {{ a.breed_name }} }
+            </p>
+          </div>
+          <span class="text-xs font-bold text-primary-700 shrink-0">Voir →</span>
+        </a>
         }
       </div>
       }

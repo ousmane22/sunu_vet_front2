@@ -13,6 +13,8 @@ describe('StaffListComponent', () => {
     .compileComponents();
 
     fixture = TestBed.createComponent(StaffListComponent);
+    fixture.componentRef.setInput('isLoading', false);
+    fixture.componentRef.setInput('staff', []);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,0 +1,54 @@
+@if (hospitalization()) {
+<div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6" role="dialog" aria-modal="true">
+  <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" (click)="onCancel()"></div>
+
+  <div class="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl border border-gray-200 max-h-[92vh] flex flex-col overflow-hidden">
+    <div class="px-6 py-5 border-b border-gray-200 shrink-0 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+          <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h2 class="text-lg font-bold text-gray-900">Clôturer le séjour</h2>
+      </div>
+      <button type="button" (click)="onCancel()" aria-label="Fermer"
+        class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <form class="flex flex-col min-h-0 flex-1" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+        @if (errorMessage()) {
+        <p class="text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3 font-medium">{{ errorMessage() }}</p>
+        }
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Résumé de sortie</label>
+          <textarea formControlName="discharge_summary" rows="3" placeholder="État de sortie, recommandations…"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-primary-500 resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Montant total final</label>
+          <input type="number" step="1" min="0" formControlName="total_amount"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary-500" />
+          <p class="text-xs text-gray-500 mt-1.5">Modifiez si le montant final diffère de l'estimation initiale.</p>
+        </div>
+      </div>
+
+      <div class="shrink-0 px-6 py-4 border-t border-gray-200 bg-gray-50 flex gap-3">
+        <button type="button" (click)="onCancel()"
+          class="px-5 py-3 rounded-xl border border-gray-300 text-sm font-bold text-gray-700 hover:bg-white">Annuler</button>
+        <button type="submit" [disabled]="isSubmitting()"
+          class="flex-1 px-5 py-3 rounded-xl bg-emerald-700 text-white text-sm font-bold hover:bg-emerald-800 disabled:opacity-50">
+          @if (isSubmitting()) { Clôture… } @else { Confirmer la sortie }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}

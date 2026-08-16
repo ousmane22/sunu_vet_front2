@@ -33,11 +33,27 @@
       </div>
     </div>
 
-    @if (cons.animal_species || cons.reason_visit || cons.businessal_exam || cons.diagnosis || cons.treatment_notes) {
+    @if (cons.animal || cons.animal_species || cons.reason_visit || cons.clinical_exam || cons.diagnosis || cons.treatment_notes) {
     <div class="space-y-3">
-      @if (cons.animal_species) {
+      @if (cons.animal) {
       <p class="text-sm font-medium text-black">
-        <span class="font-bold text-primary-800">Animal :</span> {{ cons.animal_species }}
+        <span class="font-bold text-primary-800">Dossier :</span>
+        <a [routerLink]="['/business/clinique', cons.animal.id]" class="text-primary-700 font-bold hover:underline">
+          {{ displayAnimalName(cons.animal) }}@if (cons.animal.species_name) { ({{ cons.animal.species_name }}) }
+        </a>
+      </p>
+      } @else if (cons.animal_species || cons.animal_name) {
+      <p class="text-sm font-medium text-black">
+        <span class="font-bold text-primary-800">Patient :</span>
+        {{ cons.animal_name || cons.animal_species }}
+        @if (cons.animal_name && cons.animal_species) { ({{ cons.animal_species }}) }
+      </p>
+      }
+      @if (cons.animal_weight_kg != null || cons.temperature_c != null) {
+      <p class="text-sm text-gray-700">
+        @if (cons.animal_weight_kg != null) { <span class="font-semibold">Poids :</span> {{ cons.animal_weight_kg }} kg }
+        @if (cons.animal_weight_kg != null && cons.temperature_c != null) { · }
+        @if (cons.temperature_c != null) { <span class="font-semibold">Temp. :</span> {{ cons.temperature_c }} °C }
       </p>
       }
       @if (cons.reason_visit) {
@@ -46,10 +62,10 @@
         <p class="text-sm text-gray-800 whitespace-pre-line">{{ cons.reason_visit }}</p>
       </div>
       }
-      @if (cons.businessal_exam) {
+      @if (cons.clinical_exam) {
       <div class="rounded-xl border-2 border-gray-300 bg-white p-3">
         <p class="text-xs font-bold text-black uppercase tracking-wide mb-1">Examen clinique</p>
-        <p class="text-sm text-gray-800 whitespace-pre-line">{{ cons.businessal_exam }}</p>
+        <p class="text-sm text-gray-800 whitespace-pre-line">{{ cons.clinical_exam }}</p>
       </div>
       }
       @if (cons.diagnosis) {
@@ -107,12 +123,6 @@
 
     @if (cons.status !== 'cancelled') {
     <div class="flex gap-2">
-      @if (canEdit()) {
-      <button type="button" (click)="edit.emit(cons)"
-        class="flex-1 py-3 text-sm font-bold text-amber-900 bg-amber-50 border-2 border-amber-300 rounded-xl hover:bg-amber-100 transition-colors">
-        Modifier
-      </button>
-      }
       @if (canCancel()) {
       <button type="button" (click)="cancel.emit(cons)"
         class="flex-1 py-3 text-sm font-bold text-red-900 bg-red-50 border-2 border-red-300 rounded-xl hover:bg-red-100 transition-colors">

@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { initRevealOnScroll } from '../../core/utils/reveal-on-scroll';
 import { HeroComponent } from './components/hero/hero.component';
 import { LandingNavComponent } from './components/landing-nav/landing-nav.component';
 import { FeaturesComponent } from './components/features/features.component';
@@ -28,4 +29,17 @@ import { ContactModalComponent } from './components/contact-modal/contact-modal.
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
 })
-export class LandingComponent {}
+export class LandingComponent implements AfterViewInit, OnDestroy {
+  private host = inject(ElementRef<HTMLElement>);
+  private teardownReveal?: () => void;
+
+  ngAfterViewInit(): void {
+    requestAnimationFrame(() => {
+      this.teardownReveal = initRevealOnScroll(this.host.nativeElement);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.teardownReveal?.();
+  }
+}

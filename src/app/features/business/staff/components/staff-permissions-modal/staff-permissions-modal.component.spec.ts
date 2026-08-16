@@ -13,6 +13,9 @@ describe('StaffPermissionsModalComponent', () => {
     .compileComponents();
 
     fixture = TestBed.createComponent(StaffPermissionsModalComponent);
+    fixture.componentRef.setInput('member', { id: 1, name: 'Test', email: 'test@example.com', role: 'assistant', permissions: [] });
+    fixture.componentRef.setInput('availablePermissions', []);
+    fixture.componentRef.setInput('isSaving', false);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -92,7 +92,7 @@
         </div>
         } @else {
         <div class="rounded-xl border-2 border-gray-300 overflow-hidden divide-y divide-gray-200 bg-white">
-            @for (tx of (register().transactions ?? []); track tx.id) {
+            @for (tx of sortedTransactions(); track tx.id) {
             <div class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
                 <div
                     [ngClass]="tx.type === 'income'

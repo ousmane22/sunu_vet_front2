@@ -12,7 +12,8 @@ DEPLOY_STATIC="${DEPLOY_STATIC:-${DEPLOY_BASE}/static}"
 BASE_HREF="${BASE_HREF:-/pro/}"
 BUILD_CONFIG="${BUILD_CONFIG:-vps-pro}"
 SSH_KEY="${SSH_KEY:-$HOME/.ssh/id_ed25519}"
-PRO_PORT="${PRO_PORT:-8090}"
+PRO_PORT="${PRO_PORT:-80}"
+PUBLIC_URL="http://${DEPLOY_HOST}${BASE_HREF}"
 
 DIST_DIR="$ROOT_DIR/dist/frontend2/browser"
 REMOTE="${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_STATIC}/"
@@ -34,13 +35,14 @@ scp -i "${SSH_KEY}" -o StrictHostKeyChecking=accept-new \
   "${ROOT_DIR}/deploy/vps-pro/docker-compose.yml" \
   "${ROOT_DIR}/deploy/vps-pro/nginx.conf" \
   "${ROOT_DIR}/deploy/vps-pro/setup-sunuvet-once.sh" \
+  "${ROOT_DIR}/deploy/vps-pro/sync-caddy-sunuvet.sh" \
   "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_BASE}/"
 
 ssh -i "${SSH_KEY}" -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
   "${DEPLOY_USER}@${DEPLOY_HOST}" \
-  "chmod +x '${DEPLOY_BASE}/setup-sunuvet-once.sh' && cd '${DEPLOY_BASE}' && docker compose up -d"
+  "chmod +x '${DEPLOY_BASE}/setup-sunuvet-once.sh' '${DEPLOY_BASE}/sync-caddy-sunuvet.sh' && cd '${DEPLOY_BASE}' && docker compose up -d && bash '${DEPLOY_BASE}/sync-caddy-sunuvet.sh'"
 
 echo ""
 echo "✓ SunuVet déployé (stack isolé)"
-echo "  URL préprod : http://${DEPLOY_HOST}:${PRO_PORT}${BASE_HREF}"
+echo "  URL préprod : ${PUBLIC_URL}"
 echo "  Prod Infomaniak : https://sunuvet.com (inchangée)"

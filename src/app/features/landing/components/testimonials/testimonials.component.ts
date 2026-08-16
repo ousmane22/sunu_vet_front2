@@ -19,16 +19,16 @@ interface Testimonial {
 export class TestimonialsComponent {
   testimonials: Testimonial[] = [
     {
-      name: 'Dr. Mansour Diop',
+      name: 'Dr. Mansour Diallo',
       role: 'Vétérinaire',
-      business: 'Clinique vétérinaire — Dakar',
+      business: 'Cabinet vétérinaire Kossy-Vet — Dakar',
       initials: 'MD',
       comment: 'SunuVet nous a permis de centraliser consultations et caisse. L’équipe gagne du temps chaque jour sur la paperasse.',
     },
     {
       name: 'Dr. Fallou Hann',
       role: 'Vétérinaire',
-      business: 'Cabinet vétérinaire — Pikine',
+      business: 'Cabinet vétérinaire LAMP-FALL-VET — Pikine',
       initials: 'FH',
       comment: 'Le suivi du stock et les alertes nous évitent les ruptures. Les rapports encaissé / facturé sont très clairs.',
     },

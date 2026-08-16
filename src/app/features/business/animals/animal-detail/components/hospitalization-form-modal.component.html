@@ -1,0 +1,230 @@
+@if (open()) {
+<div class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6" role="dialog" aria-modal="true">
+  <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" (click)="onCancel()"></div>
+
+  <div class="relative bg-white w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-2xl border border-gray-200 max-h-[92vh] flex flex-col overflow-hidden">
+    <!-- Header -->
+    <div class="px-6 py-5 border-b border-gray-200 shrink-0 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-hospital text-base"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-gray-900">Admettre en hospitalisation</h2>
+          <p class="text-xs text-gray-500">Admission en séjour + facturation du séjour</p>
+        </div>
+      </div>
+      <button type="button" (click)="onCancel()" aria-label="Fermer"
+        class="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50">
+        <i class="fa-solid fa-xmark text-base"></i>
+      </button>
+    </div>
+
+    <form class="flex flex-col min-h-0 flex-1" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+        @if (errorMessage()) {
+        <div class="flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <i class="fa-solid fa-circle-exclamation mt-0.5 shrink-0"></i>
+          <span class="font-medium">{{ errorMessage() }}</span>
+        </div>
+        }
+
+        <!-- ── Propriétaire ── -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+            <i class="fa-solid fa-user mr-1 text-gray-400"></i> Propriétaire (client)
+          </label>
+
+          @if (selectedClient()) {
+          <div class="flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+            <div class="w-9 h-9 rounded-lg bg-white border border-emerald-300 text-gray-900 flex items-center justify-center text-sm font-bold shrink-0">
+              {{ selectedClient()!.name.charAt(0).toUpperCase() }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-gray-900 truncate">{{ selectedClient()!.name }}</p>
+              @if (selectedClient()!.phone) {
+              <p class="text-xs text-gray-600 mt-0.5"><i class="fa-solid fa-phone mr-1"></i>{{ selectedClient()!.phone }}</p>
+              }
+            </div>
+            <button type="button" (click)="clearClient()" title="Changer de propriétaire"
+              class="w-8 h-8 flex items-center justify-center rounded-lg border border-emerald-300 text-gray-700 hover:bg-white">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          } @else if (showCreateClient()) {
+          <div class="border border-primary-300 rounded-xl overflow-hidden">
+            <div class="px-4 py-3 bg-primary-50 flex items-center justify-between border-b border-primary-200">
+              <p class="text-xs font-bold text-primary-900 uppercase tracking-wide">Nouveau client</p>
+              <button type="button" (click)="cancelCreateClient()" class="text-primary-800 hover:text-gray-900">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div class="p-4 space-y-3 bg-white">
+              @if (createClientError()) {
+              <p class="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 font-medium">{{ createClientError() }}</p>
+              }
+              <input type="text" [formControl]="$any(createClientForm.get('name'))" placeholder="Nom complet *"
+                class="w-full px-4 py-3 text-sm font-semibold border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary-500" />
+              <input type="tel" [formControl]="$any(createClientForm.get('phone'))" placeholder="Téléphone"
+                class="w-full px-4 py-3 text-sm border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-primary-500" />
+              <div class="flex gap-2 pt-1">
+                <button type="button" (click)="cancelCreateClient()"
+                  class="flex-1 py-3 text-sm font-bold border border-gray-300 rounded-xl hover:bg-gray-50">Annuler</button>
+                <button type="button" (click)="saveNewClient()" [disabled]="createClientForm.invalid || isCreatingClient()"
+                  class="flex-1 py-3 text-sm font-bold text-white bg-gray-900 rounded-xl disabled:opacity-40">Enregistrer</button>
+              </div>
+            </div>
+          </div>
+          } @else {
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-sm"></i>
+            <input type="text" [formControl]="$any(form.get('client_search'))"
+              (focus)="showClientDropdown.set(clientSearchResults().length > 0)"
+              placeholder="Rechercher un client (propriétaire)…"
+              class="w-full border border-gray-300 rounded-xl pl-9 pr-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary-500" />
+
+            @if (showClientDropdown() || (form.get('client_search')!.value && form.get('client_search')!.value!.length >= 2)) {
+            <div class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-xl overflow-hidden shadow-lg">
+              @for (cl of clientSearchResults(); track cl.id) {
+              <button type="button" (mousedown)="selectClient(cl)"
+                class="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 last:border-0">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 border border-gray-300 flex items-center justify-center text-xs font-bold shrink-0">
+                  {{ cl.name.charAt(0).toUpperCase() }}
+                </div>
+                <p class="text-sm font-bold text-gray-900 truncate">{{ cl.name }}</p>
+              </button>
+              }
+              <button type="button" (mousedown)="openCreateClient()"
+                class="w-full text-left px-4 py-3 hover:bg-primary-50 flex items-center gap-3 border-t border-gray-200">
+                <div class="w-8 h-8 rounded-lg bg-primary-50 border border-primary-300 text-primary-900 flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-plus text-sm"></i>
+                </div>
+                <p class="text-sm font-bold text-primary-900">Créer un nouveau client</p>
+              </button>
+            </div>
+            }
+          </div>
+          }
+        </div>
+
+        <!-- ── Cage / Motif ── -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+              <i class="fa-solid fa-door-closed mr-1 text-rose-500"></i> Cage / Box
+            </label>
+            <input formControlName="location" placeholder="ex. Box 3"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+              <i class="fa-solid fa-stethoscope mr-1 text-rose-500"></i> Motif
+            </label>
+            <input formControlName="reason" placeholder="ex. Observation post-opératoire"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary-500" />
+          </div>
+        </div>
+
+        <!-- ── Séparateur Facturation ── -->
+        <div class="flex items-center gap-3">
+          <div class="flex-1 h-px bg-gray-200"></div>
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-file-invoice-dollar text-primary-600"></i>
+            Facturation
+          </span>
+          <div class="flex-1 h-px bg-gray-200"></div>
+        </div>
+
+        <!-- ── Mode de paiement ── -->
+        <div>
+          <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+            <i class="fa-solid fa-credit-card mr-1"></i> Mode de paiement *
+          </h3>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" formControlName="payment_method" value="cash" class="sr-only peer" />
+              <div class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border border-gray-300 bg-white text-sm text-gray-900 font-bold transition-all peer-checked:bg-emerald-100 peer-checked:border-emerald-400 peer-checked:text-emerald-900 hover:bg-gray-50">
+                <i class="fa-solid fa-money-bill-wave text-lg"></i>
+                Espèces
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" formControlName="payment_method" value="card" class="sr-only peer" />
+              <div class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border border-gray-300 bg-white text-sm text-gray-900 font-bold transition-all peer-checked:bg-blue-100 peer-checked:border-blue-400 peer-checked:text-blue-900 hover:bg-gray-50">
+                <i class="fa-solid fa-credit-card text-lg"></i>
+                Carte
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" formControlName="payment_method" value="mobile_money" class="sr-only peer" />
+              <div class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border border-gray-300 bg-white text-sm text-gray-900 font-bold transition-all peer-checked:bg-amber-100 peer-checked:border-amber-400 peer-checked:text-amber-900 hover:bg-gray-50">
+                <i class="fa-solid fa-mobile-screen-button text-lg"></i>
+                Mobile
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- ── Montants ── -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+              <i class="fa-solid fa-money-check-dollar mr-1 text-gray-500"></i> Montant total *
+            </label>
+            <input type="number" step="1" min="0" formControlName="total_amount"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 flex items-center justify-between">
+              <span><i class="fa-solid fa-hand-holding-dollar mr-1 text-emerald-600"></i> Encaissé *</span>
+              <button type="button" (click)="setExactAmount()" class="text-primary-700 font-bold normal-case text-xs hover:underline">
+                Exact
+              </button>
+            </label>
+            <input type="number" step="1" min="0" formControlName="amount_paid"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary-500" />
+          </div>
+        </div>
+
+        <!-- ── Remise ── -->
+        <div>
+          <button type="button" (click)="toggleDiscountPanel()" class="text-xs font-bold text-primary-800 hover:underline flex items-center gap-1.5">
+            <i class="fa-solid fa-tag"></i>
+            {{ discountPanelOpen() ? 'Masquer la remise' : 'Ajouter une remise' }}
+          </button>
+          @if (discountPanelOpen()) {
+          <div class="grid grid-cols-2 gap-3 mt-2">
+            <select formControlName="discount_type"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary-500">
+              <option value="amount">Montant (FCFA)</option>
+              <option value="percent">Pourcentage (%)</option>
+            </select>
+            <input type="number" step="1" min="0" formControlName="discount_value"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary-500" />
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="shrink-0 px-6 py-4 border-t border-gray-200 bg-gray-50 flex gap-3">
+        <button type="button" (click)="onCancel()"
+          class="px-5 py-3 rounded-xl border border-gray-300 text-sm font-bold text-gray-700 hover:bg-white flex items-center gap-2">
+          <i class="fa-solid fa-arrow-left"></i>
+          Annuler
+        </button>
+        <button type="submit" [disabled]="isSubmitting()"
+          class="flex-1 px-5 py-3 rounded-xl bg-rose-600 text-white text-sm font-bold hover:bg-rose-700 disabled:opacity-50 flex items-center justify-center gap-2">
+          @if (isSubmitting()) {
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          Enregistrement…
+          } @else {
+          <i class="fa-solid fa-hospital"></i>
+          Admettre l'animal
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}

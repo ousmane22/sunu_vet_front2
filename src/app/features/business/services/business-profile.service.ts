@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { shareReplay, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import type {
@@ -21,9 +21,17 @@ export class BusinessProfileService {
    * Un seul appel HTTP par session, invalidé après update/logo/subscribe.
    */
   private profile$: Observable<BusinessProfileResponse> | null = null;
+  private readonly changed$ = new Subject<void>();
+
+  /** Émis après toute invalidation (ex. paramètres caisse mis à jour). */
+  onChanged(): Observable<void> {
+    return this.changed$.asObservable();
+  }
 
   getProfile(forceRefresh = false): Observable<BusinessProfileResponse> {
-    if (forceRefresh) this.profile$ = null;
+    if (forceRefresh) {
+      this.profile$ = null;
+    }
     if (!this.profile$) {
       this.profile$ = this.http
         .get<BusinessProfileResponse>(`${this.baseUrl}/profile`)
@@ -38,6 +46,7 @@ export class BusinessProfileService {
   /** Invalide le cache du profil après toute modification. */
   invalidateProfile(): void {
     this.profile$ = null;
+    this.changed$.next();
   }
 
   updateProfile(payload: BusinessProfileUpdatePayload): Observable<BusinessProfileResponse & { message: string }> {

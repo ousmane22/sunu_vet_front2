@@ -91,9 +91,38 @@ export type {
 } from './consultation.model';
 
 export type {
+  Vaccination,
+  VaccineType,
+  VaccineTypeListResponse,
+  VaccinationListResponse,
+  VaccinationSingleResponse,
+} from './vaccination.model';
+
+export type {
+  Hospitalization,
+  HospitalizationNote,
+  HospitalizationListResponse,
+  HospitalizationSingleResponse,
+} from './hospitalization.model';
+
+export type {
   AnimalSpecies,
   AnimalSpeciesListResponse,
 } from './animal-species.model';
+
+export type {
+  Animal,
+  AnimalDetail,
+  AnimalGender,
+  AnimalStatus,
+  AnimalListResponse,
+  AnimalSingleResponse,
+} from './animal.model';
+
+export type {
+  Breed,
+  BreedListResponse,
+} from './breed.model';
 
 export type {
   Expense,

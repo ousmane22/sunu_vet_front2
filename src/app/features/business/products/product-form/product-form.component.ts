@@ -83,7 +83,6 @@ export class ProductFormComponent {
           description: med.description,
           purchase_price: med.purchase_price,
           selling_price: med.selling_price,
-          stock_quantity: med.stock_quantity,
           low_stock_threshold: med.low_stock_threshold,
           expiry_date: med.expiry_date,
         });
@@ -149,7 +148,11 @@ export class ProductFormComponent {
 
     const val = this.form.getRawValue();
     const payload: any = { ...val };
-    
+
+    // stock_quantity ne se modifie jamais via ce formulaire en édition — seul
+    // l'ajustement de stock dédié (tracé en StockMovement) peut le changer.
+    if (this.isEditMode()) delete payload.stock_quantity;
+
     // Nettoyage des valeurs vides
     if (!payload.description) delete payload.description;
     if (!payload.expiry_date) delete payload.expiry_date;

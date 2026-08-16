@@ -1,6 +1,5 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { initRevealOnScroll } from '../../../../core/utils/reveal-on-scroll';
 import { LandingActionsService } from '../../services/landing-actions.service';
 
 type ChatPhase = 0 | 1 | 2;
@@ -21,7 +20,6 @@ export class LandingAiComponent implements AfterViewInit, OnDestroy {
   /** 0 = question, 1 = frappe, 2 = réponse assistant. */
   chatPhase = signal<ChatPhase>(0);
 
-  private teardownReveal?: () => void;
   private sectionObserver?: IntersectionObserver;
   private chatInterval?: ReturnType<typeof setInterval>;
   private chatTimeouts: ReturnType<typeof setTimeout>[] = [];
@@ -48,19 +46,16 @@ export class LandingAiComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    this.teardownReveal = initRevealOnScroll(this.host.nativeElement);
+    const section = this.host.nativeElement;
 
-    const section = this.host.nativeElement.querySelector('#assistant-ia') as HTMLElement | null;
-    const scrollRoot = document.querySelector('app-landing');
-
-    if (section && scrollRoot && typeof IntersectionObserver !== 'undefined') {
+    if (typeof IntersectionObserver !== 'undefined') {
       this.sectionObserver = new IntersectionObserver(
         ([entry]) => {
           if (!entry?.isIntersecting) return;
           this.sectionVisible.set(true);
           this.startChatDemo();
         },
-        { root: scrollRoot, threshold: 0.2 },
+        { root: null, threshold: 0.15, rootMargin: '0px 0px -5% 0px' },
       );
       this.sectionObserver.observe(section);
     } else {
@@ -70,7 +65,6 @@ export class LandingAiComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.teardownReveal?.();
     this.sectionObserver?.disconnect();
     if (this.chatInterval) clearInterval(this.chatInterval);
     this.clearChatTimeouts();

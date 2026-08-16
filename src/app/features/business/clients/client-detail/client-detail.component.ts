@@ -4,11 +4,14 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormatPricePipe, FormatDatePipe } from '../../../../core/pipes';
 import { ClientService } from '../../services/client.service';
+import { AnimalService } from '../../services/animal.service';
 import { AddPaymentModalComponent, type AddPaymentPayload } from '../../../../shared/components/add-payment-modal/add-payment-modal.component';
-import type { ClientDetail } from '../../models';
+import { AnimalFormModalComponent } from '../../animals/animals-list/components/animal-form-modal.component';
+import type { Animal, ClientDetail } from '../../models';
 import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
+import { animalDisplayName } from '../../utils/animal-display.util';
 
-type TabId = 'ventes' | 'consultations' | 'montant';
+type TabId = 'ventes' | 'consultations' | 'clinique' | 'montant';
 
 @Component({
   selector: 'app-client-detail',
@@ -20,6 +23,7 @@ type TabId = 'ventes' | 'consultations' | 'montant';
     FormatPricePipe,
     FormatDatePipe,
     AddPaymentModalComponent,
+    AnimalFormModalComponent,
   ],
   templateUrl: './client-detail.component.html',
 })
@@ -27,6 +31,7 @@ export class ClientDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private clientService = inject(ClientService);
+  private animalService = inject(AnimalService);
   private fb = inject(FormBuilder);
   private dialog = inject(SunuDialogService);
 
@@ -50,6 +55,10 @@ export class ClientDetailComponent implements OnInit {
   showPaymentModal = signal(false);
   isSubmittingPayment = signal(false);
 
+  clientAnimals = signal<Animal[]>([]);
+  animalsLoading = signal(false);
+  showAnimalModal = signal(false);
+
   sales = computed(() => this.client()?.sales ?? []);
   payments = computed(() => this.client()?.payments ?? []);
   consultations = computed(() => this.client()?.consultations ?? []);
@@ -58,6 +67,10 @@ export class ClientDetailComponent implements OnInit {
   /** True si le client a une dette (montant arrondi > 0). */
   hasDebt(amount: number | null | undefined): boolean {
     return Math.round(Number(amount) || 0) > 0;
+  }
+
+  displayAnimalName(a: Animal): string {
+    return animalDisplayName(a);
   }
 
   ngOnInit(): void {
@@ -72,6 +85,7 @@ export class ClientDetailComponent implements OnInit {
       next: (res) => {
         this.client.set(res.data);
         this.isLoading.set(false);
+        this.loadClientAnimals();
       },
       error: () => this.isLoading.set(false),
     });
@@ -79,6 +93,43 @@ export class ClientDetailComponent implements OnInit {
 
   setTab(tab: TabId): void {
     this.activeTab.set(tab);
+    if (tab === 'clinique') {
+      this.loadClientAnimals();
+    }
+  }
+
+  loadClientAnimals(): void {
+    const c = this.client();
+    if (!c) return;
+    this.animalsLoading.set(true);
+    this.animalService.getForClient(c.id).subscribe({
+      next: (res) => {
+        this.clientAnimals.set(res.data);
+        this.animalsLoading.set(false);
+      },
+      error: () => this.animalsLoading.set(false),
+    });
+  }
+
+  openAddAnimal(): void {
+    this.showAnimalModal.set(true);
+  }
+
+  closeAnimalModal(): void {
+    this.showAnimalModal.set(false);
+  }
+
+  onAnimalSaved(animal: Animal): void {
+    this.closeAnimalModal();
+    this.clientAnimals.update((list) => {
+      const idx = list.findIndex((a) => a.id === animal.id);
+      if (idx >= 0) {
+        const next = [...list];
+        next[idx] = animal;
+        return next;
+      }
+      return [animal, ...list];
+    });
   }
 
   openEdit(): void {

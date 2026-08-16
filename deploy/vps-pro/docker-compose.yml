@@ -1,11 +1,19 @@
-# Stack SunuVet uniquement — ne touche pas iziportfolio / takema.
+# Stack SunuVet — nginx interne + accès public via Caddy (port 80 /pro/).
 services:
   sunuvet-front-pro:
     image: nginx:1.27-alpine
     container_name: sunuvet_front_pro
     restart: unless-stopped
     ports:
-      - "8090:80"
+      - "127.0.0.1:8090:80"
     volumes:
       - ./static:/usr/share/nginx/html:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - default
+      - caddy
+
+networks:
+  caddy:
+    external: true
+    name: iziportfolio-api-preprod_iziportfolio

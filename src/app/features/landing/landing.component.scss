@@ -1,9 +1,39 @@
 :host {
   display: block;
-  height: 100dvh;
-  max-height: 100dvh;
+  position: relative;
+  height: 100svh;
+  max-height: 100svh;
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   scroll-behavior: smooth;
-  scroll-padding-top: 5rem;
+  scroll-padding-top: 5.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+:host ::ng-deep .reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+
+:host ::ng-deep .reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+:host ::ng-deep .reveal-delay-1 { transition-delay: 0.08s; }
+:host ::ng-deep .reveal-delay-2 { transition-delay: 0.16s; }
+:host ::ng-deep .reveal-delay-3 { transition-delay: 0.24s; }
+:host ::ng-deep .reveal-delay-4 { transition-delay: 0.32s; }
+:host ::ng-deep .reveal-delay-5 { transition-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  :host ::ng-deep .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }

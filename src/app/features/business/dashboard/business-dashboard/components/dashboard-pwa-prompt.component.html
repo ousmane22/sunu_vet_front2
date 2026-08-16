@@ -23,8 +23,7 @@
         </span>
 
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-bold text-gray-900 leading-snug">Retrouvez SunuVet en un tap</p>
-          <p class="text-xs text-gray-500 mt-1 leading-relaxed">Comme une app, directement sur votre appareil</p>
+          <p class="text-sm font-bold text-gray-900 leading-snug">Installer SunuVet directement sur votre appareil</p>
         </div>
 
         <button type="button" (click)="addToHomeScreen()" [disabled]="installing()"
@@ -35,7 +34,7 @@
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
           } @else {
-          Ajouter à l'écran d'accueil
+          Installer SunuVet
           }
         </button>
       </div>
@@ -47,9 +46,9 @@
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
         </svg>
-        Patientez…
+        Installation…
         } @else {
-        Ajouter à l'écran d'accueil
+        Installer SunuVet
         }
       </button>
     </div>
@@ -57,10 +56,6 @@
     @if (hint()) {
     <p class="px-4 pb-4 text-xs text-amber-900 bg-amber-50 border-t border-amber-100 leading-relaxed">
       {{ hint() }}
-    </p>
-    } @else if (canInstallNow()) {
-    <p class="px-4 pb-3.5 text-[11px] text-primary-700/80 border-t border-primary-50 leading-relaxed">
-      Appuyez sur le bouton — votre navigateur s'occupe du reste.
     </p>
     }
   </div>

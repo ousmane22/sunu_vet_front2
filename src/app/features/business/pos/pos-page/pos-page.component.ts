@@ -31,7 +31,7 @@ export class PosPageComponent implements OnInit, AfterViewInit, OnDestroy {
     this.registerPrompt.evaluatePrompt('pos', (open) => this.showRegisterPrompt.set(open));
     this.registerPrompt.watchRegisterChanges('pos', (open) => this.showRegisterPrompt.set(open))
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.registerPrompt.evaluatePrompt('pos', (open) => this.showRegisterPrompt.set(open)));
+      .subscribe();
   }
 
   ngAfterViewInit(): void {

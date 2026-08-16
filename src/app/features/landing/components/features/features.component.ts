@@ -1,6 +1,5 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { initRevealOnScroll } from '../../../../core/utils/reveal-on-scroll';
 
 interface Feature {
   title: string;
@@ -17,10 +16,7 @@ interface Feature {
   templateUrl: './features.component.html',
   styleUrl: './features.component.scss',
 })
-export class FeaturesComponent implements AfterViewInit, OnDestroy {
-  private host = inject(ElementRef<HTMLElement>);
-  private teardownReveal?: () => void;
-
+export class FeaturesComponent {
   features: Feature[] = [
     {
       icon: 'consultation',
@@ -70,13 +66,5 @@ export class FeaturesComponent implements AfterViewInit, OnDestroy {
     if (index === 0) return '';
     if (index <= 5) return `reveal-delay-${index}`;
     return 'reveal-delay-5';
-  }
-
-  ngAfterViewInit(): void {
-    this.teardownReveal = initRevealOnScroll(this.host.nativeElement);
-  }
-
-  ngOnDestroy(): void {
-    this.teardownReveal?.();
   }
 }

@@ -30,6 +30,13 @@ export class CashRegisterDetailsComponent {
     /** Émis après une action (ex. PDF) pour fermer le slide parent. */
     actionDone = output<void>();
 
+    /** Journal des opérations, la plus récente en premier. */
+    sortedTransactions = computed(() => {
+        const transactions = this.register()?.transactions;
+        if (!transactions) return [];
+        return [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    });
+
     totalIncome = computed(() => sumCashIncome(this.register()?.transactions));
     totalExpense = computed(() => sumCashBusinessExpenses(this.register()?.transactions));
     totalRefund = computed(() => sumCashRefunds(this.register()?.transactions));

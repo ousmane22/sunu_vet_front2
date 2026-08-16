@@ -1,0 +1,231 @@
+<div class="p-4 md:p-8 max-w-[1400px] mx-auto space-y-6">
+
+  <!-- Header V2 -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-2xl bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xl shadow-sm">
+          🐾
+        </div>
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Clinique & Patients</h1>
+          <p class="text-xs sm:text-sm text-gray-600 font-medium">Dossiers médicaux, historique clinique, vaccins et hospitalisations.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions Header -->
+    <div class="flex flex-wrap items-center gap-2.5 self-start md:self-auto">
+      <a routerLink="/business/clinique/vaccinations"
+        class="px-4 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 font-bold text-xs sm:text-sm transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span>Calendrier vaccinal</span>
+      </a>
+
+      <button type="button" (click)="openCreate()"
+        class="px-4 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-primary-600/20 hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer border-0">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        <span>+ Nouveau dossier</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats & Filtres V2 -->
+  <div class="bg-white rounded-3xl border border-gray-200 p-5 shadow-sm space-y-4">
+    <!-- Search & Total -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="relative max-w-md w-full">
+        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input id="search" type="search" [formControl]="searchControl" placeholder="Rechercher par nom, puce, propriétaire…"
+          class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-semibold text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-gray-50/60 focus:bg-white transition-all" />
+      </div>
+
+      <div class="flex items-center gap-3 text-xs font-bold text-gray-500 shrink-0">
+        <span class="px-3 py-1.5 rounded-xl bg-gray-100 text-gray-700">
+          <strong>{{ filteredAnimals().length }}</strong> dossier{{ filteredAnimals().length > 1 ? 's' : '' }}
+        </span>
+        <span class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-100">
+          <strong>{{ activeCount() }}</strong> actif{{ activeCount() > 1 ? 's' : '' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Species Pills -->
+    @if (species().length > 0) {
+    <div class="flex items-center gap-1.5 overflow-x-auto pt-1 pb-1 -mx-1 px-1">
+      <button type="button" (click)="setSpeciesFilter('all')"
+        [class.bg-primary-600]="selectedSpecies() === 'all'"
+        [class.text-white]="selectedSpecies() === 'all'"
+        [class.bg-gray-100]="selectedSpecies() !== 'all'"
+        [class.text-gray-700]="selectedSpecies() !== 'all'"
+        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border-0">
+        🐾 Tous ({{ totalCount() }})
+      </button>
+
+      @for (s of species(); track s.id) {
+      <button type="button" (click)="setSpeciesFilter(s.name)"
+        [class.bg-primary-600]="selectedSpecies() === s.name"
+        [class.text-white]="selectedSpecies() === s.name"
+        [class.bg-gray-100]="selectedSpecies() !== s.name"
+        [class.text-gray-700]="selectedSpecies() !== s.name"
+        class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 cursor-pointer border-0">
+        <span>{{ getSpeciesEmoji(s.name) }}</span>
+        <span>{{ s.name }}</span>
+      </button>
+      }
+    </div>
+    }
+  </div>
+
+  <!-- Contenu : Liste / Grille de patients V2 -->
+  @if (isLoading()) {
+  <div class="py-24 text-center">
+    <div class="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-white border border-gray-200 shadow-sm text-sm font-bold text-gray-600">
+      <svg class="w-5 h-5 animate-spin text-primary-600" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+      Chargement des dossiers patients…
+    </div>
+  </div>
+  } @else if (filteredAnimals().length === 0) {
+  <div class="bg-white rounded-3xl border border-gray-200 py-20 px-6 text-center shadow-sm max-w-md mx-auto">
+    <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center mx-auto mb-4 text-3xl shadow-sm">
+      🐾
+    </div>
+    <h3 class="font-extrabold text-gray-900 text-lg">Aucun dossier patient trouvé</h3>
+    <p class="text-xs text-gray-500 mt-1 max-w-xs mx-auto">Créez le premier dossier pour enregistrer les informations de l'animal et son suivi.</p>
+    <button type="button" (click)="openCreate()"
+      class="mt-5 px-5 py-2.5 bg-primary-600 text-white font-bold text-xs rounded-xl hover:bg-primary-700 shadow-md shadow-primary-600/20 transition-all inline-flex items-center gap-2 cursor-pointer border-0">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+      Créer un dossier patient
+    </button>
+  </div>
+  } @else {
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+    @for (a of filteredAnimals(); track a.id) {
+    <div class="group relative bg-white rounded-3xl border border-gray-200/90 p-5 hover:border-primary-300 hover:shadow-lg transition-all flex flex-col justify-between">
+
+      <!-- Header Card : Avatar + Nom + Menu -->
+      <div>
+        <div class="flex items-start justify-between gap-3 mb-3.5">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200/60 overflow-hidden shrink-0 flex items-center justify-center text-2xl shadow-sm">
+              @if (a.photo_url) {
+              <img [src]="a.photo_url" alt="" class="w-full h-full object-cover" />
+              } @else {
+              <span>{{ getSpeciesEmoji(a.species_name) }}</span>
+              }
+            </div>
+            <div class="min-w-0">
+              <a [routerLink]="['/business/clinique', a.id]" class="block">
+                <h3 class="font-extrabold text-gray-900 text-base truncate group-hover:text-primary-700 transition-colors">
+                  {{ displayName(a) }}
+                </h3>
+              </a>
+              <p class="text-xs text-gray-500 truncate mt-0.5">
+                {{ a.species_name || 'Espèce non précisée' }}@if (a.breed_name) { · {{ a.breed_name }} }
+              </p>
+            </div>
+          </div>
+
+          <!-- Actions Dropdown -->
+          <div class="relative shrink-0">
+            <button type="button" (click)="toggleMenu(a.id, $event)" aria-label="Actions du dossier"
+              class="w-8 h-8 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors cursor-pointer">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6h.01M12 12h.01M12 18h.01" />
+              </svg>
+            </button>
+
+            @if (openMenuId() === a.id) {
+            <div class="absolute right-0 top-9 z-20 w-40 bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden py-1.5"
+              (click)="$event.stopPropagation()">
+              <a [routerLink]="['/business/clinique', a.id]"
+                class="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                <svg class="w-3.5 h-3.5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                Voir dossier
+              </a>
+              <button type="button" (click)="openEdit(a, $event)"
+                class="w-full text-left px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-2 cursor-pointer border-0 bg-transparent">
+                <svg class="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Modifier
+              </button>
+              <div class="h-px bg-gray-100 my-1"></div>
+              <button type="button" (click)="deleteAnimal(a, $event)"
+                class="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2 cursor-pointer border-0 bg-transparent">
+                <svg class="w-3.5 h-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Supprimer
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Informations Card Body -->
+        <div class="space-y-2 py-2 border-y border-gray-100 text-xs text-gray-600">
+          <div class="flex items-center justify-between">
+            <span class="text-gray-400 font-medium">Propriétaire :</span>
+            <span class="font-bold text-gray-800 truncate max-w-[150px]">{{ a.client_name || '—' }}</span>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="text-gray-400 font-medium">Poids :</span>
+            <span class="font-bold text-gray-800">{{ a.weight_kg != null ? a.weight_kg + ' kg' : '—' }}</span>
+          </div>
+
+          @if (a.microchip) {
+          <div class="flex items-center justify-between font-mono">
+            <span class="text-gray-400 font-sans font-medium">Puce :</span>
+            <span class="font-bold text-gray-800 text-[11px]">{{ a.microchip }}</span>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Footer Card : Badges & Lien Dossier -->
+      <div class="mt-3.5 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-1.5">
+          <span class="inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider"
+            [ngClass]="statusClass(a.status)">
+            {{ statusLabel(a.status) }}
+          </span>
+          <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600">
+            {{ genderLabel(a.gender) }}
+          </span>
+        </div>
+
+        <a [routerLink]="['/business/clinique', a.id]"
+          class="inline-flex items-center gap-1 text-xs font-extrabold text-primary-700 hover:text-primary-900 transition-colors">
+          <span>Dossier</span>
+          <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+    </div>
+    }
+  </div>
+  }
+
+</div>
+
+<app-animal-form-modal [open]="showFormModal()" [animal]="editingAnimal()"
+  (saved)="onAnimalSaved($event)" (cancelled)="closeFormModal()" />

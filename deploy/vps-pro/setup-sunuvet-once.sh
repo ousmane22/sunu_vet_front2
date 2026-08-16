@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stack SunuVet isolé sur le VPS — sans modifier iziportfolio.
+# Stack SunuVet isolé sur le VPS — route publique via Caddy (port 80).
 set -euo pipefail
 
 BASE="/var/www/projects/sunuvet-pro"
@@ -13,4 +13,8 @@ fi
 cd "${BASE}"
 docker compose up -d
 
-echo "✓ SunuVet pro actif : http://180.149.198.229:8090/pro/"
+if [ -x "${BASE}/sync-caddy-sunuvet.sh" ]; then
+  bash "${BASE}/sync-caddy-sunuvet.sh"
+fi
+
+echo "✓ SunuVet pro actif : http://180.149.198.229/pro/"

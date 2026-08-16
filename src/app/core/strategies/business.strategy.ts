@@ -18,7 +18,7 @@ export const VETERINARY_STRATEGY: BusinessStrategy = {
     productCategory: 'Catégorie',
     consultations: 'Consultations'
   },
-  visibleMenus: ['Point de vente', 'Historique Ventes', 'Paiements', 'Gestion Caisses', 'Devis & Proformas', 'Clients', 'Consultations', 'Médicaments', 'Catégories', 'Mouvements Stock', 'Inventaire physique', 'Rapport de stock', 'Dépenses', 'Personnel', 'Rapports', 'Paramètres'],
+  visibleMenus: ['Point de vente', 'Historique Ventes', 'Paiements', 'Gestion Caisses', 'Devis & Proformas', 'Clients', 'Clinique', 'Consultations', 'Médicaments', 'Catégories', 'Mouvements Stock', 'Inventaire physique', 'Rapport de stock', 'Dépenses', 'Personnel', 'Rapports', 'Paramètres'],
   visibleFormFields: ['name', 'sku', 'type', 'description', 'purchase_price', 'selling_price', 'stock_quantity', 'low_stock_threshold', 'expiry_date']
 };
 

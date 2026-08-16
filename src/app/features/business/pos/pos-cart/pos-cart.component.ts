@@ -47,11 +47,19 @@ export class PosCartComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.loadActiveRegister();
+        this.loadRequireOpenRegister();
+
         this.cashRegService.onChanged()
             .pipe(takeUntil(this.destroy$))
             .subscribe(() => this.loadActiveRegister());
 
-        this.profileService.getProfile().subscribe({
+        this.profileService.onChanged()
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(() => this.loadRequireOpenRegister());
+    }
+
+    private loadRequireOpenRegister(): void {
+        this.profileService.getProfile(true).subscribe({
             next: (res) => this.requireOpenRegister.set(res.data.settings?.require_open_register === true),
             error: () => this.requireOpenRegister.set(false),
         });

@@ -99,7 +99,7 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
     this.registerPrompt.evaluatePrompt('consultations', (open) => this.showRegisterPrompt.set(open));
     this.registerPrompt.watchRegisterChanges('consultations', (open) => this.showRegisterPrompt.set(open))
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.registerPrompt.evaluatePrompt('consultations', (open) => this.showRegisterPrompt.set(open)));
+      .subscribe();
 
     this.loadConsultations();
 

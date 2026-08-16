@@ -83,7 +83,9 @@ export class CashRegisterReportPdfService {
         doc.text('Journal des opérations', 14, finalY);
         finalY += 8;
 
-        const transactions = register.transactions ?? [];
+        const transactions = [...(register.transactions ?? [])].sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
         if (transactions.length === 0) {
             doc.setFontSize(9);
             doc.text('Aucune transaction enregistrée.', 14, finalY);

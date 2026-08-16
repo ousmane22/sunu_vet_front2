@@ -76,6 +76,15 @@
                 </button>
                 <button
                     type="button"
+                    (click)="setTab('clinique')"
+                    [class]="activeTab() === 'clinique'
+                        ? 'border-primary-500 text-primary-600 font-medium'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="px-4 py-3 border-b-2 transition-colors">
+                    Clinique ({{ clientAnimals().length }})
+                </button>
+                <button
+                    type="button"
                     (click)="setTab('montant')"
                     [class]="activeTab() === 'montant'
                         ? 'border-primary-500 text-primary-600 font-medium'
@@ -199,6 +208,33 @@
                         </div>
                     }
                 }
+                @case ('clinique') {
+                    <div class="p-4 md:p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <p class="text-sm text-gray-600">Dossiers patients rattachés à ce client</p>
+                            <button type="button" (click)="openAddAnimal()"
+                                class="px-4 py-2 rounded-xl bg-primary-700 text-white text-sm font-bold">Nouveau dossier</button>
+                        </div>
+                        @if (animalsLoading()) {
+                        <p class="text-center text-gray-500 py-8">Chargement…</p>
+                        } @else if (clientAnimals().length === 0) {
+                        <p class="text-center text-gray-500 py-8">Aucun dossier enregistré.</p>
+                        } @else {
+                        <div class="divide-y divide-gray-100">
+                            @for (a of clientAnimals(); track a.id) {
+                            <a [routerLink]="['/business/clinique', a.id]"
+                                class="flex justify-between items-center py-3 hover:bg-gray-50 px-2 rounded-lg">
+                                <div>
+                                    <p class="font-bold text-black">{{ displayAnimalName(a) }}</p>
+                                    <p class="text-xs text-gray-500">{{ a.species_name }}@if (a.breed_name) { · {{ a.breed_name }} }</p>
+                                </div>
+                                <span class="text-primary-600 text-sm font-semibold">Voir fiche →</span>
+                            </a>
+                            }
+                        </div>
+                        }
+                    </div>
+                }
                 @case ('montant') {
                     <div class="p-8 flex flex-col items-center justify-center">
                         <p class="text-sm text-gray-500 uppercase tracking-wider mb-2">Montant total généré (ventes)</p>
@@ -282,5 +318,10 @@
     (submitPayload)="onPaymentSubmit($event)"
     (closeModal)="closePaymentModal()" />
 
+<app-animal-form-modal
+    [open]="showAnimalModal()"
+    [presetClientId]="client()?.id ?? null"
+    (saved)="onAnimalSaved($event)"
+    (cancelled)="closeAnimalModal()" />
 
 

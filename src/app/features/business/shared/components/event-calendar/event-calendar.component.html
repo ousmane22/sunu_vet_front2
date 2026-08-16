@@ -1,0 +1,31 @@
+<div class="event-calendar bg-white rounded-2xl border border-gray-200 overflow-hidden">
+  <div class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-200">
+    <h3 class="text-sm font-bold text-gray-900 capitalize">{{ monthLabel() }}</h3>
+    <div class="flex items-center gap-1.5">
+      <button type="button" (click)="today()"
+        class="px-2.5 py-1.5 text-xs font-bold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+        Aujourd'hui
+      </button>
+      <button type="button" (click)="previousMonth()" aria-label="Mois précédent"
+        class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button type="button" (click)="nextMonth()" aria-label="Mois suivant"
+        class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="p-2 sm:p-3">
+    <full-calendar #calendar [options]="calendarOptions" [events]="events()">
+      <ng-template #eventContent let-arg>
+        <ng-container [ngTemplateOutlet]="eventTemplate() ?? null" [ngTemplateOutletContext]="{ $implicit: arg.event }" />
+      </ng-template>
+    </full-calendar>
+  </div>
+</div>

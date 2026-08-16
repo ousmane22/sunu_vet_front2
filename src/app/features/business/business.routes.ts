@@ -97,6 +97,30 @@ export const BUSINESS_ROUTES: Routes = [
           ),
       },
       {
+        path: 'clinique',
+        title: 'Clinique',
+        loadComponent: () =>
+          import('./animals/animals-list/animals-list.component').then(
+            (m) => m.AnimalsListComponent
+          ),
+      },
+      {
+        path: 'clinique/vaccinations',
+        title: 'Calendrier vaccinations',
+        loadComponent: () =>
+          import('./animals/vaccination-calendar/vaccination-calendar.component').then(
+            (m) => m.VaccinationCalendarComponent
+          ),
+      },
+      {
+        path: 'clinique/:id',
+        title: 'Dossier clinique',
+        loadComponent: () =>
+          import('./animals/animal-detail/animal-detail.component').then(
+            (m) => m.AnimalDetailComponent
+          ),
+      },
+      {
         path: 'consultations',
         title: 'Consultations',
         loadComponent: () =>

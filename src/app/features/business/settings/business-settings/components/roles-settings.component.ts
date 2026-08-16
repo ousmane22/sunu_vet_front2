@@ -214,6 +214,26 @@ export class RolesSettingsComponent implements OnInit {
                             permissions: group_permissions
                         };
                     });
+                } else {
+                    permissions = permissions.map((g: any) => {
+                        let group_label = g.group_label;
+                        let group_permissions = g.permissions;
+
+                        if (g.group_key === 'clients_animals') {
+                            group_label = 'Clients & Clinique';
+                        }
+
+                        group_permissions = group_permissions.map((p: any) => {
+                            let label = p.label || p.name;
+                            label = label
+                                .replace(/Clients & Animaux/g, 'Clients & Clinique')
+                                .replace(/animaux/gi, (match: string) => match[0] === 'A' ? 'Dossiers' : 'dossiers')
+                                .replace(/animal/gi, (match: string) => match[0] === match[0].toUpperCase() ? 'Dossier' : 'dossier');
+                            return { ...p, label };
+                        });
+
+                        return { ...g, group_label, permissions: group_permissions };
+                    });
                 }
                 this.availablePermissionsGrouped.set(permissions);
             },

@@ -14,32 +14,35 @@ function isPartiallyVisible(el: HTMLElement, scrollRoot: HTMLElement | null): bo
   const rect = el.getBoundingClientRect();
   if (rect.width <= 0 || rect.height <= 0) return false;
 
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+  const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+
   if (!scrollRoot) {
-    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-    return rect.bottom > 0 && rect.top < viewportHeight;
+    return rect.bottom > 0 && rect.top < viewportHeight && rect.right > 0 && rect.left < viewportWidth;
   }
 
   const rootRect = scrollRoot.getBoundingClientRect();
-  return rect.bottom > rootRect.top && rect.top < rootRect.bottom;
+  return (
+    rect.bottom > rootRect.top &&
+    rect.top < rootRect.bottom &&
+    rect.right > rootRect.left &&
+    rect.left < rootRect.right
+  );
 }
 
-function getScrollParents(root: HTMLElement): Array<HTMLElement | Window> {
-  const parents = new Set<HTMLElement | Window>();
-  parents.add(window);
+function getScrollTargets(root: HTMLElement): Array<HTMLElement | Window> {
+  const targets = new Set<HTMLElement | Window>();
+  targets.add(window);
 
-  let node: HTMLElement | null = root;
-  while (node) {
-    const { overflowY } = getComputedStyle(node);
-    if (/(auto|scroll|overlay)/.test(overflowY) && node.scrollHeight > node.clientHeight) {
-      parents.add(node);
-    }
-    node = node.parentElement;
+  const scrollRoot = findScrollRoot(root);
+  if (scrollRoot) {
+    targets.add(scrollRoot);
   }
 
-  return [...parents];
+  return [...targets];
 }
 
-/** Révèle les éléments `.reveal` au scroll (pattern iziportfolio). */
+/** Révèle les éléments `.reveal` au scroll (conteneur landing ou fenêtre). */
 export function initRevealOnScroll(root: HTMLElement): () => void {
   const revealed = new WeakSet<Element>();
   let observer: IntersectionObserver | undefined;
@@ -52,7 +55,7 @@ export function initRevealOnScroll(root: HTMLElement): () => void {
     observer?.unobserve(el);
   };
 
-  const scrollRoot = findScrollRoot(root);
+  const scrollRoot = findScrollRoot(root) ?? root.closest('app-landing');
 
   const scan = () => {
     root.querySelectorAll('.reveal:not(.is-visible)').forEach((node) => {
@@ -80,6 +83,7 @@ export function initRevealOnScroll(root: HTMLElement): () => void {
     return () => undefined;
   }
 
+  // Observer viewport : fiable quand le scroll est dans app-landing (pas window).
   observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
@@ -89,9 +93,9 @@ export function initRevealOnScroll(root: HTMLElement): () => void {
       }
     },
     {
-      root: scrollRoot,
-      threshold: 0.08,
-      rootMargin: scrollRoot ? '0px 0px -5% 0px' : '80px 0px 80px 0px',
+      root: null,
+      threshold: [0, 0.05, 0.12],
+      rootMargin: '0px 0px -4% 0px',
     },
   );
 
@@ -102,21 +106,46 @@ export function initRevealOnScroll(root: HTMLElement): () => void {
     }
   });
 
-  const scrollParents = getScrollParents(root);
-  scrollParents.forEach((parent) => {
-    parent.addEventListener('scroll', scheduleScan, { passive: true });
+  const observeNewNodes = () => {
+    root.querySelectorAll('.reveal:not(.is-visible)').forEach((node) => {
+      if (!revealed.has(node)) {
+        observer!.observe(node);
+        if (isPartiallyVisible(node as HTMLElement, scrollRoot)) {
+          markVisible(node);
+        }
+      }
+    });
+  };
+
+  let mutationObserver: MutationObserver | undefined;
+  if (typeof MutationObserver !== 'undefined') {
+    mutationObserver = new MutationObserver(() => {
+      observeNewNodes();
+      scheduleScan();
+    });
+    mutationObserver.observe(root, { childList: true, subtree: true });
+  }
+
+  const scrollTargets = getScrollTargets(root);
+  scrollTargets.forEach((target) => {
+    target.addEventListener('scroll', scheduleScan, { passive: true });
   });
+  window.addEventListener('resize', scheduleScan, { passive: true });
 
   scheduleScan();
   requestAnimationFrame(scheduleScan);
+  setTimeout(scheduleScan, 120);
+  setTimeout(scheduleScan, 400);
 
   return () => {
     if (rafId) {
       cancelAnimationFrame(rafId);
     }
     observer?.disconnect();
-    scrollParents.forEach((parent) => {
-      parent.removeEventListener('scroll', scheduleScan);
+    mutationObserver?.disconnect();
+    scrollTargets.forEach((target) => {
+      target.removeEventListener('scroll', scheduleScan);
     });
+    window.removeEventListener('resize', scheduleScan);
   };
 }

@@ -13,6 +13,8 @@ describe('StaffFormModalComponent', () => {
     .compileComponents();
 
     fixture = TestBed.createComponent(StaffFormModalComponent);
+    fixture.componentRef.setInput('roles', []);
+    fixture.componentRef.setInput('member', null);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

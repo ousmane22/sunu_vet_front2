@@ -6,6 +6,13 @@ export interface ConsultationClient {
   balance_due: number;
 }
 
+export interface ConsultationAnimal {
+  id: number;
+  name: string | null;
+  species_name?: string | null;
+  breed_name?: string | null;
+}
+
 export interface ConsultationPayment {
   id: number;
   amount: number;
@@ -20,6 +27,8 @@ export interface Consultation {
   payment_method: string;
   created_at: string;
   client?: ConsultationClient | null;
+  animal_id?: number | null;
+  animal?: ConsultationAnimal | null;
   total_amount: number;
   discount_amount?: number;
   net_amount: number;
@@ -28,10 +37,14 @@ export interface Consultation {
   user?: { id: number; name: string };
   animal_species?: string | null;
   animal_name?: string | null;
+  animal_weight_kg?: number | null;
+  temperature_c?: number | null;
+  general_condition?: string | null;
   reason_visit?: string | null;
-  businessal_exam?: string | null;
+  clinical_exam?: string | null;
   diagnosis?: string | null;
   treatment_notes?: string | null;
+  next_visit_at?: string | null;
   /** Présent en détail (getOne) */
   payments?: ConsultationPayment[];
 }
@@ -50,7 +63,3 @@ export interface ConsultationListResponse {
     count: number;
   };
 }
-
-
-
-

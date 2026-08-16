@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Sale, SaleItem, BusinessProfile, Quote, QuoteItem } from '../../features/business/models';
-import type { InventorySession } from '../../features/business/models';
+import type { InventorySession, AnimalDetail, Consultation, Hospitalization } from '../../features/business/models';
 import { formatPrice } from '../utils/format.util';
 import { BusinessProfileService } from '../../features/business/services/business-profile.service';
 import { SunuDialogService } from '../../shared/services/sunu-dialog.service';
@@ -557,6 +557,130 @@ export class PrintService {
             };
         } else {
             await this.dialog.alert('Veuillez autoriser les pop-ups pour imprimer le rapport.', {
+                type: 'warning',
+                title: 'Impression bloquée',
+            });
+        }
+    }
+
+    /** Ouvre une fenêtre d'impression avec le récapitulatif de facturation d'un animal (consultations + hospitalisations). */
+    async printAnimalBilling(
+        animal: AnimalDetail,
+        entries: { kind: 'consultation' | 'hospitalisation'; date: string; entry: Consultation | Hospitalization }[]
+    ): Promise<void> {
+        const business = await this.getBusinessInfo();
+
+        const isConsultation = (e: Consultation | Hospitalization): e is Consultation => !('admitted_at' in e);
+        const entryLabel = (e: Consultation | Hospitalization): string =>
+            isConsultation(e) ? (e.reason_visit || 'Consultation') : `Hospitalisation${e.location ? ' — ' + e.location : ''}`;
+
+        const totalNet = entries.reduce((sum, { entry }) => sum + (entry.net_amount || 0), 0);
+        const totalPaid = entries.reduce((sum, { entry }) => sum + (entry.amount_paid || 0), 0);
+        const totalDue = entries.reduce((sum, { entry }) => sum + (entry.amount_due || 0), 0);
+
+        const rows = entries.map(({ date, entry }) => {
+            const dateStr = new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            return `<tr>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${dateStr}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${entryLabel(entry).replace(/</g, '&lt;')}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${entry.status}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align:right">${formatPrice(entry.net_amount || 0).replace(/ /g, ' ')}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align:right">${entry.amount_due > 0 ? formatPrice(entry.amount_due).replace(/ /g, ' ') : '—'}</td>
+            </tr>`;
+        }).join('');
+
+        const animalName = animal.name || `${animal.animal_species?.name || animal.species_name || 'Animal'} #${animal.id}`;
+
+        const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Facturation ${animalName}</title>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; color: #1a202c; margin: 0; padding: 40px; line-height: 1.5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+        .business-info h1 { margin: 0; font-size: 24px; font-weight: 900; color: #2d3748; }
+        .business-info p { margin: 4px 0; color: #718096; font-size: 13px; }
+        .report-title { text-align: right; }
+        .report-title h2 { margin: 0; font-size: 20px; font-weight: 900; color: #4a5568; }
+        .report-title p { margin: 4px 0; font-size: 13px; color: #718096; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th { background: #f7fafc; padding: 10px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; border-bottom: 2px solid #e2e8f0; }
+        .totals-container { display: flex; justify-content: flex-end; }
+        .totals { width: 280px; }
+        .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #edf2f7; }
+        .total-row.grand-total { border-bottom: none; font-size: 18px; font-weight: 900; color: #2d3748; padding-top: 14px; }
+        .footer { margin-top: 60px; padding-top: 16px; border-top: 1px solid #e2e8f0; text-align: center; color: #a0aec0; font-size: 11px; }
+        @media print { body { padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="business-info">
+                <h1>${business?.name ?? 'SUNU VET'}</h1>
+                <p>${business?.address ?? ''} ${business?.city ?? ''}</p>
+                <p>Tél: ${business?.phone ?? ''}</p>
+            </div>
+            <div class="report-title">
+                <h2>Récapitulatif facturation</h2>
+                <p>Patient : ${animalName.replace(/</g, '&lt;')}</p>
+                ${animal.client ? `<p>Propriétaire : ${animal.client.name.replace(/</g, '&lt;')}</p>` : ''}
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Acte</th>
+                    <th>Statut</th>
+                    <th style="text-align:right">Montant net</th>
+                    <th style="text-align:right">Reste dû</th>
+                </tr>
+            </thead>
+            <tbody>${rows || '<tr><td colspan="5" style="padding:20px;text-align:center">Aucun élément facturé</td></tr>'}</tbody>
+        </table>
+
+        <div class="totals-container">
+            <div class="totals">
+                <div class="total-row">
+                    <span>Encaissé</span>
+                    <span>${formatPrice(totalPaid).replace(/ /g, ' ')}</span>
+                </div>
+                ${totalDue > 0 ? `
+                <div class="total-row" style="color: #c05621;">
+                    <span>Reste dû</span>
+                    <span>${formatPrice(totalDue).replace(/ /g, ' ')}</span>
+                </div>
+                ` : ''}
+                <div class="total-row grand-total">
+                    <span>TOTAL FACTURÉ</span>
+                    <span>${formatPrice(totalNet).replace(/ /g, ' ')}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">Document généré par Sunu Vet • ${new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+    </div>
+</body>
+</html>`;
+
+        const w = window.open('', '_blank');
+        if (w) {
+            w.document.write(html);
+            w.document.close();
+            w.focus();
+            w.onload = () => {
+                setTimeout(() => {
+                    w.print();
+                    w.close();
+                }, 500);
+            };
+        } else {
+            await this.dialog.alert('Veuillez autoriser les pop-ups pour imprimer la facturation.', {
                 type: 'warning',
                 title: 'Impression bloquée',
             });
