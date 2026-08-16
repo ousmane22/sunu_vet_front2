@@ -67,6 +67,7 @@ export class DashboardPwaPromptComponent {
     this.installing.set(true);
 
     try {
+      await this.pwa.waitForInstallReady(6000);
       const outcome = await this.pwa.promptInstall();
 
       if (outcome === 'unavailable') {
@@ -79,11 +80,14 @@ export class DashboardPwaPromptComponent {
 
   private fallbackHint(): string {
     if (this.pwa.isIosSafari()) {
-      return 'Sur iPhone ou iPad : Partager → Sur l\'écran d\'accueil.';
+      return 'Sur iPhone ou iPad : appuyez sur Partager, puis Sur l\'écran d\'accueil.';
+    }
+    if (this.pwa.isChromeDesktop()) {
+      return 'Menu ⋮ en haut à droite → Diffuser, enregistrer et partager → Installer SunuVet. Ou cherchez l\'icône ⊕ dans la barre d\'adresse.';
     }
     if (this.pwa.isDesktop()) {
-      return 'Utilisez le menu de votre navigateur, puis « Installer SunuVet » ou « Ajouter à l\'écran d\'accueil ».';
+      return 'Ouvrez le menu du navigateur (⋮) et cherchez « Installer SunuVet » ou « Ajouter à l\'écran d\'accueil ».';
     }
-    return 'Ouvrez le menu de votre navigateur, puis « Ajouter à l\'écran d\'accueil ».';
+    return 'Ouvrez le menu du navigateur et choisissez « Ajouter à l\'écran d\'accueil ».';
   }
 }

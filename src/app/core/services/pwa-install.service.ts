@@ -42,6 +42,11 @@ export class PwaInstallService {
     return isIos && isSafari;
   }
 
+  isChromeDesktop(): boolean {
+    if (typeof navigator === 'undefined') return false;
+    return this.isDesktop() && /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
+  }
+
   /** Peut afficher la bannière (pas déjà installée). */
   canShowBanner(): boolean {
     return !this.isStandalone();
@@ -55,6 +60,26 @@ export class PwaInstallService {
 
   isDesktop(): boolean {
     return !this.isMobileDevice();
+  }
+
+  /** Attend que le navigateur signale que l'installation est possible. */
+  waitForInstallReady(timeoutMs = 5000): Promise<boolean> {
+    if (this.installReady()) return Promise.resolve(true);
+
+    return new Promise((resolve) => {
+      const started = Date.now();
+      const timer = window.setInterval(() => {
+        if (this.installReady()) {
+          window.clearInterval(timer);
+          resolve(true);
+          return;
+        }
+        if (Date.now() - started >= timeoutMs) {
+          window.clearInterval(timer);
+          resolve(false);
+        }
+      }, 250);
+    });
   }
 
   /** Lance le prompt natif d'installation. */
@@ -78,5 +103,4 @@ export class PwaInstallService {
     return window.matchMedia('(display-mode: standalone)').matches
       || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
   }
-
 }

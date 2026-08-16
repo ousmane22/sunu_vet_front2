@@ -19,7 +19,7 @@ export const appConfig: ApplicationConfig = {
     { provide: LOCALE_ID, useValue: 'fr' },
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:5000',
+      registrationStrategy: 'registerImmediately',
     }),
   ],
 };
