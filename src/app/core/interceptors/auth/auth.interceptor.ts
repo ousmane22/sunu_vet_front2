@@ -3,12 +3,14 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('auth_token');
+  const isOwnApi = req.url.startsWith(environment.apiUrl) || req.url.startsWith('/api/');
 
   let authReq = req;
-  if (token) {
+  if (token && isOwnApi) {
     authReq = req.clone({
       headers: req.headers.set('Authorization', `Bearer ${token}`),
     });

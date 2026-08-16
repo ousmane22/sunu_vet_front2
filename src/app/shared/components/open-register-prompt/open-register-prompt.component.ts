@@ -13,4 +13,5 @@ export class OpenRegisterPromptComponent {
   activityLabel = input.required<string>();
 
   openRegister = output<void>();
+  cancel = output<void>();
 }

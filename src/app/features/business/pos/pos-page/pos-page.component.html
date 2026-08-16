@@ -4,6 +4,7 @@
     [open]="showRegisterPrompt()"
     activityLabel="une vente"
     (openRegister)="onOpenRegister()"
+    (cancel)="showRegisterPrompt.set(false)"
   />
 
   <!-- Barre supérieure : onglets mobile + plein écran -->
