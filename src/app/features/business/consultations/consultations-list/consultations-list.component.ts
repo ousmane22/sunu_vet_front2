@@ -131,6 +131,12 @@ export class ConsultationsListComponent implements OnInit, OnDestroy {
     this.registerPrompt.openRegisterPage('/business/consultations');
   }
 
+  onCancelRegisterPrompt(): void {
+    this.showRegisterPrompt.set(false);
+    this.registerPrompt.leavePage('consultations');
+    void this.router.navigate(['/business/dashboard']);
+  }
+
   onPeriodChange(period: ConsultPeriod): void {
     this.selectedPeriod.set(period);
     if (period === 'today') {

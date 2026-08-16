@@ -1,5 +1,6 @@
 import { Component, inject, signal, ViewChild, ElementRef, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { TabButtonComponent } from '../../../../shared/components/tab-button/tab-button.component';
 import { PosProductGridComponent } from '../pos-product-grid/pos-product-grid.component';
@@ -18,6 +19,7 @@ import { Subject, takeUntil } from 'rxjs';
 export class PosPageComponent implements OnInit, AfterViewInit, OnDestroy {
   cartService = inject(CartService);
   private registerPrompt = inject(OpenRegisterPromptService);
+  private router = inject(Router);
   private destroy$ = new Subject<void>();
 
   mobileTab = signal<'products' | 'cart'>('products');
@@ -49,6 +51,12 @@ export class PosPageComponent implements OnInit, AfterViewInit, OnDestroy {
   onOpenRegister(): void {
     this.showRegisterPrompt.set(false);
     this.registerPrompt.openRegisterPage('/business/pos');
+  }
+
+  onCancelRegisterPrompt(): void {
+    this.showRegisterPrompt.set(false);
+    this.registerPrompt.leavePage('pos');
+    void this.router.navigate(['/business/dashboard']);
   }
 
   toggleFullscreen(): void {
