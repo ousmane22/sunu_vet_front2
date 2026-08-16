@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { AppUpdateService } from './core/services/app-update.service';
 import { SunuDialogComponent } from './shared/components/sunu-dialog/sunu-dialog.component';
 
 @Component({
@@ -10,6 +11,9 @@ import { SunuDialogComponent } from './shared/components/sunu-dialog/sunu-dialog
 })
 export class AppComponent {
   title = 'frontend';
+
+  /** Initialise la détection des mises à jour PWA en production. */
+  private readonly _appUpdate = inject(AppUpdateService);
 }
 
 

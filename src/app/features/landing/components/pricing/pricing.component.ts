@@ -115,7 +115,7 @@ export class PricingComponent implements OnInit {
 
   priceSuffix(plan: LandingPlan): string {
     if (plan.slug === 'trial' || plan.price <= 0) {
-      return ' · 15 jours';
+      return ' · 30 jours';
     }
     if (plan.slug === 'yearly') {
       return '/an';
@@ -129,14 +129,14 @@ export class PricingComponent implements OnInit {
         id: 1,
         name: 'Essai Gratuit',
         slug: 'trial',
-        description: "Période d'essai de 15 jours",
+        description: "Période d'essai de 30 jours",
         price: 0,
         formatted_price: '0 XOF',
         currency: 'XOF',
-        duration_in_months: 0.5,
+        duration_in_months: 1,
         max_users: 999,
         max_animals: 999999,
-        features: ['Accès complet pendant 15 jours'],
+        features: ['Accès complet pendant 30 jours'],
         is_popular: false,
       },
       {

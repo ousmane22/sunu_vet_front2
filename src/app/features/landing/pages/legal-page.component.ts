@@ -23,14 +23,14 @@ const LEGAL_CONTENT: Record<LegalPageSlug, LegalPageContent> = {
       {
         title: 'Comment démarrer ?',
         paragraphs: [
-          'Créez un compte gratuit, renseignez votre clinique et profitez de 15 jours d’essai complet sans engagement.',
+          'Créez un compte gratuit, renseignez votre clinique et profitez de 30 jours d’essai complet sans engagement.',
           'Notre équipe peut vous accompagner par téléphone ou e-mail si besoin.',
         ],
       },
       {
         title: 'L’essai est-il vraiment gratuit ?',
         paragraphs: [
-          'Oui. Pendant 15 jours, vous accédez à l’ensemble des fonctionnalités. Aucune carte bancaire n’est demandée à l’inscription.',
+          'Oui. Pendant 30 jours, vous accédez à l’ensemble des fonctionnalités. Aucune carte bancaire n’est demandée à l’inscription.',
         ],
       },
       {
@@ -96,7 +96,7 @@ const LEGAL_CONTENT: Record<LegalPageSlug, LegalPageContent> = {
       {
         title: 'Compte & essai',
         paragraphs: [
-          'L’inscription crée un espace dédié à votre établissement. L’essai gratuit dure 15 jours, puis un abonnement payant s’applique si vous continuez.',
+          'L’inscription crée un espace dédié à votre établissement. L’essai gratuit dure 30 jours, puis un abonnement payant s’applique si vous continuez.',
         ],
       },
       {

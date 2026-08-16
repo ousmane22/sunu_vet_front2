@@ -7,6 +7,7 @@ import { BusinessStrategyService } from '../../../../core/services/business-stra
 import { BusinessDashboardService } from '../../services/business-dashboard.service';
 import { BusinessProfileService } from '../../services/business-profile.service';
 import { DashboardAssistantComponent } from '../../dashboard/business-dashboard/components/dashboard-assistant.component';
+import { DashboardPwaPromptComponent } from '../../dashboard/business-dashboard/components/dashboard-pwa-prompt.component';
 import type { BusinessDashboardStats, BusinessProfile } from '../../models';
 
 interface MenuItem {
@@ -24,7 +25,7 @@ interface MenuGroup {
 @Component({
   selector: 'app-business-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, DashboardAssistantComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, DashboardAssistantComponent, DashboardPwaPromptComponent],
   templateUrl: './business-layout.component.html',
 })
 export class BusinessLayoutComponent implements OnInit {
