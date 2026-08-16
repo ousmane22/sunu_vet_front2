@@ -1,0 +1,30 @@
+:host {
+  display: block;
+}
+
+.chart-bar {
+  animation: chart-grow 1s ease-out both;
+}
+
+@for $i from 1 through 7 {
+  .chart-bar:nth-child(#{$i}) {
+    animation-delay: #{0.08 + $i * 0.06}s;
+  }
+}
+
+@keyframes chart-grow {
+  from {
+    transform: scaleY(0.2);
+    opacity: 0.5;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-bar {
+    animation: none !important;
+  }
+}

@@ -11,6 +11,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/landing/landing.component').then((m) => m.LandingComponent),
   },
   {
+    path: 'demo',
+    title: 'Démo interactive — SunuVet',
+    loadComponent: () =>
+      import('./features/landing/pages/demo/demo-page.component').then((m) => m.DemoPageComponent),
+  },
+  {
     path: 'faq',
     title: 'FAQ — SunuVet',
     loadComponent: () => import('./features/landing/pages/legal-page.component').then((m) => m.LegalPageComponent),

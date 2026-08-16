@@ -8,7 +8,6 @@ import { LandingAiComponent } from './components/landing-ai/landing-ai.component
 import { PricingComponent } from './components/pricing/pricing.component';
 import { TestimonialsComponent } from './components/testimonials/testimonials.component';
 import { CtaComponent } from './components/cta/cta.component';
-import { DemoModalComponent } from './components/demo-modal/demo-modal.component';
 import { ContactModalComponent } from './components/contact-modal/contact-modal.component';
 
 @Component({
@@ -24,7 +23,6 @@ import { ContactModalComponent } from './components/contact-modal/contact-modal.
     PricingComponent,
     TestimonialsComponent,
     CtaComponent,
-    DemoModalComponent,
     ContactModalComponent,
   ],
   templateUrl: './landing.component.html',

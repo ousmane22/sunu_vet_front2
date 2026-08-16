@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../auth/services/auth.service';
-import { DemoModalService } from './demo-modal.service';
 import { ContactModalService } from './contact-modal.service';
 
 /** Navigation partagée landing (CTA, compte, démo). */
@@ -9,7 +8,6 @@ import { ContactModalService } from './contact-modal.service';
 export class LandingActionsService {
   private router = inject(Router);
   private auth = inject(AuthService);
-  private demoModal = inject(DemoModalService);
   private contactModal = inject(ContactModalService);
 
   goToRegister(): void {
@@ -43,7 +41,7 @@ export class LandingActionsService {
   }
 
   openDemo(): void {
-    this.demoModal.open();
+    void this.router.navigate(['/demo']);
   }
 
   openContact(): void {
