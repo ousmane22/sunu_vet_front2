@@ -2,8 +2,8 @@
   <app-open-register-prompt
     [open]="showRegisterPrompt()"
     activityLabel="une consultation"
-    (openRegister)="onOpenRegister()"
-    (cancel)="onCancelRegisterPrompt()"
+    (openRegister)="onOpenRegisterFromPrompt()"
+    (cancel)="showRegisterPrompt.set(false)"
   />
 
   <!-- En-tête -->

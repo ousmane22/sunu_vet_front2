@@ -1,4 +1,11 @@
 <div class="p-4 md:p-8 max-w-[1400px] mx-auto space-y-8">
+    <app-open-register-prompt
+        [open]="showRegisterPrompt()"
+        activityLabel="une dépense"
+        (openRegister)="onOpenRegisterFromPrompt()"
+        (cancel)="showRegisterPrompt.set(false)"
+    />
+
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
             <h1 class="text-4xl font-black text-gray-900 tracking-tight">Dépenses</h1>

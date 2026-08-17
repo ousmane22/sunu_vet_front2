@@ -11,13 +11,15 @@ import { CartService } from '../../services/cart.service';
 import { BusinessProfileService } from '../../services/business-profile.service';
 import { BusinessStrategyService } from '../../../../core/services/business-strategy.service';
 import { OpenRegisterSessionService } from '../../services/open-register-session.service';
+import { OpenRegisterPromptService } from '../../services/open-register-prompt.service';
+import { OpenRegisterPromptComponent } from '../../../../shared/components/open-register-prompt/open-register-prompt.component';
 import { PAGINATION } from '../../../../core/config/pagination.config';
 import type { PosProduct, PosProductListResponse, CashRegister } from '../../models';
 
 @Component({
     selector: 'app-pos-product-grid',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterModule, FormatPricePipe],
+    imports: [CommonModule, ReactiveFormsModule, RouterModule, FormatPricePipe, OpenRegisterPromptComponent],
     templateUrl: './pos-product-grid.component.html',
     host: {
         'class': 'flex flex-col min-h-0 flex-1'
@@ -55,15 +57,15 @@ export class PosProductGridComponent implements OnInit {
     private cartService = inject(CartService);
     private profileService = inject(BusinessProfileService);
     registerSession = inject(OpenRegisterSessionService);
+    private registerPrompt = inject(OpenRegisterPromptService);
     private fb = inject(FormBuilder);
     strategyService = inject(BusinessStrategyService);
 
     products = signal<PosProduct[]>([]);
     loading = signal(true);
     activeRegister = signal<CashRegister | null>(null);
-    /** True une fois que getCurrent() a répondu (évite d'afficher "Caisse fermée" pendant le chargement). */
-    registerChecked = signal(false);
     requireOpenRegister = signal(false);
+    showRegisterPrompt = signal(false);
 
     searchControl = this.fb.control('');
 
@@ -93,14 +95,8 @@ export class PosProductGridComponent implements OnInit {
 
     private loadActiveRegister(): void {
         this.cashRegisterService.getCurrent(true).subscribe({
-            next: (res) => {
-                this.activeRegister.set(res.data);
-                this.registerChecked.set(true);
-            },
-            error: () => {
-                this.activeRegister.set(null);
-                this.registerChecked.set(true);
-            },
+            next: (res) => this.activeRegister.set(res.data),
+            error: () => this.activeRegister.set(null),
         });
     }
 
@@ -140,10 +136,18 @@ export class PosProductGridComponent implements OnInit {
     }
 
     addToCart(med: PosProduct): void {
-        if (this.registerSession.shouldBlock(this.requireOpenRegister(), !!this.activeRegister(), 'pos')) return;
+        if (this.registerSession.shouldBlock(this.requireOpenRegister(), !!this.activeRegister(), 'pos')) {
+            this.showRegisterPrompt.set(true);
+            return;
+        }
         if (med.stock_quantity <= 0) return;
         this.cartService.add(med);
         this.playAddSound();
+    }
+
+    onOpenRegisterFromPrompt(): void {
+        this.showRegisterPrompt.set(false);
+        this.registerPrompt.openRegisterPage('/business/pos');
     }
 
     private playAddSound(): void {

@@ -8,11 +8,13 @@ import { PAGINATION } from '../../../../core/config/pagination.config';
 import type { Expense } from '../../models';
 import { ExpenseCreateModalComponent } from '../components/expense-create-modal/expense-create-modal.component';
 import { SunuDialogService } from '../../../../shared/services/sunu-dialog.service';
+import { OpenRegisterPromptService } from '../../services/open-register-prompt.service';
+import { OpenRegisterPromptComponent } from '../../../../shared/components/open-register-prompt/open-register-prompt.component';
 
 @Component({
     selector: 'app-expenses-list',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, FormatPricePipe, FormatDatePipe, ExpenseCreateModalComponent],
+    imports: [CommonModule, ReactiveFormsModule, FormatPricePipe, FormatDatePipe, ExpenseCreateModalComponent, OpenRegisterPromptComponent],
     templateUrl: './expenses-list.component.html',
 })
 export class ExpensesListComponent implements OnInit {
@@ -20,6 +22,7 @@ export class ExpensesListComponent implements OnInit {
     private fb = inject(FormBuilder);
     private authService = inject(AuthService);
     private dialog = inject(SunuDialogService);
+    private registerPrompt = inject(OpenRegisterPromptService);
 
     can(perm: string): boolean {
         return this.authService.hasPermission(perm);
@@ -31,6 +34,7 @@ export class ExpensesListComponent implements OnInit {
     // Modal state
     showModal     = signal(false);
     expenseToEdit = signal<Expense | null>(null);
+    showRegisterPrompt = signal(false);
 
     // Filters
     filterForm = this.fb.group({
@@ -85,8 +89,19 @@ export class ExpensesListComponent implements OnInit {
     }
 
     openModal(): void {
-        this.expenseToEdit.set(null);
-        this.showModal.set(true);
+        this.registerPrompt.canProceed().subscribe((ok) => {
+            if (ok) {
+                this.expenseToEdit.set(null);
+                this.showModal.set(true);
+            } else {
+                this.showRegisterPrompt.set(true);
+            }
+        });
+    }
+
+    onOpenRegisterFromPrompt(): void {
+        this.showRegisterPrompt.set(false);
+        this.registerPrompt.openRegisterPage('/business/expenses');
     }
 
     closeModal(): void {

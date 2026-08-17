@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { requireOpenRegisterGuard } from '../../core/guards/business/require-open-register.guard';
 
 /**
  * Ordre important : routes statiques et segments littéraux avant les paramètres
@@ -131,7 +130,6 @@ export const BUSINESS_ROUTES: Routes = [
       {
         path: 'expenses',
         title: 'Dépenses',
-        canActivate: [requireOpenRegisterGuard],
         loadComponent: () =>
           import('./expenses/expenses-list/expenses-list.component').then(
             (m) => m.ExpensesListComponent
