@@ -1,0 +1,22 @@
+# robots.txt for https://www.sunuvet.com
+User-agent: *
+Allow: /
+Allow: /demo
+Allow: /faq
+Allow: /docs
+Allow: /terms
+Allow: /privacy
+Allow: /login
+Allow: /register
+
+# Disallow private application areas
+Disallow: /business/
+Disallow: /super-admin/
+Disallow: /profile/
+Disallow: /api/
+
+# Crawl-delay
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://www.sunuvet.com/sitemap.xml
