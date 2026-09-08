@@ -31,7 +31,7 @@ export class SubscriptionSettingsComponent implements OnInit {
     });
 
     ngOnInit(): void {
-        this.profileService.getProfile().subscribe({
+        this.profileService.getProfile(true).subscribe({
             next: (res) => {
                 this.profile.set(res.data);
                 this.isLoading.set(false);
@@ -48,7 +48,7 @@ export class SubscriptionSettingsComponent implements OnInit {
     }
 
     loadProfile(): void {
-        this.profileService.getProfile().subscribe({
+        this.profileService.getProfile(true).subscribe({
             next: (res) => this.profile.set(res.data),
             error: () => this.errorMessage.set('Impossible de recharger le profil.'),
         });

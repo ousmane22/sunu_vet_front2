@@ -129,7 +129,7 @@ export class AuthService {
         }
         this.setAuthData(response.token, response.user);
         this.isImpersonating.set(true);
-        this.router.navigate(['/business']);
+        window.location.href = '/business';
       }),
       catchError((error) => throwError(() => error))
     );
@@ -139,7 +139,7 @@ export class AuthService {
   stopImpersonation(): void {
     const backupStr = sessionStorage.getItem(IMPERSONATION_BACKUP_KEY);
     if (!backupStr) {
-      this.router.navigate(['/super-admin']);
+      window.location.href = '/super-admin';
       return;
     }
 
@@ -149,11 +149,11 @@ export class AuthService {
       sessionStorage.removeItem(IMPERSONATION_BACKUP_KEY);
       this.setAuthData(backup.token, user);
       this.isImpersonating.set(false);
-      this.router.navigate(['/super-admin']);
+      window.location.href = '/super-admin';
     } catch {
       sessionStorage.removeItem(IMPERSONATION_BACKUP_KEY);
       this.clearAuthData();
-      this.router.navigate(['/login']);
+      window.location.href = '/login';
     }
   }
 

@@ -21,6 +21,7 @@ export class BusinessProfileService {
    * Un seul appel HTTP par session, invalidé après update/logo/subscribe.
    */
   private profile$: Observable<BusinessProfileResponse> | null = null;
+  private lastToken: string | null = null;
   private readonly changed$ = new Subject<void>();
 
   /** Émis après toute invalidation (ex. paramètres caisse mis à jour). */
@@ -29,6 +30,11 @@ export class BusinessProfileService {
   }
 
   getProfile(forceRefresh = false): Observable<BusinessProfileResponse> {
+    const currentToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (currentToken !== this.lastToken) {
+      this.profile$ = null;
+      this.lastToken = currentToken;
+    }
     if (forceRefresh) {
       this.profile$ = null;
     }

@@ -165,7 +165,7 @@ export class BusinessLayoutComponent implements OnInit {
     this.dashboardService.getStats().subscribe({
       next: (res) => this.dashboardStats.set(res.data),
     });
-    this.profileService.getProfile().subscribe({
+    this.profileService.getProfile(true).subscribe({
       next: (res) => this.profile.set(res.data),
     });
   }

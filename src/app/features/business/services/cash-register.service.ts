@@ -22,9 +22,15 @@ export class CashRegisterService {
      * Invalidé après open(), close() ou correctBalance().
      */
     private current$: Observable<CashRegisterSingleResponse> | null = null;
+    private lastToken: string | null = null;
     private readonly changed$ = new Subject<void>();
 
     getCurrent(forceRefresh = false): Observable<CashRegisterSingleResponse> {
+        const currentToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (currentToken !== this.lastToken) {
+            this.current$ = null;
+            this.lastToken = currentToken;
+        }
         if (forceRefresh) this.current$ = null;
         if (!this.current$) {
             this.current$ = this.http

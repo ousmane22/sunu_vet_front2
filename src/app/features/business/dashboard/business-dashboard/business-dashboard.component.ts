@@ -87,7 +87,7 @@ export class BusinessDashboardComponent implements OnInit {
   }
 
   loadProfile() {
-    this.profileService.getProfile().subscribe({
+    this.profileService.getProfile(true).subscribe({
       next: (res) => this.profile.set(res.data),
     });
   }
